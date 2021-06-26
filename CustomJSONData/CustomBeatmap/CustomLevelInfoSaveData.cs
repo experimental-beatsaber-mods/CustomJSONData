@@ -85,63 +85,63 @@
                                 break;
 
                             case "_version":
-                                version = reader.ReadAsString();
+                                version = reader.ReadAsString() ?? version;
                                 break;
 
                             case "_songName":
-                                songName = reader.ReadAsString();
+                                songName = reader.ReadAsString() ?? songName;
                                 break;
 
                             case "_songSubName":
-                                songSubName = reader.ReadAsString();
+                                songSubName = reader.ReadAsString() ?? songSubName;
                                 break;
 
                             case "_songAuthorName":
-                                songAuthorName = reader.ReadAsString();
+                                songAuthorName = reader.ReadAsString() ?? songAuthorName;
                                 break;
 
                             case "_levelAuthorName":
-                                levelAuthorName = reader.ReadAsString();
+                                levelAuthorName = reader.ReadAsString() ?? levelAuthorName;
                                 break;
 
                             case "_beatsPerMinute":
-                                beatsPerMinute = (float)reader.ReadAsDouble();
+                                beatsPerMinute = (float?)reader.ReadAsDouble() ?? beatsPerMinute;
                                 break;
 
                             case "_songTimeOffset":
-                                songTimeOffset = (float)reader.ReadAsDouble();
+                                songTimeOffset = (float?)reader.ReadAsDouble() ?? songTimeOffset;
                                 break;
 
                             case "_shuffle":
-                                shuffle = (float)reader.ReadAsDouble();
+                                shuffle = (float?)reader.ReadAsDouble() ?? shuffle;
                                 break;
 
                             case "_shufflePeriod":
-                                shufflePeriod = (float)reader.ReadAsDouble();
+                                shufflePeriod = (float?)reader.ReadAsDouble() ?? shufflePeriod;
                                 break;
 
                             case "_previewStartTime":
-                                previewStartTime = (float)reader.ReadAsDouble();
+                                previewStartTime = (float?)reader.ReadAsDouble() ?? previewStartTime;
                                 break;
 
                             case "_previewDuration":
-                                previewDuration = (float)reader.ReadAsDouble();
+                                previewDuration = (float?)reader.ReadAsDouble() ?? previewDuration;
                                 break;
 
                             case "_songFilename":
-                                songFilename = reader.ReadAsString();
+                                songFilename = reader.ReadAsString() ?? songFilename;
                                 break;
 
                             case "_coverImageFilename":
-                                coverImageFilename = reader.ReadAsString();
+                                coverImageFilename = reader.ReadAsString() ?? coverImageFilename;
                                 break;
 
                             case "_environmentName":
-                                environmentName = reader.ReadAsString();
+                                environmentName = reader.ReadAsString() ?? environmentName;
                                 break;
 
                             case "_allDirectionsEnvironmentName":
-                                allDirectionsEnvrionmentName = reader.ReadAsString();
+                                allDirectionsEnvrionmentName = reader.ReadAsString() ?? allDirectionsEnvrionmentName;
                                 break;
 
                             case "_difficultyBeatmapSets":
@@ -154,7 +154,7 @@
                                         switch (objectName)
                                         {
                                             case "_beatmapCharacteristicName":
-                                                beatmapCharacteristicName = reader.ReadAsString();
+                                                beatmapCharacteristicName = reader.ReadAsString() ?? beatmapCharacteristicName;
                                                 break;
 
                                             case "_difficultyBeatmaps":
@@ -171,23 +171,23 @@
                                                         switch (difficultyBeatmapObjectName)
                                                         {
                                                             case "_difficulty":
-                                                                difficulty = reader.ReadAsString();
+                                                                difficulty = reader.ReadAsString() ?? difficulty;
                                                                 break;
 
                                                             case "_difficultyRank":
-                                                                difficultyRank = (int)reader.ReadAsInt32();
+                                                                difficultyRank = reader.ReadAsInt32() ?? difficultyRank;
                                                                 break;
 
                                                             case "_beatmapFilename":
-                                                                beatmapFilename = reader.ReadAsString();
+                                                                beatmapFilename = reader.ReadAsString() ?? beatmapFilename;
                                                                 break;
 
                                                             case "_noteJumpMovementSpeed":
-                                                                noteJumpMovementSpeed = (float)reader.ReadAsDouble();
+                                                                noteJumpMovementSpeed = (float?)reader.ReadAsDouble() ?? noteJumpMovementSpeed;
                                                                 break;
 
                                                             case "_noteJumpStartBeatOffset":
-                                                                noteJumpStartBeatOffset = (float)reader.ReadAsDouble();
+                                                                noteJumpStartBeatOffset = (float?)reader.ReadAsDouble() ?? noteJumpStartBeatOffset;
                                                                 break;
 
                                                             case "_customData":

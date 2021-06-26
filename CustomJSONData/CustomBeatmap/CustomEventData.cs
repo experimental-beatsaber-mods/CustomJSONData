@@ -16,5 +16,10 @@
         public float time { get; }
 
         public Dictionary<string, object> data { get; }
+
+        public CustomEventData GetCopy()
+        {
+            return new CustomEventData(time, type, data.Copy());
+        }
     }
 }

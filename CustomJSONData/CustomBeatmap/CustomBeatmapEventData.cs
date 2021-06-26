@@ -11,5 +11,10 @@
         }
 
         public Dictionary<string, object> customData { get; }
+
+        public CustomBeatmapEventData GetCopy()
+        {
+            return new CustomBeatmapEventData(time, type, value, customData.Copy());
+        }
     }
 }

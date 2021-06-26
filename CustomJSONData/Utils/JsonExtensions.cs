@@ -6,14 +6,17 @@
 
     internal static class JsonExtensions
     {
-        internal static void ReadToDictionary(this JsonReader reader, Dictionary<string, object> dictionary, Func<string, bool> specialCase = null) => ObjectReadObject(reader, dictionary, specialCase);
+        internal static void ReadToDictionary(this JsonReader reader, Dictionary<string, object> dictionary, Func<string, bool>? specialCase = null)
+        {
+            ObjectReadObject(reader, dictionary, specialCase);
+        }
 
-        internal static void ReadObject(this JsonReader reader, Action<object> action)
+        internal static void ReadObject(this JsonReader reader, Action<string> action)
         {
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
             {
-                action(reader.Value);
+                action((string?)reader.Value ?? string.Empty);
 
                 reader.Read();
             }
@@ -52,6 +55,11 @@
                     return ObjectReadList(reader);
 
                 default:
+                    if (reader.Value == null)
+                    {
+                        throw new JsonSerializationException("Unexpected null value when reading.");
+                    }
+
                     return reader.Value;
             }
         }
@@ -79,7 +87,7 @@
             throw new JsonSerializationException("Unexpected end when reading Dictionary.");
         }
 
-        private static object ObjectReadObject(JsonReader reader, Dictionary<string, object> dictionary = null, Func<string, bool> specialCase = null)
+        private static object ObjectReadObject(JsonReader reader, Dictionary<string, object>? dictionary = null, Func<string, bool>? specialCase = null)
         {
             if (dictionary == null)
             {
@@ -91,7 +99,7 @@
                 switch (reader.TokenType)
                 {
                     case JsonToken.PropertyName:
-                        string propertyName = reader.Value.ToString();
+                        string propertyName = (string?)reader.Value ?? string.Empty;
 
                         if (specialCase != null && !specialCase(propertyName))
                         {

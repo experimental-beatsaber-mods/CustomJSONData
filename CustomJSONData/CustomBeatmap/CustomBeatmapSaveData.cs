@@ -51,7 +51,7 @@
                                 break;
 
                             case "_version":
-                                version = reader.ReadAsString();
+                                version = reader.ReadAsString() ?? version;
                                 break;
 
                             case "_events":
@@ -66,15 +66,15 @@
                                         switch (objectName)
                                         {
                                             case "_time":
-                                                time = (float)reader.ReadAsDouble();
+                                                time = (float?)reader.ReadAsDouble() ?? time;
                                                 break;
 
                                             case "_type":
-                                                type = (BeatmapEventType)reader.ReadAsInt32();
+                                                type = (BeatmapEventType?)reader.ReadAsInt32() ?? type;
                                                 break;
 
                                             case "_value":
-                                                value = (int)reader.ReadAsInt32();
+                                                value = reader.ReadAsInt32() ?? value;
                                                 break;
 
                                             case "_customData":
@@ -106,23 +106,23 @@
                                         switch (objectName)
                                         {
                                             case "_time":
-                                                time = (float)reader.ReadAsDouble();
+                                                time = (float?)reader.ReadAsDouble() ?? time;
                                                 break;
 
                                             case "_lineIndex":
-                                                lineIndex = (int)reader.ReadAsInt32();
+                                                lineIndex = reader.ReadAsInt32() ?? lineIndex;
                                                 break;
 
                                             case "_lineLayer":
-                                                lineLayer = (NoteLineLayer)reader.ReadAsInt32();
+                                                lineLayer = (NoteLineLayer?)reader.ReadAsInt32() ?? lineLayer;
                                                 break;
 
                                             case "_type":
-                                                type = (NoteType)reader.ReadAsInt32();
+                                                type = (NoteType?)reader.ReadAsInt32() ?? type;
                                                 break;
 
                                             case "_cutDirection":
-                                                cutDirection = (NoteCutDirection)reader.ReadAsInt32();
+                                                cutDirection = (NoteCutDirection?)reader.ReadAsInt32() ?? cutDirection;
                                                 break;
 
                                             case "_customData":
@@ -153,19 +153,19 @@
                                         switch (objectName)
                                         {
                                             case "_time":
-                                                time = (float)reader.ReadAsDouble();
+                                                time = (float?)reader.ReadAsDouble() ?? time;
                                                 break;
 
                                             case "_lineIndex":
-                                                lineIndex = (int)reader.ReadAsInt32();
+                                                lineIndex = reader.ReadAsInt32() ?? lineIndex;
                                                 break;
 
                                             case "_lineLayer":
-                                                lineLayer = (NoteLineLayer)reader.ReadAsInt32();
+                                                lineLayer = (NoteLineLayer?)reader.ReadAsInt32() ?? lineLayer;
                                                 break;
 
                                             case "_offsetDirection":
-                                                offsetDirection = (OffsetDirection)reader.ReadAsInt32();
+                                                offsetDirection = (OffsetDirection?)reader.ReadAsInt32() ?? offsetDirection;
                                                 break;
 
                                             case "_customData":
@@ -197,23 +197,23 @@
                                         switch (objectName)
                                         {
                                             case "_time":
-                                                time = (float)reader.ReadAsDouble();
+                                                time = (float?)reader.ReadAsDouble() ?? time;
                                                 break;
 
                                             case "_lineIndex":
-                                                lineIndex = (int)reader.ReadAsInt32();
+                                                lineIndex = reader.ReadAsInt32() ?? lineIndex;
                                                 break;
 
                                             case "_type":
-                                                type = (ObstacleType)reader.ReadAsInt32();
+                                                type = (ObstacleType?)reader.ReadAsInt32() ?? type;
                                                 break;
 
                                             case "_duration":
-                                                duration = (float)reader.ReadAsDouble();
+                                                duration = (float?)reader.ReadAsDouble() ?? duration;
                                                 break;
 
                                             case "_width":
-                                                width = (int)reader.ReadAsInt32();
+                                                width = reader.ReadAsInt32() ?? width;
                                                 break;
 
                                             case "_customData":
@@ -245,7 +245,7 @@
                                                 switch (objectName)
                                                 {
                                                     case "_keyword":
-                                                        keyword = reader.ReadAsString();
+                                                        keyword = reader.ReadAsString() ?? keyword;
                                                         break;
 
                                                     case "_specialEvents":
@@ -257,7 +257,7 @@
                                                         reader.Read();
                                                         while (reader.TokenType != JsonToken.EndArray)
                                                         {
-                                                            specialEvents.Add((BeatmapEventType)reader.ReadAsInt32());
+                                                            specialEvents.Add((BeatmapEventType?)reader.ReadAsInt32() ?? default);
 
                                                             if (!reader.Read())
                                                             {
@@ -299,11 +299,11 @@
                                                 switch (objectName)
                                                 {
                                                     case "_time":
-                                                        time = (float)reader.ReadAsDouble();
+                                                        time = (float?)reader.ReadAsDouble() ?? time;
                                                         break;
 
                                                     case "_type":
-                                                        type = reader.ReadAsString();
+                                                        type = reader.ReadAsString() ?? type;
                                                         break;
 
                                                     case "_data":

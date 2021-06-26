@@ -11,9 +11,10 @@
     [HarmonyPatch("CreateTransformedData")]
     internal class BeatDataMirrorTransformCreateTransformData
     {
+#pragma warning disable CS8625
         private static readonly ConstructorInfo _beatmapDataCtor = typeof(BeatmapData).GetConstructors().First();
-        private static readonly ConstructorInfo _customBeatmapDataCtor = typeof(CustomBeatmapData).GetConstructors().First();
-        private static readonly MethodInfo _copyCustomData = SymbolExtensions.GetMethodInfo(() => CopyCustomData(null, null));
+        private static readonly MethodInfo _copyCustomData = SymbolExtensions.GetMethodInfo(() => CopyCustomBeatmapData(0, null));
+#pragma warning restore CS8625
 
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -27,9 +28,8 @@
                     instructionList[i].operand == _beatmapDataCtor)
                 {
                     foundCtor = true;
-                    instructionList[i].operand = _customBeatmapDataCtor;
-                    instructionList.Insert(i + 1, new CodeInstruction(OpCodes.Ldarg_0));
-                    instructionList.Insert(i + 2, new CodeInstruction(OpCodes.Call, _copyCustomData));
+                    instructionList[i] = new CodeInstruction(OpCodes.Ldarg_0);
+                    instructionList.Insert(i + 1, new CodeInstruction(OpCodes.Call, _copyCustomData));
                 }
             }
 #pragma warning restore CS0252
@@ -41,15 +41,14 @@
             return instructionList.AsEnumerable();
         }
 
-        private static CustomBeatmapData CopyCustomData(CustomBeatmapData result, IReadonlyBeatmapData beatmapData)
+        private static BeatmapData CopyCustomBeatmapData(int numberOfLines, IReadonlyBeatmapData beatmapData)
         {
             if (beatmapData is CustomBeatmapData customBeatmapData)
             {
-                CustomBeatmapData.CopyCustomData(customBeatmapData, result);
+                return customBeatmapData.BaseCopy();
             }
 
-            // keep result on the stack
-            return result;
+            return new BeatmapData(numberOfLines);
         }
     }
 }

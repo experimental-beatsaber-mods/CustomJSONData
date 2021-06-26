@@ -14,6 +14,7 @@
     {
         private const BindingFlags FLAGS = BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance;
 
+#pragma warning disable CS8625
         private static readonly MethodInfo _createBombNoteData = SymbolExtensions.GetMethodInfo(() => NoteData.CreateBombNoteData(0, 0, 0));
         private static readonly MethodInfo _createBombCustomNoteData = SymbolExtensions.GetMethodInfo(() => CustomNoteData.CreateBombNoteData(0, 0, 0, null));
         private static readonly MethodInfo _createBasicNoteData = SymbolExtensions.GetMethodInfo(() => NoteData.CreateBasicNoteData(0, 0, 0, 0, 0));
@@ -33,18 +34,19 @@
         private static readonly MethodInfo _getEventCustomData = SymbolExtensions.GetMethodInfo(() => GetEventCustomData(null));
 
         private static readonly MethodInfo _createCustomBeatmapData = SymbolExtensions.GetMethodInfo(() => CreateCustomBeatmapData(null, null, 0, 0));
+#pragma warning restore CS8625
 
-        internal static CustomBeatmapSaveData BeatmapSaveData { get; set; }
+        internal static CustomBeatmapSaveData? BeatmapSaveData { get; set; }
 
-        internal static Dictionary<string, object> BeatmapCustomData { get; set; }
+        internal static Dictionary<string, object>? BeatmapCustomData { get; set; }
 
-        internal static Dictionary<string, object> LevelCustomData { get; set; }
+        internal static Dictionary<string, object>? LevelCustomData { get; set; }
 
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
 
-            FieldInfo bpmChangesDataField = null;
+            FieldInfo? bpmChangesDataField = null;
 
             bool foundBombNoteData = false;
             bool foundBasicNoteData = false;
@@ -186,12 +188,14 @@
 
         private static CustomBeatmapData CreateCustomBeatmapData(BeatmapDataLoader beatmapDataLoader, List<BeatmapDataLoader.BpmChangeData> bpmChanges, float shuffle, float shufflePeriod)
         {
-            CustomBeatmapData customBeatmapData = new CustomBeatmapData(4);
+            CustomBeatmapData customBeatmapData;
 
             if (BeatmapSaveData != null)
             {
                 List<CustomBeatmapSaveData.CustomEventData> customEventsSaveData = BeatmapSaveData.customEvents;
                 customEventsSaveData = customEventsSaveData.OrderBy(x => x.time).ToList();
+
+                List<CustomEventData> customEventDatas = new List<CustomEventData>(customEventsSaveData.Count);
 
                 foreach (CustomBeatmapSaveData.CustomEventData customEventData in customEventsSaveData)
                 {
@@ -206,16 +210,14 @@
                     BeatmapDataLoader.BpmChangeData bpmchangeData = bpmChanges[bpmChangesDataIdx];
                     float realTime = bpmchangeData.bpmChangeStartTime + beatmapDataLoader.GetRealTimeFromBPMTime(time - bpmchangeData.bpmChangeStartBpmTime, bpmchangeData.bpm, shuffle, shufflePeriod);
 
-                    customBeatmapData.AddCustomEventData(new CustomEventData(realTime, customEventData.type, customEventData.data));
+                    customEventDatas.Add(new CustomEventData(realTime, customEventData.type, customEventData.data));
                 }
 
-                customBeatmapData.SetCustomData(BeatmapSaveData.customData);
-                customBeatmapData.SetLevelCustomData(BeatmapCustomData, LevelCustomData);
+                customBeatmapData = new CustomBeatmapData(4, customEventDatas, BeatmapSaveData.customData, BeatmapCustomData ?? new Dictionary<string, object>(), LevelCustomData ?? new Dictionary<string, object>());
             }
             else
             {
-                customBeatmapData.SetCustomData(new Dictionary<string, object>());
-                customBeatmapData.SetLevelCustomData(new Dictionary<string, object>(), new Dictionary<string, object>());
+                customBeatmapData = new CustomBeatmapData(4, new List<CustomEventData>(), new Dictionary<string, object>(), new Dictionary<string, object>(), new Dictionary<string, object>());
             }
 
             return customBeatmapData;

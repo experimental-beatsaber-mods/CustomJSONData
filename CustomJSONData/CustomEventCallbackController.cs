@@ -13,19 +13,45 @@
 
         private readonly List<CustomEventCallbackData> _customEventCallbackData = new List<CustomEventCallbackData>();
 
-        private BeatmapObjectCallbackController _beatmapObjectCallbackController;
+        private BeatmapObjectCallbackController? _beatmapObjectCallbackController;
 
         public delegate void CustomEventCallback(CustomEventData eventData);
 
-        public static event Action<CustomEventCallbackController> didInitEvent;
+        public static event Action<CustomEventCallbackController>? didInitEvent;
 
-        public CustomBeatmapData BeatmapData { get; private set; }
+        public CustomBeatmapData? BeatmapData { get; private set; }
 
-        public BeatmapObjectCallbackController BeatmapObjectCallbackController => _beatmapObjectCallbackController;
+        public BeatmapObjectCallbackController? BeatmapObjectCallbackController => _beatmapObjectCallbackController;
 
-        public IAudioTimeSource AudioTimeSource => _audioTimeSourceAccessor(ref _beatmapObjectCallbackController);
+        public IAudioTimeSource? AudioTimeSource
+        {
+            get
+            {
+                if (_beatmapObjectCallbackController != null)
+                {
+                    return _audioTimeSourceAccessor(ref _beatmapObjectCallbackController);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
-        public float SpawningStartTime => _spawningStartTimeAccessor(ref _beatmapObjectCallbackController);
+        public float? SpawningStartTime
+        {
+            get
+            {
+                if (_beatmapObjectCallbackController != null)
+                {
+                    return _spawningStartTimeAccessor(ref _beatmapObjectCallbackController);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
         public CustomEventCallbackData AddCustomEventCallback(CustomEventCallback callback, float aheadTime = 0, bool callIfBeforeStartTime = true)
         {
@@ -58,7 +84,7 @@
 
         private void LateUpdate()
         {
-            if (_beatmapObjectCallbackController.enabled && BeatmapData != null)
+            if ((_beatmapObjectCallbackController?.enabled ?? false) && BeatmapData != null)
             {
                 for (int l = 0; l < _customEventCallbackData.Count; l++)
                 {
@@ -66,7 +92,7 @@
                     while (customEventCallbackData.nextEventIndex < BeatmapData.customEventsData.Count)
                     {
                         CustomEventData customEventData = BeatmapData.customEventsData[customEventCallbackData.nextEventIndex];
-                        if (customEventData.time - customEventCallbackData.aheadTime >= AudioTimeSource.songTime)
+                        if (customEventData.time - customEventCallbackData.aheadTime >= AudioTimeSource?.songTime)
                         {
                             break;
                         }

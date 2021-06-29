@@ -14,7 +14,7 @@
             List<BeatmapSaveData.WaypointData> waypoints,
             List<BeatmapSaveData.ObstacleData> obstacles,
             SpecialEventKeywordFiltersData specialEventsKeywordFilters,
-            Dictionary<string, object> customData,
+            Dictionary<string, object?> customData,
             List<CustomEventData> customEvents)
             : base(events, notes, waypoints, obstacles, specialEventsKeywordFilters)
         {
@@ -25,12 +25,12 @@
 
         public List<CustomEventData> customEvents { get; }
 
-        public Dictionary<string, object> customData { get; }
+        public Dictionary<string, object?> customData { get; }
 
         internal static CustomBeatmapSaveData Deserialize(string path)
         {
             string version = string.Empty;
-            Dictionary<string, object> customData = new Dictionary<string, object>();
+            Dictionary<string, object?> customData = new Dictionary<string, object?>();
             List<CustomEventData> customEvents = new List<CustomEventData>();
             List<EventData> events = new List<EventData>();
             List<NoteData> notes = new List<NoteData>();
@@ -38,295 +38,293 @@
             List<ObstacleData> obstacles = new List<ObstacleData>();
             List<SpecialEventsForKeyword> keywords = new List<SpecialEventsForKeyword>();
 
-            using (JsonTextReader reader = new JsonTextReader(new StreamReader(path)))
+            using JsonTextReader reader = new JsonTextReader(new StreamReader(path));
+            while (reader.Read())
             {
-                while (reader.Read())
+                if (reader.TokenType == JsonToken.PropertyName)
                 {
-                    if (reader.TokenType == JsonToken.PropertyName)
+                    switch (reader.Value)
                     {
-                        switch (reader.Value)
-                        {
-                            default:
-                                reader.Skip();
-                                break;
+                        default:
+                            reader.Skip();
+                            break;
 
-                            case "_version":
-                                version = reader.ReadAsString() ?? version;
-                                break;
+                        case "_version":
+                            version = reader.ReadAsString() ?? version;
+                            break;
 
-                            case "_events":
-                                reader.ReadObjectArray(() =>
+                        case "_events":
+                            reader.ReadObjectArray(() =>
+                            {
+                                float time = default;
+                                BeatmapEventType type = default;
+                                int value = default;
+                                Dictionary<string, object?> data = new Dictionary<string, object?>();
+                                reader.ReadObject(objectName =>
                                 {
-                                    float time = default;
-                                    BeatmapEventType type = default;
-                                    int value = default;
-                                    Dictionary<string, object> data = new Dictionary<string, object>();
-                                    reader.ReadObject(objectName =>
+                                    switch (objectName)
                                     {
-                                        switch (objectName)
-                                        {
-                                            case "_time":
-                                                time = (float?)reader.ReadAsDouble() ?? time;
-                                                break;
+                                        case "_time":
+                                            time = (float?)reader.ReadAsDouble() ?? time;
+                                            break;
 
-                                            case "_type":
-                                                type = (BeatmapEventType?)reader.ReadAsInt32() ?? type;
-                                                break;
+                                        case "_type":
+                                            type = (BeatmapEventType?)reader.ReadAsInt32() ?? type;
+                                            break;
 
-                                            case "_value":
-                                                value = reader.ReadAsInt32() ?? value;
-                                                break;
+                                        case "_value":
+                                            value = reader.ReadAsInt32() ?? value;
+                                            break;
 
-                                            case "_customData":
-                                                reader.ReadToDictionary(data);
-                                                break;
+                                        case "_customData":
+                                            reader.ReadToDictionary(data);
+                                            break;
 
-                                            default:
-                                                reader.Skip();
-                                                break;
-                                        }
-                                    });
-
-                                    events.Add(new EventData(time, type, value, data));
-                                });
-
-                                break;
-
-                            case "_notes":
-                                reader.ReadObjectArray(() =>
-                                {
-                                    float time = default;
-                                    int lineIndex = default;
-                                    NoteLineLayer lineLayer = default;
-                                    NoteType type = default;
-                                    NoteCutDirection cutDirection = default;
-                                    Dictionary<string, object> data = new Dictionary<string, object>();
-                                    reader.ReadObject(objectName =>
-                                    {
-                                        switch (objectName)
-                                        {
-                                            case "_time":
-                                                time = (float?)reader.ReadAsDouble() ?? time;
-                                                break;
-
-                                            case "_lineIndex":
-                                                lineIndex = reader.ReadAsInt32() ?? lineIndex;
-                                                break;
-
-                                            case "_lineLayer":
-                                                lineLayer = (NoteLineLayer?)reader.ReadAsInt32() ?? lineLayer;
-                                                break;
-
-                                            case "_type":
-                                                type = (NoteType?)reader.ReadAsInt32() ?? type;
-                                                break;
-
-                                            case "_cutDirection":
-                                                cutDirection = (NoteCutDirection?)reader.ReadAsInt32() ?? cutDirection;
-                                                break;
-
-                                            case "_customData":
-                                                reader.ReadToDictionary(data);
-                                                break;
-
-                                            default:
-                                                reader.Skip();
-                                                break;
-                                        }
-                                    });
-
-                                    notes.Add(new NoteData(time, lineIndex, lineLayer, type, cutDirection, data));
-                                });
-
-                                break;
-
-                            case "_waypoints":
-                                reader.ReadObjectArray(() =>
-                                {
-                                    float time = default;
-                                    int lineIndex = default;
-                                    NoteLineLayer lineLayer = default;
-                                    OffsetDirection offsetDirection = default;
-                                    Dictionary<string, object> data = new Dictionary<string, object>();
-                                    reader.ReadObject(objectName =>
-                                    {
-                                        switch (objectName)
-                                        {
-                                            case "_time":
-                                                time = (float?)reader.ReadAsDouble() ?? time;
-                                                break;
-
-                                            case "_lineIndex":
-                                                lineIndex = reader.ReadAsInt32() ?? lineIndex;
-                                                break;
-
-                                            case "_lineLayer":
-                                                lineLayer = (NoteLineLayer?)reader.ReadAsInt32() ?? lineLayer;
-                                                break;
-
-                                            case "_offsetDirection":
-                                                offsetDirection = (OffsetDirection?)reader.ReadAsInt32() ?? offsetDirection;
-                                                break;
-
-                                            case "_customData":
-                                                reader.ReadToDictionary(data);
-                                                break;
-
-                                            default:
-                                                reader.Skip();
-                                                break;
-                                        }
-                                    });
-
-                                    waypoints.Add(new WaypointData(time, lineIndex, lineLayer, offsetDirection, data));
-                                });
-
-                                break;
-
-                            case "_obstacles":
-                                reader.ReadObjectArray(() =>
-                                {
-                                    float time = default;
-                                    int lineIndex = default;
-                                    ObstacleType type = default;
-                                    float duration = default;
-                                    int width = default;
-                                    Dictionary<string, object> data = new Dictionary<string, object>();
-                                    reader.ReadObject(objectName =>
-                                    {
-                                        switch (objectName)
-                                        {
-                                            case "_time":
-                                                time = (float?)reader.ReadAsDouble() ?? time;
-                                                break;
-
-                                            case "_lineIndex":
-                                                lineIndex = reader.ReadAsInt32() ?? lineIndex;
-                                                break;
-
-                                            case "_type":
-                                                type = (ObstacleType?)reader.ReadAsInt32() ?? type;
-                                                break;
-
-                                            case "_duration":
-                                                duration = (float?)reader.ReadAsDouble() ?? duration;
-                                                break;
-
-                                            case "_width":
-                                                width = reader.ReadAsInt32() ?? width;
-                                                break;
-
-                                            case "_customData":
-                                                reader.ReadToDictionary(data);
-                                                break;
-
-                                            default:
-                                                reader.Skip();
-                                                break;
-                                        }
-                                    });
-
-                                    obstacles.Add(new ObstacleData(time, lineIndex, type, duration, width, data));
-                                });
-
-                                break;
-
-                            case "_specialEventsKeywordFilters":
-                                reader.ReadObject(propertyName =>
-                                {
-                                    if (propertyName.Equals("_keywords"))
-                                    {
-                                        reader.ReadObjectArray(() =>
-                                        {
-                                            string keyword = string.Empty;
-                                            List<BeatmapEventType> specialEvents = new List<BeatmapEventType>();
-                                            reader.ReadObject(objectName =>
-                                            {
-                                                switch (objectName)
-                                                {
-                                                    case "_keyword":
-                                                        keyword = reader.ReadAsString() ?? keyword;
-                                                        break;
-
-                                                    case "_specialEvents":
-                                                        if (reader.TokenType != JsonToken.StartArray)
-                                                        {
-                                                            throw new JsonSerializationException("Was not array.");
-                                                        }
-
-                                                        reader.Read();
-                                                        while (reader.TokenType != JsonToken.EndArray)
-                                                        {
-                                                            specialEvents.Add((BeatmapEventType?)reader.ReadAsInt32() ?? default);
-
-                                                            if (!reader.Read())
-                                                            {
-                                                                throw new JsonSerializationException("Unexpected end when reading _specialEvents.");
-                                                            }
-                                                        }
-
-                                                        break;
-
-                                                    default:
-                                                        reader.Skip();
-                                                        break;
-                                                }
-                                            });
-
-                                            keywords.Add(new SpecialEventsForKeyword(keyword, specialEvents));
-                                        });
-                                    }
-                                    else
-                                    {
-                                        reader.Skip();
+                                        default:
+                                            reader.Skip();
+                                            break;
                                     }
                                 });
 
-                                break;
+                                events.Add(new EventData(time, type, value, data));
+                            });
 
-                            case "_customData":
-                                reader.ReadToDictionary(customData, propertyName =>
+                            break;
+
+                        case "_notes":
+                            reader.ReadObjectArray(() =>
+                            {
+                                float time = default;
+                                int lineIndex = default;
+                                NoteLineLayer lineLayer = default;
+                                NoteType type = default;
+                                NoteCutDirection cutDirection = default;
+                                Dictionary<string, object?> data = new Dictionary<string, object?>();
+                                reader.ReadObject(objectName =>
                                 {
-                                    if (propertyName == "_customEvents")
+                                    switch (objectName)
                                     {
-                                        reader.ReadObjectArray(() =>
+                                        case "_time":
+                                            time = (float?)reader.ReadAsDouble() ?? time;
+                                            break;
+
+                                        case "_lineIndex":
+                                            lineIndex = reader.ReadAsInt32() ?? lineIndex;
+                                            break;
+
+                                        case "_lineLayer":
+                                            lineLayer = (NoteLineLayer?)reader.ReadAsInt32() ?? lineLayer;
+                                            break;
+
+                                        case "_type":
+                                            type = (NoteType?)reader.ReadAsInt32() ?? type;
+                                            break;
+
+                                        case "_cutDirection":
+                                            cutDirection = (NoteCutDirection?)reader.ReadAsInt32() ?? cutDirection;
+                                            break;
+
+                                        case "_customData":
+                                            reader.ReadToDictionary(data);
+                                            break;
+
+                                        default:
+                                            reader.Skip();
+                                            break;
+                                    }
+                                });
+
+                                notes.Add(new NoteData(time, lineIndex, lineLayer, type, cutDirection, data));
+                            });
+
+                            break;
+
+                        case "_waypoints":
+                            reader.ReadObjectArray(() =>
+                            {
+                                float time = default;
+                                int lineIndex = default;
+                                NoteLineLayer lineLayer = default;
+                                OffsetDirection offsetDirection = default;
+                                Dictionary<string, object?> data = new Dictionary<string, object?>();
+                                reader.ReadObject(objectName =>
+                                {
+                                    switch (objectName)
+                                    {
+                                        case "_time":
+                                            time = (float?)reader.ReadAsDouble() ?? time;
+                                            break;
+
+                                        case "_lineIndex":
+                                            lineIndex = reader.ReadAsInt32() ?? lineIndex;
+                                            break;
+
+                                        case "_lineLayer":
+                                            lineLayer = (NoteLineLayer?)reader.ReadAsInt32() ?? lineLayer;
+                                            break;
+
+                                        case "_offsetDirection":
+                                            offsetDirection = (OffsetDirection?)reader.ReadAsInt32() ?? offsetDirection;
+                                            break;
+
+                                        case "_customData":
+                                            reader.ReadToDictionary(data);
+                                            break;
+
+                                        default:
+                                            reader.Skip();
+                                            break;
+                                    }
+                                });
+
+                                waypoints.Add(new WaypointData(time, lineIndex, lineLayer, offsetDirection, data));
+                            });
+
+                            break;
+
+                        case "_obstacles":
+                            reader.ReadObjectArray(() =>
+                            {
+                                float time = default;
+                                int lineIndex = default;
+                                ObstacleType type = default;
+                                float duration = default;
+                                int width = default;
+                                Dictionary<string, object?> data = new Dictionary<string, object?>();
+                                reader.ReadObject(objectName =>
+                                {
+                                    switch (objectName)
+                                    {
+                                        case "_time":
+                                            time = (float?)reader.ReadAsDouble() ?? time;
+                                            break;
+
+                                        case "_lineIndex":
+                                            lineIndex = reader.ReadAsInt32() ?? lineIndex;
+                                            break;
+
+                                        case "_type":
+                                            type = (ObstacleType?)reader.ReadAsInt32() ?? type;
+                                            break;
+
+                                        case "_duration":
+                                            duration = (float?)reader.ReadAsDouble() ?? duration;
+                                            break;
+
+                                        case "_width":
+                                            width = reader.ReadAsInt32() ?? width;
+                                            break;
+
+                                        case "_customData":
+                                            reader.ReadToDictionary(data);
+                                            break;
+
+                                        default:
+                                            reader.Skip();
+                                            break;
+                                    }
+                                });
+
+                                obstacles.Add(new ObstacleData(time, lineIndex, type, duration, width, data));
+                            });
+
+                            break;
+
+                        case "_specialEventsKeywordFilters":
+                            reader.ReadObject(propertyName =>
+                            {
+                                if (propertyName.Equals("_keywords"))
+                                {
+                                    reader.ReadObjectArray(() =>
+                                    {
+                                        string keyword = string.Empty;
+                                        List<BeatmapEventType> specialEvents = new List<BeatmapEventType>();
+                                        reader.ReadObject(objectName =>
                                         {
-                                            float time = default;
-                                            string type = string.Empty;
-                                            Dictionary<string, object> data = new Dictionary<string, object>();
-                                            reader.ReadObject(objectName =>
+                                            switch (objectName)
                                             {
-                                                switch (objectName)
-                                                {
-                                                    case "_time":
-                                                        time = (float?)reader.ReadAsDouble() ?? time;
-                                                        break;
+                                                case "_keyword":
+                                                    keyword = reader.ReadAsString() ?? keyword;
+                                                    break;
 
-                                                    case "_type":
-                                                        type = reader.ReadAsString() ?? type;
-                                                        break;
+                                                case "_specialEvents":
+                                                    if (reader.TokenType != JsonToken.StartArray)
+                                                    {
+                                                        throw new JsonSerializationException("Was not array.");
+                                                    }
 
-                                                    case "_data":
-                                                        reader.ReadToDictionary(data);
-                                                        break;
+                                                    reader.Read();
+                                                    while (reader.TokenType != JsonToken.EndArray)
+                                                    {
+                                                        specialEvents.Add((BeatmapEventType?)reader.ReadAsInt32() ?? default);
 
-                                                    default:
-                                                        reader.Skip();
-                                                        break;
-                                                }
-                                            });
+                                                        if (!reader.Read())
+                                                        {
+                                                            throw new JsonSerializationException("Unexpected end when reading _specialEvents.");
+                                                        }
+                                                    }
 
-                                            customEvents.Add(new CustomEventData(time, type, data));
+                                                    break;
+
+                                                default:
+                                                    reader.Skip();
+                                                    break;
+                                            }
                                         });
 
-                                        return false;
-                                    }
+                                        keywords.Add(new SpecialEventsForKeyword(keyword, specialEvents));
+                                    });
+                                }
+                                else
+                                {
+                                    reader.Skip();
+                                }
+                            });
 
-                                    return true;
-                                });
+                            break;
 
-                                break;
-                        }
+                        case "_customData":
+                            reader.ReadToDictionary(customData, propertyName =>
+                            {
+                                if (propertyName == "_customEvents")
+                                {
+                                    reader.ReadObjectArray(() =>
+                                    {
+                                        float time = default;
+                                        string type = string.Empty;
+                                        Dictionary<string, object?> data = new Dictionary<string, object?>();
+                                        reader.ReadObject(objectName =>
+                                        {
+                                            switch (objectName)
+                                            {
+                                                case "_time":
+                                                    time = (float?)reader.ReadAsDouble() ?? time;
+                                                    break;
+
+                                                case "_type":
+                                                    type = reader.ReadAsString() ?? type;
+                                                    break;
+
+                                                case "_data":
+                                                    reader.ReadToDictionary(data);
+                                                    break;
+
+                                                default:
+                                                    reader.Skip();
+                                                    break;
+                                            }
+                                        });
+
+                                        customEvents.Add(new CustomEventData(time, type, data));
+                                    });
+
+                                    return false;
+                                }
+
+                                return true;
+                            });
+
+                            break;
                     }
                 }
             }
@@ -344,18 +342,18 @@
 
         public new class EventData : BeatmapSaveData.EventData
         {
-            internal EventData(float time, BeatmapEventType type, int value, Dictionary<string, object> customData)
+            internal EventData(float time, BeatmapEventType type, int value, Dictionary<string, object?> customData)
                 : base(time, type, value)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object> customData { get; }
+            public Dictionary<string, object?> customData { get; }
         }
 
         public class CustomEventData
         {
-            internal CustomEventData(float time, string type, Dictionary<string, object> data)
+            internal CustomEventData(float time, string type, Dictionary<string, object?> data)
             {
                 this.time = time;
                 this.type = type;
@@ -366,40 +364,40 @@
 
             public string type { get; }
 
-            public Dictionary<string, object> data { get; }
+            public Dictionary<string, object?> data { get; }
         }
 
         public new class NoteData : BeatmapSaveData.NoteData
         {
-            internal NoteData(float time, int lineIndex, NoteLineLayer lineLayer, NoteType type, NoteCutDirection cutDirection, Dictionary<string, object> customData)
+            internal NoteData(float time, int lineIndex, NoteLineLayer lineLayer, NoteType type, NoteCutDirection cutDirection, Dictionary<string, object?> customData)
                 : base(time, lineIndex, lineLayer, type, cutDirection)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object> customData { get; }
+            public Dictionary<string, object?> customData { get; }
         }
 
         public new class WaypointData : BeatmapSaveData.WaypointData
         {
-            public WaypointData(float time, int lineIndex, NoteLineLayer lineLayer, OffsetDirection offsetDirection, Dictionary<string, object> customData)
+            public WaypointData(float time, int lineIndex, NoteLineLayer lineLayer, OffsetDirection offsetDirection, Dictionary<string, object?> customData)
                 : base(time, lineIndex, lineLayer, offsetDirection)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object> customData { get; }
+            public Dictionary<string, object?> customData { get; }
         }
 
         public new class ObstacleData : BeatmapSaveData.ObstacleData
         {
-            public ObstacleData(float time, int lineIndex, ObstacleType type, float duration, int width, Dictionary<string, object> customData)
+            public ObstacleData(float time, int lineIndex, ObstacleType type, float duration, int width, Dictionary<string, object?> customData)
                 : base(time, lineIndex, type, duration, width)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object> customData { get; }
+            public Dictionary<string, object?> customData { get; }
         }
     }
 }

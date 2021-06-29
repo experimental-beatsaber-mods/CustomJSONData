@@ -1,7 +1,7 @@
 ﻿{
   "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
   "author": "Aeroluna",
-  "description": "Adds support for loading of and access to arbitrary data on beatmap difficulties, notes, lighting events, and obstacles.",
+  "description": "Lets mappers include arbitrary data in beatmaps, and lets modders access that data. Why did I make this? Good question.",
   "gameVersion": "1.16.2",
   "dependsOn": {
     "BSIPA": "^4.1.6"
@@ -12,10 +12,5 @@
   "id": "CustomJSONData",
   "name": "CustomJSONData",
   "version": "2.0.2",
-  "icon": "CustomJSONData.icon.png",
-  "links": {
-    "project-home": "https://github.com/artemiswkearney/CustomJSONData/wiki",
-    "project-source": "https://github.com/artemiswkearney/CustomJSONData",
-    "donate": "https://ko-fi.com/artibs"
-  }
+  "icon": "CustomJSONData.icon.png"
 }

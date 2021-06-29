@@ -1,6 +1,5 @@
 ﻿namespace CustomJSONData.CustomBeatmap
 {
-    using System;
     using System.Collections.Generic;
     using System.Reflection;
 
@@ -13,27 +12,24 @@
         public CustomBeatmapData(
             int numberOfLines,
             List<CustomEventData> customEventsData,
-            Dictionary<string, object> customData,
-            Dictionary<string, object> beatmapCustomData,
-            Dictionary<string, object> levelCustomData)
+            Dictionary<string, object?> customData,
+            Dictionary<string, object?> beatmapCustomData,
+            Dictionary<string, object?> levelCustomData)
             : base(numberOfLines)
         {
             this.customEventsData = customEventsData;
             this.customData = customData;
             this.beatmapCustomData = beatmapCustomData;
             this.levelCustomData = levelCustomData;
-            CustomBeatmapDataWasCreated?.Invoke(this);
         }
-
-        public static event Action<CustomBeatmapData>? CustomBeatmapDataWasCreated;
 
         public List<CustomEventData> customEventsData { get; }
 
-        public Dictionary<string, object> customData { get; }
+        public Dictionary<string, object?> customData { get; }
 
-        public Dictionary<string, object> beatmapCustomData { get; }
+        public Dictionary<string, object?> beatmapCustomData { get; }
 
-        public Dictionary<string, object> levelCustomData { get; }
+        public Dictionary<string, object?> levelCustomData { get; }
 
         private static MethodInfo CopyBeatmapObjectsMethod
         {

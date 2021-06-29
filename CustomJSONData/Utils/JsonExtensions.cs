@@ -6,7 +6,7 @@
 
     internal static class JsonExtensions
     {
-        internal static void ReadToDictionary(this JsonReader reader, Dictionary<string, object> dictionary, Func<string, bool>? specialCase = null)
+        internal static void ReadToDictionary(this JsonReader reader, Dictionary<string, object?> dictionary, Func<string, bool>? specialCase = null)
         {
             ObjectReadObject(reader, dictionary, specialCase);
         }
@@ -44,7 +44,7 @@
             }
         }
 
-        private static object ObjectReadValue(JsonReader reader)
+        private static object? ObjectReadValue(JsonReader reader)
         {
             switch (reader.TokenType)
             {
@@ -55,18 +55,13 @@
                     return ObjectReadList(reader);
 
                 default:
-                    if (reader.Value == null)
-                    {
-                        throw new JsonSerializationException("Unexpected null value when reading.");
-                    }
-
                     return reader.Value;
             }
         }
 
-        private static IList<object> ObjectReadList(JsonReader reader)
+        private static IList<object?> ObjectReadList(JsonReader reader)
         {
-            IList<object> list = new List<object>();
+            IList<object?> list = new List<object?>();
 
             while (reader.Read())
             {
@@ -87,11 +82,11 @@
             throw new JsonSerializationException("Unexpected end when reading Dictionary.");
         }
 
-        private static object ObjectReadObject(JsonReader reader, Dictionary<string, object>? dictionary = null, Func<string, bool>? specialCase = null)
+        private static object ObjectReadObject(JsonReader reader, Dictionary<string, object?>? dictionary = null, Func<string, bool>? specialCase = null)
         {
             if (dictionary == null)
             {
-                dictionary = new Dictionary<string, object>();
+                dictionary = new Dictionary<string, object?>();
             }
 
             while (reader.Read())

@@ -4,7 +4,7 @@
 
     public class CustomEventData
     {
-        public CustomEventData(float time, string type, Dictionary<string, object> data)
+        public CustomEventData(float time, string type, Dictionary<string, object?> data)
         {
             this.time = time;
             this.type = type;
@@ -15,7 +15,7 @@
 
         public float time { get; }
 
-        public Dictionary<string, object> data { get; }
+        public Dictionary<string, object?> data { get; }
 
         public CustomEventData GetCopy()
         {

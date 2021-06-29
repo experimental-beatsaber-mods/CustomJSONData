@@ -11,10 +11,8 @@
     [HarmonyPatch("CreateTransformedData")]
     internal class BeatDataMirrorTransformCreateTransformData
     {
-#pragma warning disable CS8625
-        private static readonly ConstructorInfo _beatmapDataCtor = typeof(BeatmapData).GetConstructors().First();
-        private static readonly MethodInfo _copyCustomData = SymbolExtensions.GetMethodInfo(() => CopyCustomBeatmapData(0, null));
-#pragma warning restore CS8625
+        private static readonly ConstructorInfo _beatmapDataCtor = AccessTools.FirstConstructor(typeof(BeatmapData), _ => true);
+        private static readonly MethodInfo _copyCustomData = AccessTools.Method(typeof(BeatDataMirrorTransformCreateTransformData), nameof(CopyCustomBeatmapData));
 
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -35,7 +33,7 @@
 #pragma warning restore CS0252
             if (!foundCtor)
             {
-                Logger.Log("Failed to patch BeatDataTransformHelper!", IPA.Logging.Logger.Level.Error);
+                Logger.Log("Failed to patch BeatmapDataMirrorTransform!", IPA.Logging.Logger.Level.Error);
             }
 
             return instructionList.AsEnumerable();

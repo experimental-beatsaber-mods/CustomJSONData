@@ -23,35 +23,9 @@
 
         public BeatmapObjectCallbackController? BeatmapObjectCallbackController => _beatmapObjectCallbackController;
 
-        public IAudioTimeSource? AudioTimeSource
-        {
-            get
-            {
-                if (_beatmapObjectCallbackController != null)
-                {
-                    return _audioTimeSourceAccessor(ref _beatmapObjectCallbackController);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
+        public IAudioTimeSource? AudioTimeSource => _audioTimeSourceAccessor(ref _beatmapObjectCallbackController!);
 
-        public float? SpawningStartTime
-        {
-            get
-            {
-                if (_beatmapObjectCallbackController != null)
-                {
-                    return _spawningStartTimeAccessor(ref _beatmapObjectCallbackController);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
+        public float? SpawningStartTime => _spawningStartTimeAccessor(ref _beatmapObjectCallbackController!);
 
         public CustomEventCallbackData AddCustomEventCallback(CustomEventCallback callback, float aheadTime = 0, bool callIfBeforeStartTime = true)
         {
@@ -84,7 +58,7 @@
 
         private void LateUpdate()
         {
-            if ((_beatmapObjectCallbackController?.enabled ?? false) && BeatmapData != null)
+            if (_beatmapObjectCallbackController!.enabled && BeatmapData != null)
             {
                 for (int l = 0; l < _customEventCallbackData.Count; l++)
                 {

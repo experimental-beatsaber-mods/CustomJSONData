@@ -231,6 +231,7 @@
                             break;
 
                         case "_specialEventsKeywordFilters":
+                            reader.Read();
                             reader.ReadObject(propertyName =>
                             {
                                 if (propertyName.Equals("_keywords"))
@@ -248,19 +249,29 @@
                                                     break;
 
                                                 case "_specialEvents":
+                                                    reader.Read();
                                                     if (reader.TokenType != JsonToken.StartArray)
                                                     {
-                                                        throw new JsonSerializationException("Was not array.");
+                                                        throw new JsonSerializationException("_specialEvents was not array.");
                                                     }
 
-                                                    reader.Read();
-                                                    while (reader.TokenType != JsonToken.EndArray)
+                                                    while (true)
                                                     {
-                                                        specialEvents.Add((BeatmapEventType?)reader.ReadAsInt32() ?? default);
-
-                                                        if (!reader.Read())
+                                                        int? specialEvent = reader.ReadAsInt32();
+                                                        if (specialEvent.HasValue)
                                                         {
-                                                            throw new JsonSerializationException("Unexpected end when reading _specialEvents.");
+                                                            specialEvents.Add((BeatmapEventType)specialEvent);
+                                                        }
+                                                        else
+                                                        {
+                                                            if (reader.TokenType == JsonToken.EndArray)
+                                                            {
+                                                                break;
+                                                            }
+                                                            else
+                                                            {
+                                                                throw new JsonSerializationException($"Value in _specialEvents was not int.");
+                                                            }
                                                         }
                                                     }
 

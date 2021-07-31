@@ -30,6 +30,8 @@
         private static readonly ConstructorInfo _customEventDataCtor = AccessTools.FirstConstructor(typeof(CustomBeatmapEventData), _ => true);
         private static readonly MethodInfo _getEventCustomData = AccessTools.Method(typeof(BeatmapDataLoaderGetBeatmapDataFromBeatmapSaveData), nameof(GetEventCustomData));
 
+        private static readonly ConstructorInfo _dictionaryCtor = AccessTools.FirstConstructor(typeof(Dictionary<string, object?>), _ => true);
+
         private static readonly MethodInfo _createCustomBeatmapData = AccessTools.Method(typeof(BeatmapDataLoaderGetBeatmapDataFromBeatmapSaveData), nameof(CreateCustomBeatmapData));
 
         internal static CustomBeatmapSaveData? BeatmapSaveData { get; set; }
@@ -40,106 +42,69 @@
 
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            List<CodeInstruction> instructionList = instructions.ToList();
+            FieldInfo bpmChangesDataField = (FieldInfo)instructions.First(n => n.opcode == OpCodes.Stfld && ((FieldInfo)n.operand).Name == "bpmChangesData").operand; // idk how else to get this field
 
-            FieldInfo? bpmChangesDataField = null;
+            return new CodeMatcher(instructions)
 
-            bool foundBombNoteData = false;
-            bool foundBasicNoteData = false;
-            bool foundWaypointData = false;
-            bool foundObstacleData = false;
-            bool foundEventData = false;
-            bool foundBeatmapData = false;
-#pragma warning disable CS0252
-            for (int i = 0; i < instructionList.Count; i++)
-            {
-                if (!foundBombNoteData &&
-                    instructionList[i].opcode == OpCodes.Call &&
-                    instructionList[i].operand == _createBombNoteData)
-                {
-                    foundBombNoteData = true;
-                    instructionList[i].operand = _createBombCustomNoteData;
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Call, _getNoteCustomData));
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Ldloc_S, 6));
-                }
+                // CreateCustomBeatmapData
+                .MatchForward(
+                    false,
+                    new CodeMatch(OpCodes.Ldc_I4_0),
+                    new CodeMatch(OpCodes.Stloc_S))
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Ldloc_0),
+                    new CodeInstruction(OpCodes.Ldfld, bpmChangesDataField),
+                    new CodeInstruction(OpCodes.Ldarg_S, 7),
+                    new CodeInstruction(OpCodes.Ldarg_S, 8),
+                    new CodeInstruction(OpCodes.Call, _createCustomBeatmapData),
+                    new CodeInstruction(OpCodes.Stloc_1))
 
-                if (!foundBasicNoteData &&
-                    instructionList[i].opcode == OpCodes.Call &&
-                    instructionList[i].operand == _createBasicNoteData)
-                {
-                    foundBasicNoteData = true;
-                    instructionList[i].operand = _createBasicCustomNoteData;
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Call, _getNoteCustomData));
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Ldloc_S, 6));
-                }
+                // bomb note
+                .MatchForward(false, new CodeMatch(OpCodes.Call, _createBombNoteData))
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Ldloc_S, 6),
+                    new CodeInstruction(OpCodes.Call, _getNoteCustomData))
+                .SetOperandAndAdvance(_createBombCustomNoteData)
 
-                if (!foundWaypointData &&
-                    instructionList[i].opcode == OpCodes.Newobj &&
-                    instructionList[i].operand == _waypointDataCtor)
-                {
-                    foundWaypointData = true;
-                    instructionList[i].operand = _customWaypointDataCtor;
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Call, _getWaypointCustomData));
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Ldloc_S, 7));
-                }
+                // basic note
+                .MatchForward(false, new CodeMatch(OpCodes.Call, _createBasicNoteData))
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Ldloc_S, 6),
+                    new CodeInstruction(OpCodes.Call, _getNoteCustomData))
+                .SetOperandAndAdvance(_createBasicCustomNoteData)
 
-                if (!foundObstacleData &&
-                    instructionList[i].opcode == OpCodes.Newobj &&
-                    instructionList[i].operand == _obstacleDataCtor)
-                {
-                    foundObstacleData = true;
-                    instructionList[i].operand = _customObstacleDataCtor;
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Call, _getObstacleCustomData));
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Ldloc_S, 8));
-                }
+                // waypoint
+                .MatchForward(false, new CodeMatch(OpCodes.Newobj, _waypointDataCtor))
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Ldloc_S, 7),
+                    new CodeInstruction(OpCodes.Call, _getWaypointCustomData))
+                .SetOperandAndAdvance(_customWaypointDataCtor)
 
-                if (instructionList[i].opcode == OpCodes.Newobj &&
-                    instructionList[i].operand == _eventDataCtor)
-                {
-                    instructionList[i].operand = _customEventDataCtor;
-                    instructionList.Insert(i, new CodeInstruction(OpCodes.Call, _getEventCustomData));
-                    if (!foundEventData)
-                    {
-                        instructionList.Insert(i, new CodeInstruction(OpCodes.Ldloc_S, 21));
-                    }
-                    else
-                    {
-                        instructionList.Insert(i, new CodeInstruction(OpCodes.Ldnull));
-                    }
+                // obstacle
+                .MatchForward(false, new CodeMatch(OpCodes.Newobj, _obstacleDataCtor))
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Ldloc_S, 8),
+                    new CodeInstruction(OpCodes.Call, _getObstacleCustomData))
+                .SetOperandAndAdvance(_customObstacleDataCtor)
 
-                    foundEventData = true;
-                }
+                // event with custom data
+                .MatchForward(
+                    false,
+                    new CodeMatch(OpCodes.Newobj, _eventDataCtor),
+                    new CodeMatch(OpCodes.Stloc_S))
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Ldloc_S, 21),
+                    new CodeInstruction(OpCodes.Call, _getEventCustomData))
+                .SetOperandAndAdvance(_customEventDataCtor)
 
-                if (bpmChangesDataField == null &&
-                    instructionList[i].opcode == OpCodes.Stfld &&
-                    ((FieldInfo)instructionList[i].operand).Name == "bpmChangesData")
-                {
-                    bpmChangesDataField = (FieldInfo)instructionList[i].operand;
-                }
+                // event w/o custom data
+                .MatchForward(false, new CodeMatch(OpCodes.Newobj, _eventDataCtor))
+                .Repeat(n => n
+                    .InsertAndAdvance(new CodeInstruction(OpCodes.Newobj, _dictionaryCtor))
+                    .SetOperandAndAdvance(_customEventDataCtor))
 
-                // we look for this specifically because it happens after the bpm changes have been loaded
-                if (!foundBeatmapData &&
-                    bpmChangesDataField != null &&
-                    instructionList[i].opcode == OpCodes.Stfld &&
-                    ((FieldInfo)instructionList[i].operand).Name == "bpmChangesDataIdx")
-                {
-                    foundBeatmapData = true;
-                    instructionList.Insert(i + 1, new CodeInstruction(OpCodes.Ldarg_0));
-                    instructionList.Insert(i + 2, new CodeInstruction(OpCodes.Ldloc_0));
-                    instructionList.Insert(i + 3, new CodeInstruction(OpCodes.Ldfld, bpmChangesDataField));
-                    instructionList.Insert(i + 4, new CodeInstruction(OpCodes.Ldarg_S, 7));
-                    instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldarg_S, 8));
-                    instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Call, _createCustomBeatmapData));
-                    instructionList.Insert(i + 7, new CodeInstruction(OpCodes.Stloc_1));
-                }
-            }
-#pragma warning restore CS0252
-            if (!foundBombNoteData || !foundBasicNoteData || /*!foundLongNoteData ||*/ !foundWaypointData || !foundObstacleData || !foundEventData || !foundBeatmapData)
-            {
-                Logger.Log("Failed to patch GetBeatmapDataFromBeatmapSaveData in BeatmapDataLoader!", IPA.Logging.Logger.Level.Error);
-            }
-
-            return instructionList.AsEnumerable();
+                .InstructionEnumeration();
         }
 
         private static Dictionary<string, object?> GetNoteCustomData(BeatmapSaveData.NoteData noteSaveData)
@@ -213,7 +178,7 @@
             }
             else
             {
-                customBeatmapData = new CustomBeatmapData(4, new List<CustomEventData>(), new Dictionary<string, object?>(), new Dictionary<string, object?>(), new Dictionary<string, object?>());
+                throw new System.InvalidOperationException("Could not get BeatmapSaveData");
             }
 
             return customBeatmapData;

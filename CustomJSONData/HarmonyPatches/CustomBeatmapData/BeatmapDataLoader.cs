@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
-    using CustomJSONData;
     using CustomJSONData.CustomBeatmap;
     using HarmonyLib;
 
@@ -178,7 +177,7 @@
             }
             else
             {
-                throw new System.InvalidOperationException("Could not get BeatmapSaveData");
+                customBeatmapData = new CustomBeatmapData(4, new List<CustomEventData>(), new Dictionary<string, object?>(), new Dictionary<string, object?>(), new Dictionary<string, object?>());
             }
 
             return customBeatmapData;

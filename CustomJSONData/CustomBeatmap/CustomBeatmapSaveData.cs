@@ -1,5 +1,6 @@
 ﻿namespace CustomJSONData.CustomBeatmap
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -59,6 +60,7 @@
                                 float time = default;
                                 BeatmapEventType type = default;
                                 int value = default;
+                                float floatValue = default;
                                 Dictionary<string, object?> data = new Dictionary<string, object?>();
                                 reader.ReadObject(objectName =>
                                 {
@@ -76,6 +78,10 @@
                                             value = reader.ReadAsInt32() ?? value;
                                             break;
 
+                                        case "_floatValue":
+                                            time = (float?)reader.ReadAsDouble() ?? floatValue;
+                                            break;
+
                                         case "_customData":
                                             reader.ReadToDictionary(data);
                                             break;
@@ -86,7 +92,7 @@
                                     }
                                 });
 
-                                events.Add(new EventData(time, type, value, data));
+                                events.Add(new EventData(time, type, value, floatValue, data));
                             });
 
                             break;
@@ -340,7 +346,7 @@
                 }
             }
 
-            return new CustomBeatmapSaveData(
+            CustomBeatmapSaveData beatmapSaveData = new CustomBeatmapSaveData(
                 version,
                 events.Cast<BeatmapSaveData.EventData>().ToList(),
                 notes.Cast<BeatmapSaveData.NoteData>().ToList(),
@@ -349,12 +355,58 @@
                 new SpecialEventKeywordFiltersData(keywords),
                 customData,
                 customEvents);
+
+            // Below taken straight from BeatmapSaveData.DeserializeFromJSONString
+            if (!string.IsNullOrEmpty(beatmapSaveData.version))
+            {
+                Version versionVersion = new Version(beatmapSaveData.version);
+                Version value = new Version("2.5.0");
+                if (versionVersion.CompareTo(value) < 0)
+                {
+                    ConvertBeatmapSaveDataPreV2_5_0(beatmapSaveData);
+                }
+            }
+            else
+            {
+                ConvertBeatmapSaveDataPreV2_5_0(beatmapSaveData);
+            }
+
+            return beatmapSaveData;
+        }
+
+        private static void ConvertBeatmapSaveDataPreV2_5_0(CustomBeatmapSaveData beatmapSaveData)
+        {
+            List<BeatmapSaveData.EventData> list = new List<BeatmapSaveData.EventData>(beatmapSaveData.events.Count);
+            foreach (EventData eventData in beatmapSaveData.events)
+            {
+                EventData? newData = null;
+                if (eventData.type == BeatmapEventType.Event10)
+                {
+                    newData = new EventData(eventData.time, BeatmapEventType.BpmChange, eventData.value, eventData.floatValue, eventData.customData);
+                }
+
+                if (((global::BeatmapEventType)eventData.type).IsBPMChangeEvent())
+                {
+                    if (eventData.value != 0)
+                    {
+                        newData = new EventData(eventData.time, eventData.type, eventData.value, eventData.value, eventData.customData);
+                    }
+                }
+                else
+                {
+                    newData = new EventData(eventData.time, eventData.type, eventData.value, 1f, eventData.customData);
+                }
+
+                list.Add(newData ?? eventData);
+            }
+
+            beatmapSaveData._events = list;
         }
 
         public new class EventData : BeatmapSaveData.EventData
         {
-            internal EventData(float time, BeatmapEventType type, int value, Dictionary<string, object?> customData)
-                : base(time, type, value)
+            internal EventData(float time, BeatmapEventType type, int value, float floatValue, Dictionary<string, object?> customData)
+                : base(time, type, value, floatValue)
             {
                 this.customData = customData;
             }

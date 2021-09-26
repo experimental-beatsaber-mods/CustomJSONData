@@ -4,8 +4,8 @@
 
     public class CustomBeatmapEventData : BeatmapEventData
     {
-        private CustomBeatmapEventData(float time, BeatmapEventType type, int value, Dictionary<string, object?> customData)
-            : base(time, type, value)
+        private CustomBeatmapEventData(float time, BeatmapEventType type, int value, float floatValue, Dictionary<string, object?> customData)
+            : base(time, type, value, floatValue)
         {
             this.customData = customData;
         }
@@ -14,7 +14,7 @@
 
         public CustomBeatmapEventData GetCopy()
         {
-            return new CustomBeatmapEventData(time, type, value, customData.Copy());
+            return new CustomBeatmapEventData(time, type, value, floatValue, customData.Copy());
         }
     }
 }

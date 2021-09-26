@@ -41,8 +41,6 @@
 
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            FieldInfo bpmChangesDataField = (FieldInfo)instructions.First(n => n.opcode == OpCodes.Stfld && ((FieldInfo)n.operand).Name == "bpmChangesData").operand; // idk how else to get this field
-
             return new CodeMatcher(instructions)
 
                 // CreateCustomBeatmapData
@@ -52,12 +50,11 @@
                     new CodeMatch(OpCodes.Stloc_S))
                 .InsertAndAdvance(
                     new CodeInstruction(OpCodes.Ldarg_0),
-                    new CodeInstruction(OpCodes.Ldloc_0),
-                    new CodeInstruction(OpCodes.Ldfld, bpmChangesDataField),
+                    new CodeInstruction(OpCodes.Ldloc_1),
                     new CodeInstruction(OpCodes.Ldarg_S, 7),
                     new CodeInstruction(OpCodes.Ldarg_S, 8),
                     new CodeInstruction(OpCodes.Call, _createCustomBeatmapData),
-                    new CodeInstruction(OpCodes.Stloc_1))
+                    new CodeInstruction(OpCodes.Stloc_0))
 
                 // bomb note
                 .MatchForward(false, new CodeMatch(OpCodes.Call, _createBombNoteData))
@@ -159,18 +156,8 @@
 
                 foreach (CustomBeatmapSaveData.CustomEventData customEventData in customEventsSaveData)
                 {
-                    // Same math from BeatmapDataLoader
-                    int bpmChangesDataIdx = 0;
-                    float time = customEventData.time;
-                    while (bpmChangesDataIdx < bpmChanges.Count - 1 && bpmChanges[bpmChangesDataIdx + 1].bpmChangeStartBpmTime < time)
-                    {
-                        bpmChangesDataIdx++;
-                    }
-
-                    BeatmapDataLoader.BpmChangeData bpmchangeData = bpmChanges[bpmChangesDataIdx];
-                    float realTime = bpmchangeData.bpmChangeStartTime + beatmapDataLoader.GetRealTimeFromBPMTime(time - bpmchangeData.bpmChangeStartBpmTime, bpmchangeData.bpm, shuffle, shufflePeriod);
-
-                    customEventDatas.Add(new CustomEventData(realTime, customEventData.type, customEventData.data));
+                    float time = beatmapDataLoader.ProcessTime(customEventData.time, bpmChanges, shuffle, shufflePeriod);
+                    customEventDatas.Add(new CustomEventData(time, customEventData.type, customEventData.data));
                 }
 
                 customBeatmapData = new CustomBeatmapData(4, customEventDatas, BeatmapSaveData.customData, BeatmapCustomData ?? new Dictionary<string, object?>(), LevelCustomData ?? new Dictionary<string, object?>());

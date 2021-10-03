@@ -69,7 +69,7 @@
             return false;
         }
 
-        private static void Postfix(BeatmapData __result, string difficultyFileName, StandardLevelInfoSaveData standardLevelInfoSaveData)
+        private static void Postfix()
         {
             BeatmapSaveData = null;
             BeatmapCustomData = null;

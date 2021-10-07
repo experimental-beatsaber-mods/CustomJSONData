@@ -98,6 +98,7 @@
         {
             CustomBeatmapData customBeatmapData = BaseCopy();
             CopyBeatmapObjects(this, customBeatmapData);
+            CopyAvailableSpecialEventsPerKeywordDictionary(this, customBeatmapData);
             return customBeatmapData;
         }
 

@@ -36,16 +36,31 @@
                 {
                     return (T)Convert.ChangeType(value, underlyingType);
                 }
+                else if (value is IConvertible)
+                {
+                    return (T)Convert.ChangeType(value, typeof(T));
+                }
                 else
                 {
-                    if (value is IConvertible)
-                    {
-                        return (T)Convert.ChangeType(value, typeof(T));
-                    }
-                    else
-                    {
-                        return (T?)value;
-                    }
+                    return (T?)value;
+                }
+            }
+
+            return default;
+        }
+
+        public static T? GetStringToEnum<T>(this Dictionary<string, object?> dictionary, string key)
+        {
+            if (dictionary.TryGetValue(key, out object? value) && value != null)
+            {
+                Type underlyingType = Nullable.GetUnderlyingType(typeof(T));
+                if (underlyingType != null)
+                {
+                    return (T)Enum.Parse(underlyingType, (string)value);
+                }
+                else
+                {
+                    return (T)Enum.Parse(typeof(T), (string)value);
                 }
             }
 

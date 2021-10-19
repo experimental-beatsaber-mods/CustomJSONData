@@ -79,7 +79,7 @@
                                             break;
 
                                         case "_floatValue":
-                                            time = (float?)reader.ReadAsDouble() ?? floatValue;
+                                            floatValue = (float?)reader.ReadAsDouble() ?? floatValue;
                                             break;
 
                                         case "_customData":

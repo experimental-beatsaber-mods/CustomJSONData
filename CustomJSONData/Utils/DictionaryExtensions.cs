@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using Newtonsoft.Json;
 
@@ -65,6 +66,40 @@
             }
 
             return default;
+        }
+
+        public static string Stringify(this Dictionary<string, object?> dictionary)
+        {
+            return FormatDictionary(dictionary);
+        }
+
+        public static string FormatDictionary(Dictionary<string, object?> dictionary, int indent = 0)
+        {
+            string prefix = new string('\t', indent);
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine(prefix + "{");
+            foreach (KeyValuePair<string, object?> pair in dictionary)
+            {
+                builder.AppendLine($"{prefix}\t\"{pair.Key}\": {FormatObject(pair.Value, indent + 1)}");
+            }
+
+            builder.Append(prefix + "}");
+            return builder.ToString();
+        }
+
+        public static string FormatList(List<object?> list, int indent = 0)
+        {
+            return "[" + string.Join(", ", list.Select(n => FormatObject(n, indent))) + "]";
+        }
+
+        public static string FormatObject(object? obj, int indent = 0)
+        {
+            return obj switch
+            {
+                List<object?> recursiveList => FormatList(recursiveList, indent),
+                Dictionary<string, object?> dictionary => FormatDictionary(dictionary, indent),
+                _ => obj?.ToString() ?? "NULL",
+            };
         }
     }
 }

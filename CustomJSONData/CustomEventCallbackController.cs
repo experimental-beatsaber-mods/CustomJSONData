@@ -39,6 +39,14 @@
             _customEventCallbackData?.Remove(callbackData);
         }
 
+        public void InvokeCustomEvent(CustomEventData customEventData)
+        {
+            for (int l = 0; l < _customEventCallbackData.Count; l++)
+            {
+                _customEventCallbackData[l].callback(customEventData);
+            }
+        }
+
         internal void SetNewBeatmapData(IReadonlyBeatmapData beatmapData)
         {
             BeatmapData = (CustomBeatmapData)beatmapData;

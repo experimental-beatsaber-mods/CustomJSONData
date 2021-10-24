@@ -4,14 +4,14 @@
     using System.Collections.Generic;
     using Newtonsoft.Json;
 
-    internal static class JsonExtensions
+    public static class JsonExtensions
     {
-        internal static void ReadToDictionary(this JsonReader reader, Dictionary<string, object?> dictionary, Func<string, bool>? specialCase = null)
+        public static void ReadToDictionary(this JsonReader reader, Dictionary<string, object?> dictionary, Func<string, bool>? specialCase = null)
         {
             ObjectReadObject(reader, dictionary, specialCase);
         }
 
-        internal static void ReadObject(this JsonReader reader, Action<string> action)
+        public static void ReadObject(this JsonReader reader, Action<string> action)
         {
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
@@ -22,7 +22,7 @@
             }
         }
 
-        internal static void ReadObjectArray(this JsonReader reader, Action action)
+        public static void ReadObjectArray(this JsonReader reader, Action action)
         {
             reader.Read(); // StartArray
             if (reader.TokenType != JsonToken.StartArray)

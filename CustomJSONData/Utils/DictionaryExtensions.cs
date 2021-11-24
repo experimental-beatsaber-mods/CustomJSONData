@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Text;
     using Newtonsoft.Json;
+    using UnityEngine;
 
     public static class DictionaryExtensions
     {
@@ -48,6 +49,18 @@
             }
 
             return default;
+        }
+
+        public static Vector3? GetVector3(this Dictionary<string, object?> dictionary, string key)
+        {
+            List<float>? data = dictionary.Get<List<object>>(key)?.Select(Convert.ToSingle).ToList();
+            Vector3? final = null;
+            if (data != null)
+            {
+                final = new Vector3(data[0], data[1], data[2]);
+            }
+
+            return final;
         }
 
         public static T? GetStringToEnum<T>(this Dictionary<string, object?> dictionary, string key)

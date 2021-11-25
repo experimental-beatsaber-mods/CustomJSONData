@@ -1,56 +1,59 @@
-﻿namespace CustomJSONData
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using Newtonsoft.Json;
-    using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using IPA.Utilities;
+using JetBrains.Annotations;
+using Newtonsoft.Json;
+using UnityEngine;
 
+namespace CustomJSONData
+{
     public static class DictionaryExtensions
     {
+        [PublicAPI]
         public static Dictionary<string, object?> FromJSON(string jsonString)
         {
-            using MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonString));
-            using JsonTextReader reader = new JsonTextReader(new StreamReader(jsonString));
+            using MemoryStream stream = new(Encoding.UTF8.GetBytes(jsonString));
+            using JsonTextReader reader = new(new StreamReader(jsonString));
             return FromJSON(reader);
         }
 
         public static Dictionary<string, object?> FromJSON(JsonReader reader, Func<string, bool>? specialCase = null)
         {
-            Dictionary<string, object?> dictioanry = new Dictionary<string, object?>();
+            Dictionary<string, object?> dictioanry = new();
             reader.ReadToDictionary(dictioanry, specialCase);
             return dictioanry;
         }
 
-        public static Dictionary<string, object?> Copy(this Dictionary<string, object?> dictionary)
+        public static Dictionary<string, object?> Copy(this Dictionary<string, object?>? dictionary)
         {
             return dictionary != null ? new Dictionary<string, object?>(dictionary) : new Dictionary<string, object?>();
         }
 
         public static T? Get<T>(this Dictionary<string, object?> dictionary, string key)
         {
-            if (dictionary.TryGetValue(key, out object? value))
+            if (!dictionary.TryGetValue(key, out object? value))
             {
-                Type underlyingType = Nullable.GetUnderlyingType(typeof(T));
-                if (underlyingType != null)
-                {
-                    return (T)Convert.ChangeType(value, underlyingType);
-                }
-                else if (value is IConvertible)
-                {
-                    return (T)Convert.ChangeType(value, typeof(T));
-                }
-                else
-                {
-                    return (T?)value;
-                }
+                return default;
             }
 
-            return default;
+            Type? underlyingType = Nullable.GetUnderlyingType(typeof(T));
+            if (underlyingType != null)
+            {
+                return (T)Convert.ChangeType(value, underlyingType);
+            }
+
+            if (value is IConvertible)
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+
+            return (T?)value;
         }
 
+        [PublicAPI]
         public static Vector3? GetVector3(this Dictionary<string, object?> dictionary, string key)
         {
             List<float>? data = dictionary.Get<List<object>>(key)?.Select(Convert.ToSingle).ToList();
@@ -63,24 +66,24 @@
             return final;
         }
 
+        [PublicAPI]
         public static T? GetStringToEnum<T>(this Dictionary<string, object?> dictionary, string key)
         {
-            if (dictionary.TryGetValue(key, out object? value) && value != null)
+            if (!dictionary.TryGetValue(key, out object? value) || value == null)
             {
-                Type underlyingType = Nullable.GetUnderlyingType(typeof(T));
-                if (underlyingType != null)
-                {
-                    return (T)Enum.Parse(underlyingType, (string)value);
-                }
-                else
-                {
-                    return (T)Enum.Parse(typeof(T), (string)value);
-                }
+                return default;
             }
 
-            return default;
+            Type? underlyingType = Nullable.GetUnderlyingType(typeof(T));
+            if (underlyingType != null)
+            {
+                return (T)Enum.Parse(underlyingType, (string)value);
+            }
+
+            return (T)Enum.Parse(typeof(T), (string)value);
         }
 
+        [PublicAPI]
         public static string Stringify(this Dictionary<string, object?> dictionary)
         {
             return FormatDictionary(dictionary);
@@ -88,12 +91,12 @@
 
         public static string FormatDictionary(Dictionary<string, object?> dictionary, int indent = 0)
         {
-            string prefix = new string('\t', indent);
-            StringBuilder builder = new StringBuilder();
+            string prefix = new('\t', indent);
+            StringBuilder builder = new();
             builder.AppendLine(prefix + "{");
-            foreach (KeyValuePair<string, object?> pair in dictionary)
+            foreach ((string key, object? value) in dictionary)
             {
-                builder.AppendLine($"{prefix}\t\"{pair.Key}\": {FormatObject(pair.Value, indent + 1)}");
+                builder.AppendLine($"{prefix}\t\"{key}\": {FormatObject(value, indent + 1)}");
             }
 
             builder.Append(prefix + "}");
@@ -111,7 +114,7 @@
             {
                 List<object?> recursiveList => FormatList(recursiveList, indent),
                 Dictionary<string, object?> dictionary => FormatDictionary(dictionary, indent),
-                _ => obj?.ToString() ?? "NULL",
+                _ => obj?.ToString() ?? "NULL"
             };
         }
     }

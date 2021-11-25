@@ -1,9 +1,10 @@
-﻿namespace CustomJSONData
-{
-    using System;
-    using System.Collections.Generic;
-    using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using JetBrains.Annotations;
+using Newtonsoft.Json;
 
+namespace CustomJSONData
+{
     public static class JsonExtensions
     {
         public static void ReadToDictionary(this JsonReader reader, Dictionary<string, object?> dictionary, Func<string, bool>? specialCase = null)
@@ -11,7 +12,7 @@
             ObjectReadObject(reader, dictionary, specialCase);
         }
 
-        public static void ReadObject(this JsonReader reader, Action<string> action)
+        public static void ReadObject(this JsonReader reader, [InstantHandle] Action<string> action)
         {
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
@@ -22,7 +23,7 @@
             }
         }
 
-        public static void ReadObjectArray(this JsonReader reader, Action action)
+        public static void ReadObjectArray(this JsonReader reader, [InstantHandle] Action action)
         {
             reader.Read(); // StartArray
             if (reader.TokenType != JsonToken.StartArray)
@@ -46,17 +47,12 @@
 
         private static object? ObjectReadValue(JsonReader reader)
         {
-            switch (reader.TokenType)
+            return reader.TokenType switch
             {
-                case JsonToken.StartObject:
-                    return ObjectReadObject(reader);
-
-                case JsonToken.StartArray:
-                    return ObjectReadList(reader);
-
-                default:
-                    return reader.Value;
-            }
+                JsonToken.StartObject => ObjectReadObject(reader),
+                JsonToken.StartArray => ObjectReadList(reader),
+                _ => reader.Value
+            };
         }
 
         private static IList<object?> ObjectReadList(JsonReader reader)
@@ -84,13 +80,11 @@
 
         private static object ObjectReadObject(JsonReader reader, Dictionary<string, object?>? dictionary = null, Func<string, bool>? specialCase = null)
         {
-            if (dictionary == null)
-            {
-                dictionary = new Dictionary<string, object?>();
-            }
+            dictionary ??= new Dictionary<string, object?>();
 
             while (reader.Read())
             {
+                // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
                 switch (reader.TokenType)
                 {
                     case JsonToken.PropertyName:

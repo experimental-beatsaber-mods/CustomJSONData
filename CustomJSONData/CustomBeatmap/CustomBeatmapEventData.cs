@@ -1,7 +1,7 @@
-﻿namespace CustomJSONData.CustomBeatmap
-{
-    using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace CustomJSONData.CustomBeatmap
+{
     public class CustomBeatmapEventData : BeatmapEventData
     {
         private CustomBeatmapEventData(float time, BeatmapEventType type, int value, float floatValue, Dictionary<string, object?> customData)

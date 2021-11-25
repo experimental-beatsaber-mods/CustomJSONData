@@ -1,12 +1,13 @@
-﻿namespace CustomJSONData.HarmonyPatches
-{
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Reflection.Emit;
-    using CustomJSONData.CustomBeatmap;
-    using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using CustomJSONData.CustomBeatmap;
+using HarmonyLib;
+using JetBrains.Annotations;
 
+namespace CustomJSONData.HarmonyPatches
+{
     [HarmonyPatch(typeof(BeatmapDataLoader))]
     [HarmonyPatch("GetBeatmapDataFromBeatmapSaveData")]
     internal static class BeatmapDataLoaderGetBeatmapDataFromBeatmapSaveData
@@ -39,6 +40,7 @@
 
         internal static Dictionary<string, object?>? LevelCustomData { get; set; }
 
+        [UsedImplicitly]
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
@@ -152,13 +154,10 @@
                 List<CustomBeatmapSaveData.CustomEventData> customEventsSaveData = BeatmapSaveData.customEvents;
                 customEventsSaveData = customEventsSaveData.OrderBy(x => x.time).ToList();
 
-                List<CustomEventData> customEventDatas = new List<CustomEventData>(customEventsSaveData.Count);
-
-                foreach (CustomBeatmapSaveData.CustomEventData customEventData in customEventsSaveData)
-                {
-                    float time = beatmapDataLoader.ProcessTime(customEventData.time, bpmChanges, shuffle, shufflePeriod);
-                    customEventDatas.Add(new CustomEventData(time, customEventData.type, customEventData.data));
-                }
+                List<CustomEventData> customEventDatas = new(customEventsSaveData.Count);
+                customEventDatas.AddRange(from customEventData in customEventsSaveData
+                    let time = beatmapDataLoader.ProcessTime(customEventData.time, bpmChanges, shuffle, shufflePeriod)
+                    select new CustomEventData(time, customEventData.type, customEventData.data));
 
                 customBeatmapData = new CustomBeatmapData(4, customEventDatas, BeatmapSaveData.customData, BeatmapCustomData ?? new Dictionary<string, object?>(), LevelCustomData ?? new Dictionary<string, object?>());
             }

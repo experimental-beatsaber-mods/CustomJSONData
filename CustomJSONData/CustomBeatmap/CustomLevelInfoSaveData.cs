@@ -1,9 +1,11 @@
-﻿namespace CustomJSONData.CustomBeatmap
-{
-    using System.Collections.Generic;
-    using System.IO;
-    using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using JetBrains.Annotations;
+using Newtonsoft.Json;
 
+namespace CustomJSONData.CustomBeatmap
+{
     public class CustomLevelInfoSaveData : StandardLevelInfoSaveData
     {
         internal CustomLevelInfoSaveData(
@@ -68,11 +70,11 @@
             string coverImageFilename = string.Empty;
             string environmentName = string.Empty;
             string allDirectionsEnvrionmentName = string.Empty;
-            List<DifficultyBeatmapSet> difficultyBeatmapSets = new List<DifficultyBeatmapSet>();
-            Dictionary<string, object?> customData = new Dictionary<string, object?>();
-            Dictionary<string, Dictionary<string, object?>> beatmapCustomDatasByFilename = new Dictionary<string, Dictionary<string, object?>>();
+            List<DifficultyBeatmapSet> difficultyBeatmapSets = new();
+            Dictionary<string, object?> customData = new();
+            Dictionary<string, Dictionary<string, object?>> beatmapCustomDatasByFilename = new();
 
-            using JsonTextReader reader = new JsonTextReader(new StreamReader(path));
+            using JsonTextReader reader = new(new StreamReader(path));
             while (reader.Read())
             {
                 if (reader.TokenType == JsonToken.PropertyName)
@@ -147,7 +149,7 @@
                             reader.ReadObjectArray(() =>
                             {
                                 string beatmapCharacteristicName = string.Empty;
-                                List<DifficultyBeatmap> difficultyBeatmaps = new List<DifficultyBeatmap>();
+                                List<DifficultyBeatmap> difficultyBeatmaps = new();
                                 reader.ReadObject(objectName =>
                                 {
                                     switch (objectName)
@@ -164,7 +166,7 @@
                                                 string beatmapFilename = string.Empty;
                                                 float noteJumpMovementSpeed = default;
                                                 float noteJumpStartBeatOffset = default;
-                                                Dictionary<string, object?> data = new Dictionary<string, object?>();
+                                                Dictionary<string, object?> data = new();
                                                 reader.ReadObject(difficultyBeatmapObjectName =>
                                                 {
                                                     switch (difficultyBeatmapObjectName)
@@ -211,7 +213,9 @@
                                     }
                                 });
 
-                                difficultyBeatmapSets.Add(new DifficultyBeatmapSet(beatmapCharacteristicName, difficultyBeatmaps.ToArray()));
+                                difficultyBeatmapSets.Add(new DifficultyBeatmapSet(
+                                    beatmapCharacteristicName,
+                                    difficultyBeatmaps.ToArray<StandardLevelInfoSaveData.DifficultyBeatmap>()));
                             });
 
                             break;
@@ -252,6 +256,7 @@
                 this.customData = customData;
             }
 
+            [PublicAPI]
             public Dictionary<string, object?> customData { get; }
         }
     }

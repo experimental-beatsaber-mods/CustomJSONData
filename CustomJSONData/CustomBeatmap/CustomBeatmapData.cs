@@ -1,8 +1,9 @@
-﻿namespace CustomJSONData.CustomBeatmap
-{
-    using System.Collections.Generic;
-    using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 
+namespace CustomJSONData.CustomBeatmap
+{
     public class CustomBeatmapData : BeatmapData
     {
         private static MethodInfo? _copyBeatmapObjects;
@@ -37,7 +38,8 @@
             {
                 if (_copyBeatmapObjects == null)
                 {
-                    _copyBeatmapObjects = typeof(BeatmapData).GetMethod("CopyBeatmapObjects", BindingFlags.Static | BindingFlags.NonPublic);
+                    _copyBeatmapObjects = typeof(BeatmapData).GetMethod("CopyBeatmapObjects", BindingFlags.Static | BindingFlags.NonPublic)
+                                          ?? throw new InvalidOperationException("Could not find method [CopyBeatmapObjects]");
                 }
 
                 return _copyBeatmapObjects;
@@ -50,7 +52,8 @@
             {
                 if (_copyBeatmapEvents == null)
                 {
-                    _copyBeatmapEvents = typeof(BeatmapData).GetMethod("CopyBeatmapEvents", BindingFlags.Static | BindingFlags.NonPublic);
+                    _copyBeatmapEvents = typeof(BeatmapData).GetMethod("CopyBeatmapEvents", BindingFlags.Static | BindingFlags.NonPublic)
+                                         ?? throw new InvalidOperationException("Could not find method [CopyBeatmapEvents]");
                 }
 
                 return _copyBeatmapEvents;
@@ -63,7 +66,8 @@
             {
                 if (_copyAvailableSpecialEventsPerKeywordDictionary == null)
                 {
-                    _copyAvailableSpecialEventsPerKeywordDictionary = typeof(BeatmapData).GetMethod("CopyAvailableSpecialEventsPerKeywordDictionary", BindingFlags.Static | BindingFlags.NonPublic);
+                    _copyAvailableSpecialEventsPerKeywordDictionary = typeof(BeatmapData).GetMethod("CopyAvailableSpecialEventsPerKeywordDictionary", BindingFlags.Static | BindingFlags.NonPublic)
+                                                                      ?? throw new InvalidOperationException("Could not find method [CopyAvailableSpecialEventsPerKeywordDictionary]");
                 }
 
                 return _copyAvailableSpecialEventsPerKeywordDictionary;
@@ -113,7 +117,7 @@
         internal CustomBeatmapData BaseCopy()
         {
             List<CustomEventData> customEventsDataCopy = customEventsData.ConvertAll(n => n.GetCopy());
-            CustomBeatmapData customBeatmapData = new CustomBeatmapData(_beatmapLinesData.Length, customEventsDataCopy, customData.Copy(), beatmapCustomData.Copy(), levelCustomData.Copy());
+            CustomBeatmapData customBeatmapData = new(_beatmapLinesData.Length, customEventsDataCopy, customData.Copy(), beatmapCustomData.Copy(), levelCustomData.Copy());
             return customBeatmapData;
         }
     }

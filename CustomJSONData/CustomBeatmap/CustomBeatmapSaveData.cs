@@ -1,11 +1,12 @@
-﻿namespace CustomJSONData.CustomBeatmap
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using JetBrains.Annotations;
+using Newtonsoft.Json;
 
+namespace CustomJSONData.CustomBeatmap
+{
     public class CustomBeatmapSaveData : BeatmapSaveData
     {
         private CustomBeatmapSaveData(
@@ -24,6 +25,7 @@
             this.customEvents = customEvents;
         }
 
+        [PublicAPI]
         public static event Action<DeserializeEventArgs>? deserializeCustomDataEvent;
 
         public List<CustomEventData> customEvents { get; }
@@ -33,15 +35,15 @@
         public static CustomBeatmapSaveData Deserialize(string path)
         {
             string version = string.Empty;
-            Dictionary<string, object?> customData = new Dictionary<string, object?>();
-            List<CustomEventData> customEvents = new List<CustomEventData>();
-            List<EventData> events = new List<EventData>();
-            List<NoteData> notes = new List<NoteData>();
-            List<WaypointData> waypoints = new List<WaypointData>();
-            List<ObstacleData> obstacles = new List<ObstacleData>();
-            List<SpecialEventsForKeyword> keywords = new List<SpecialEventsForKeyword>();
+            Dictionary<string, object?> customData = new();
+            List<CustomEventData> customEvents = new();
+            List<EventData> events = new();
+            List<NoteData> notes = new();
+            List<WaypointData> waypoints = new();
+            List<ObstacleData> obstacles = new();
+            List<SpecialEventsForKeyword> keywords = new();
 
-            using JsonTextReader reader = new JsonTextReader(new StreamReader(path));
+            using JsonTextReader reader = new(new StreamReader(path));
             while (reader.Read())
             {
                 if (reader.TokenType == JsonToken.PropertyName)
@@ -93,22 +95,23 @@
                             break;
 
                         case "_customData":
-                            DeserializeEventArgs eventArgs = new DeserializeEventArgs(reader, customData, customEvents, events, notes, waypoints, obstacles, keywords);
+                            DeserializeEventArgs eventArgs = new(reader, customData, customEvents, events, notes, waypoints, obstacles, keywords);
 
                             reader.ReadToDictionary(customData, propertyName =>
                             {
+                                // ReSharper disable AccessToModifiedClosure
                                 eventArgs.PropertyName = propertyName;
                                 DeserializeCustomEventsArray(eventArgs);
                                 deserializeCustomDataEvent?.Invoke(eventArgs);
-                                if (eventArgs.DontAddToDictionary)
-                                {
-                                    eventArgs.DontAddToDictionary = false;
-                                    return false;
-                                }
-                                else
+                                if (!eventArgs.DontAddToDictionary)
                                 {
                                     return true;
                                 }
+
+                                eventArgs.DontAddToDictionary = false;
+                                return false;
+
+                                // ReSharper restore AccessToModifiedClosure
                             });
 
                             break;
@@ -116,7 +119,7 @@
                 }
             }
 
-            CustomBeatmapSaveData beatmapSaveData = new CustomBeatmapSaveData(
+            CustomBeatmapSaveData beatmapSaveData = new(
                 version,
                 events.Cast<BeatmapSaveData.EventData>().ToList(),
                 notes.Cast<BeatmapSaveData.NoteData>().ToList(),
@@ -129,8 +132,8 @@
             // Below taken straight from BeatmapSaveData.DeserializeFromJSONString
             if (!string.IsNullOrEmpty(beatmapSaveData.version))
             {
-                Version versionVersion = new Version(beatmapSaveData.version);
-                Version value = new Version("2.5.0");
+                Version versionVersion = new(beatmapSaveData.version);
+                Version value = new("2.5.0");
                 if (versionVersion.CompareTo(value) < 0)
                 {
                     ConvertBeatmapSaveDataPreV2_5_0(beatmapSaveData);
@@ -144,13 +147,13 @@
             return beatmapSaveData;
         }
 
-        public static EventData DeserializeEvent(JsonTextReader reader)
+        public static EventData DeserializeEvent([InstantHandle] JsonTextReader reader)
         {
             float time = default;
             BeatmapEventType type = default;
             int value = default;
             float floatValue = default;
-            Dictionary<string, object?> data = new Dictionary<string, object?>();
+            Dictionary<string, object?> data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -184,14 +187,14 @@
             return new EventData(time, type, value, floatValue, data);
         }
 
-        public static NoteData DeserializeNote(JsonTextReader reader)
+        public static NoteData DeserializeNote([InstantHandle] JsonTextReader reader)
         {
             float time = default;
             int lineIndex = default;
             NoteLineLayer lineLayer = default;
             NoteType type = default;
             NoteCutDirection cutDirection = default;
-            Dictionary<string, object?> data = new Dictionary<string, object?>();
+            Dictionary<string, object?> data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -229,13 +232,13 @@
             return new NoteData(time, lineIndex, lineLayer, type, cutDirection, data);
         }
 
-        public static WaypointData DeserializeWaypoint(JsonTextReader reader)
+        public static WaypointData DeserializeWaypoint([InstantHandle] JsonTextReader reader)
         {
             float time = default;
             int lineIndex = default;
             NoteLineLayer lineLayer = default;
             OffsetDirection offsetDirection = default;
-            Dictionary<string, object?> data = new Dictionary<string, object?>();
+            Dictionary<string, object?> data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -269,14 +272,14 @@
             return new WaypointData(time, lineIndex, lineLayer, offsetDirection, data);
         }
 
-        public static ObstacleData DeserializeObstacle(JsonTextReader reader)
+        public static ObstacleData DeserializeObstacle([InstantHandle] JsonTextReader reader)
         {
             float time = default;
             int lineIndex = default;
             ObstacleType type = default;
             float duration = default;
             int width = default;
-            Dictionary<string, object?> data = new Dictionary<string, object?>();
+            Dictionary<string, object?> data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -314,10 +317,10 @@
             return new ObstacleData(time, lineIndex, type, duration, width, data);
         }
 
-        public static SpecialEventsForKeyword DeserializeKeyword(JsonTextReader reader)
+        public static SpecialEventsForKeyword DeserializeKeyword([InstantHandle] JsonTextReader reader)
         {
             string keyword = string.Empty;
-            List<BeatmapEventType> specialEvents = new List<BeatmapEventType>();
+            List<BeatmapEventType> specialEvents = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -346,10 +349,8 @@
                                 {
                                     break;
                                 }
-                                else
-                                {
-                                    throw new JsonSerializationException($"Value in _specialEvents was not int.");
-                                }
+
+                                throw new JsonSerializationException("Value in _specialEvents was not int.");
                             }
                         }
 
@@ -368,7 +369,7 @@
         {
             float time = default;
             string type = string.Empty;
-            Dictionary<string, object?> data = new Dictionary<string, object?>();
+            Dictionary<string, object?> data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -396,20 +397,23 @@
 
         private static void DeserializeCustomEventsArray(DeserializeEventArgs eventArgs)
         {
-            if (eventArgs.PropertyName == "_customEvents")
+            if (eventArgs.PropertyName != "_customEvents")
             {
-                JsonTextReader reader = eventArgs.Reader;
-                reader.ReadObjectArray(() => eventArgs.CustomEvents.Add(DeserializeCustomEvent(reader)));
-
-                eventArgs.DontAddToDictionary = true;
+                return;
             }
+
+            JsonTextReader reader = eventArgs.Reader;
+            reader.ReadObjectArray(() => eventArgs.CustomEvents.Add(DeserializeCustomEvent(reader)));
+
+            eventArgs.DontAddToDictionary = true;
         }
 
         private static void ConvertBeatmapSaveDataPreV2_5_0(CustomBeatmapSaveData beatmapSaveData)
         {
-            List<BeatmapSaveData.EventData> list = new List<BeatmapSaveData.EventData>(beatmapSaveData.events.Count);
-            foreach (EventData eventData in beatmapSaveData.events)
+            List<BeatmapSaveData.EventData> list = new(beatmapSaveData.events.Count);
+            foreach (BeatmapSaveData.EventData originalEventData in beatmapSaveData.events)
             {
+                EventData? eventData = (EventData)originalEventData;
                 EventData? newData = null;
                 if (eventData.type == BeatmapEventType.Event10)
                 {
@@ -456,24 +460,30 @@
                 Keywords = keywords;
             }
 
-            public bool DontAddToDictionary { get; set; } = false;
+            public bool DontAddToDictionary { get; set; }
 
             public JsonTextReader Reader { get; }
 
             public string PropertyName { get; internal set; } = string.Empty;
 
+            [PublicAPI]
             public Dictionary<string, object?> CustomData { get; }
 
             public List<CustomEventData> CustomEvents { get; }
 
+            [PublicAPI]
             public List<EventData> Events { get; }
 
+            [PublicAPI]
             public List<NoteData> Notes { get; }
 
+            [PublicAPI]
             public List<WaypointData> Waypoints { get; }
 
+            [PublicAPI]
             public List<ObstacleData> Obstacles { get; }
 
+            [PublicAPI]
             public List<SpecialEventsForKeyword> Keywords { get; }
         }
 

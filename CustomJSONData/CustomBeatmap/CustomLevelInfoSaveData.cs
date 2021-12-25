@@ -53,7 +53,9 @@ namespace CustomJSONData.CustomBeatmap
 
         public Dictionary<string, Dictionary<string, object?>> beatmapCustomDatasByFilename { get; }
 
-        internal static CustomLevelInfoSaveData Deserialize(string path)
+        // SongCore 3.9.0 skips past the CustomLevelLoader, so we just use the string data instead
+        // Unfortunately no reading from a stream, but info.dat's should never be big enough to matter
+        internal static CustomLevelInfoSaveData Deserialize(string stringData)
         {
             string version = string.Empty;
             string songName = string.Empty;
@@ -74,7 +76,7 @@ namespace CustomJSONData.CustomBeatmap
             Dictionary<string, object?> customData = new();
             Dictionary<string, Dictionary<string, object?>> beatmapCustomDatasByFilename = new();
 
-            using JsonTextReader reader = new(new StreamReader(path));
+            using JsonTextReader reader = new(new StringReader(stringData));
             while (reader.Read())
             {
                 if (reader.TokenType == JsonToken.PropertyName)

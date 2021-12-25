@@ -24,7 +24,8 @@ namespace CustomJSONData.HarmonyPatches
         }
     }*/
 
-    [HarmonyPatch(typeof(CustomLevelLoader))]
+    // Obsolete as of SongCore 3.9.0
+    /*[HarmonyPatch(typeof(CustomLevelLoader))]
     [HarmonyPatch("LoadCustomLevelInfoSaveData")]
     internal class CustomLevelLoaderLoadCustomLevelInfoSaveData
     {
@@ -39,7 +40,7 @@ namespace CustomJSONData.HarmonyPatches
 
             return false;
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(CustomLevelLoader))]
     [HarmonyPatch("LoadBeatmapDataBeatmapData")]

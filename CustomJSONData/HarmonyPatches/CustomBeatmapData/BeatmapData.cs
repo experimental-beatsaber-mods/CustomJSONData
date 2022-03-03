@@ -4,9 +4,8 @@ using JetBrains.Annotations;
 
 namespace CustomJSONData.HarmonyPatches
 {
-    [HarmonyPatch(typeof(BeatmapData))]
-    [HarmonyPatch("CopyBeatmapEvents")]
-    internal class BeatmapDataCopyBeatmapEvents
+    [HarmonyPatch(typeof(BeatmapData), "CopyBeatmapEvents")]
+    internal static class BeatmapDataCopyBeatmapEvents
     {
         [UsedImplicitly]
         private static bool Prefix(IReadonlyBeatmapData src, BeatmapData dst)

@@ -7,12 +7,11 @@ using JetBrains.Annotations;
 
 namespace CustomJSONData.HarmonyPatches
 {
-    [HarmonyPatch(typeof(BeatmapDataMirrorTransform))]
-    [HarmonyPatch("CreateTransformedData")]
-    internal class BeatDataMirrorTransformCreateTransformData
+    [HarmonyPatch(typeof(BeatmapDataMirrorTransform), nameof(BeatmapDataMirrorTransform.CreateTransformedData))]
+    internal static class BeatDataMirrorTransformCreateTransformedData
     {
         private static readonly ConstructorInfo _beatmapDataCtor = AccessTools.FirstConstructor(typeof(BeatmapData), _ => true);
-        private static readonly MethodInfo _copyCustomData = AccessTools.Method(typeof(BeatDataMirrorTransformCreateTransformData), nameof(CopyCustomBeatmapData));
+        private static readonly MethodInfo _copyCustomData = AccessTools.Method(typeof(BeatDataMirrorTransformCreateTransformedData), nameof(CopyCustomBeatmapData));
 
         [UsedImplicitly]
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)

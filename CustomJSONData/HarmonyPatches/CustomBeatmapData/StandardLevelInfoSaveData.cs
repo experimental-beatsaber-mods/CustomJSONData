@@ -4,9 +4,8 @@ using JetBrains.Annotations;
 
 namespace CustomJSONData.HarmonyPatches
 {
-    [HarmonyPatch(typeof(StandardLevelInfoSaveData))]
-    [HarmonyPatch("DeserializeFromJSONString")]
-    internal class StandardLevelInfoSaveDataDeserializeFromJSONString
+    [HarmonyPatch(typeof(StandardLevelInfoSaveData), nameof(StandardLevelInfoSaveData.DeserializeFromJSONString))]
+    internal static class StandardLevelInfoSaveDataDeserializeFromJSONString
     {
         [UsedImplicitly]
         private static bool Prefix(ref StandardLevelInfoSaveData __result, string stringData)

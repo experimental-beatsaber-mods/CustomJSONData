@@ -42,9 +42,8 @@ namespace CustomJSONData.HarmonyPatches
         }
     }*/
 
-    [HarmonyPatch(typeof(CustomLevelLoader))]
-    [HarmonyPatch("LoadBeatmapDataBeatmapData")]
-    internal class CustomLevelLoaderLoadBeatmapDataBeatmapData
+    [HarmonyPatch(typeof(CustomLevelLoader), "LoadBeatmapDataBeatmapData")]
+    internal static class CustomLevelLoaderLoadBeatmapDataBeatmapData
     {
         [UsedImplicitly]
         private static bool Prefix(ref BeatmapData __result, string customLevelPath, string difficultyFileName, StandardLevelInfoSaveData standardLevelInfoSaveData, BeatmapDataLoader ____beatmapDataLoader)

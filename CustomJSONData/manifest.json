@@ -4,10 +4,11 @@
   "description": "Lets mappers include arbitrary data in beatmaps, and lets modders access that data. Why did I make this? Good question.",
   "gameVersion": "1.19.0",
   "dependsOn": {
-    "BSIPA": "^4.2.0"
+    "BSIPA": "^4.2.0",
+    "SiraUtil": "^3.0.0"
   },
   "id": "CustomJSONData",
   "name": "CustomJSONData",
-  "version": "2.0.9",
+  "version": "2.1.0",
   "icon": "CustomJSONData.icon.png"
 }

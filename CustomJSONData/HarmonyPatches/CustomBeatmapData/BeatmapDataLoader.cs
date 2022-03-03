@@ -8,8 +8,7 @@ using JetBrains.Annotations;
 
 namespace CustomJSONData.HarmonyPatches
 {
-    [HarmonyPatch(typeof(BeatmapDataLoader))]
-    [HarmonyPatch("GetBeatmapDataFromBeatmapSaveData")]
+    [HarmonyPatch(typeof(BeatmapDataLoader), nameof(BeatmapDataLoader.GetBeatmapDataFromBeatmapSaveData))]
     internal static class BeatmapDataLoaderGetBeatmapDataFromBeatmapSaveData
     {
         private static readonly MethodInfo _createBombNoteData = AccessTools.Method(typeof(NoteData), nameof(NoteData.CreateBombNoteData));

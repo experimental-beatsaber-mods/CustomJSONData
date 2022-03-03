@@ -34,20 +34,42 @@ namespace CustomJSONData
 
         public static T? Get<T>(this Dictionary<string, object?> dictionary, string key)
         {
+            static bool IsNumericType(object o)
+            {
+                switch (Type.GetTypeCode(o.GetType()))
+                {
+                    case TypeCode.Byte:
+                    case TypeCode.SByte:
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.Decimal:
+                    case TypeCode.Double:
+                    case TypeCode.Single:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            // trygetvalue missing [notnullwhen] attribute :(
             if (!dictionary.TryGetValue(key, out object? value))
             {
                 return default;
             }
 
-            Type? underlyingType = Nullable.GetUnderlyingType(typeof(T));
-            if (underlyingType != null)
+            if (value == null)
             {
-                return (T)Convert.ChangeType(value, underlyingType);
+                return default;
             }
 
-            if (value is IConvertible)
+            Type resultType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+            if (IsNumericType(value!))
             {
-                return (T)Convert.ChangeType(value, typeof(T));
+                return (T)Convert.ChangeType(value, resultType);
             }
 
             return (T?)value;

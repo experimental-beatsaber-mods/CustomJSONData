@@ -7,8 +7,7 @@ using JetBrains.Annotations;
 
 namespace CustomJSONData.HarmonyPatches
 {
-    [HarmonyPatch(typeof(BeatmapDataStrobeFilterTransform))]
-    [HarmonyPatch("CreateTransformedData")]
+    [HarmonyPatch(typeof(BeatmapDataStrobeFilterTransform), nameof(BeatmapDataStrobeFilterTransform.CreateTransformedData))]
     internal static class BeatmapDataStrobeFilterTransformCreateTransformedData
     {
         private static readonly ConstructorInfo _eventDataCtor = AccessTools.FirstConstructor(typeof(BeatmapEventData), _ => true);

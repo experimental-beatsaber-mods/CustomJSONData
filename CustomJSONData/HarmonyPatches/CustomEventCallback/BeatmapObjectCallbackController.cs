@@ -1,30 +1,24 @@
-﻿using HarmonyLib;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using SiraUtil.Affinity;
 
 namespace CustomJSONData.HarmonyPatches
 {
-    [HarmonyPatch(typeof(BeatmapObjectCallbackController))]
-    [HarmonyPatch("Start")]
-    internal class BeatmapObjectCallbackControllerStart
+    internal class BeatmapObjectCallbackControllerSetNewBeatmapData : IAffinity
     {
-        [UsedImplicitly]
-        private static void Postfix(BeatmapObjectCallbackController __instance, IReadonlyBeatmapData ____beatmapData)
-        {
-            if (____beatmapData is CustomBeatmap.CustomBeatmapData)
-            {
-                __instance.gameObject.AddComponent<CustomEventCallbackController>().Init(__instance, ____beatmapData);
-            }
-        }
-    }
+        private readonly CustomEventCallbackController _customEventCallbackController;
 
-    [HarmonyPatch(typeof(BeatmapObjectCallbackController))]
-    [HarmonyPatch("SetNewBeatmapData")]
-    internal class BeatmapObjectCallbackControllerSetNewBeatmapData
-    {
-        [UsedImplicitly]
-        private static void Postfix(BeatmapObjectCallbackController __instance, IReadonlyBeatmapData beatmapData)
+        private BeatmapObjectCallbackControllerSetNewBeatmapData(
+            CustomEventCallbackController customEventCallbackController)
         {
-            __instance.GetComponent<CustomEventCallbackController>()?.SetNewBeatmapData(beatmapData);
+            _customEventCallbackController = customEventCallbackController;
+        }
+
+        [UsedImplicitly]
+        [AffinityPostfix]
+        [AffinityPatch(typeof(BeatmapObjectCallbackController), nameof(BeatmapObjectCallbackController.SetNewBeatmapData))]
+        private void Postfix(BeatmapObjectCallbackController __instance, IReadonlyBeatmapData beatmapData)
+        {
+            _customEventCallbackController.SetNewBeatmapData(beatmapData);
         }
     }
 }

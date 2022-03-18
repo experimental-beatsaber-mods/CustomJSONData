@@ -1,9 +1,6 @@
-﻿using System.Reflection;
-using CustomJSONData.Installers;
-using HarmonyLib;
+﻿using HarmonyLib;
 using IPA;
 using JetBrains.Annotations;
-using SiraUtil.Zenject;
 
 namespace CustomJSONData
 {
@@ -15,10 +12,9 @@ namespace CustomJSONData
 #pragma warning disable CA1822
         [UsedImplicitly]
         [Init]
-        public Plugin(IPA.Logging.Logger l, Zenjector zenjector)
+        public Plugin(IPA.Logging.Logger l)
         {
             Logger.logger = l;
-            zenjector.Install<CallbackControllerInstaller>(Location.Player);
         }
 
         [UsedImplicitly]

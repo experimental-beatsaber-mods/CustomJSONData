@@ -2,24 +2,22 @@
 
 namespace CustomJSONData.CustomBeatmap
 {
-    public class CustomEventData
+    public class CustomEventData : BeatmapDataItem, ICustomData
     {
         public CustomEventData(float time, string type, Dictionary<string, object?> data)
+            : base(time, 0, 0, (BeatmapDataItemType)2)
         {
-            this.time = time;
-            this.type = type;
-            this.data = data;
+            eventType = type;
+            customData = data;
         }
 
-        public string type { get; }
+        public string eventType { get; }
 
-        public float time { get; }
+        public Dictionary<string, object?> customData { get; }
 
-        public Dictionary<string, object?> data { get; }
-
-        public CustomEventData GetCopy()
+        public override BeatmapDataItem GetCopy()
         {
-            return new CustomEventData(time, type, data.Copy());
+            return new CustomEventData(time, eventType, customData.Copy());
         }
     }
 }

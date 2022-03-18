@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
 
-    public class CustomWaypointData : WaypointData
+    public class CustomWaypointData : WaypointData, ICustomData
     {
         public CustomWaypointData(float time, int lineIndex, NoteLineLayer noteLineLayer, OffsetDirection offsetDirection, Dictionary<string, object?> customData)
             : base(time, lineIndex, noteLineLayer, offsetDirection)
@@ -12,9 +12,9 @@
 
         public Dictionary<string, object?> customData { get; }
 
-        public override BeatmapObjectData GetCopy()
+        public override BeatmapDataItem GetCopy()
         {
-            return new CustomWaypointData(time, lineIndex, noteLineLayer, offsetDirection, new Dictionary<string, object?>(customData));
+            return new CustomWaypointData(time, lineIndex, lineLayer, offsetDirection, customData.Copy());
         }
     }
 }

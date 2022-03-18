@@ -3,18 +3,18 @@ using System.Reflection;
 using System.Reflection.Emit;
 using CustomJSONData.CustomBeatmap;
 using HarmonyLib;
-using JetBrains.Annotations;
 
 namespace CustomJSONData.HarmonyPatches
 {
-    [HarmonyPatch(typeof(BeatmapDataStrobeFilterTransform), nameof(BeatmapDataStrobeFilterTransform.CreateTransformedData))]
-    internal static class BeatmapDataStrobeFilterTransformCreateTransformedData
+    [HarmonyPatch(typeof(BeatmapDataStrobeFilterTransform))]
+    internal static class StrobeFilterCustomify
     {
         private static readonly ConstructorInfo _eventDataCtor = AccessTools.FirstConstructor(typeof(BeatmapEventData), _ => true);
-        private static readonly ConstructorInfo _customEventDataCtor = AccessTools.FirstConstructor(typeof(CustomBeatmapEventData), _ => true);
-        private static readonly MethodInfo _getEventCustomData = AccessTools.Method(typeof(BeatmapDataStrobeFilterTransformCreateTransformedData), nameof(GetEventCustomData));
+        private static readonly ConstructorInfo _customEventDataCtor = AccessTools.FirstConstructor(typeof(CustomBasicBeatmapEventData), _ => true);
+        private static readonly MethodInfo _getEventCustomData = AccessTools.Method(typeof(StrobeFilterCustomify), nameof(GetEventCustomData));
 
-        [UsedImplicitly]
+        [HarmonyTranspiler]
+        [HarmonyPatch(nameof(BeatmapDataStrobeFilterTransform.CreateTransformedData))]
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
@@ -31,9 +31,9 @@ namespace CustomJSONData.HarmonyPatches
 
         private static Dictionary<string, object?> GetEventCustomData(BeatmapEventData beatmapEventData)
         {
-            if (beatmapEventData is CustomBeatmapEventData customBeatmapEventData)
+            if (beatmapEventData is ICustomData customBeatmapEventData)
             {
-                return new Dictionary<string, object?>(customBeatmapEventData.customData);
+                return customBeatmapEventData.customData;
             }
 
             return new Dictionary<string, object?>();

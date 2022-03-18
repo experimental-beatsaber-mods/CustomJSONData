@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CustomJSONData.CustomBeatmap;
 using IPA.Utilities;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -27,9 +28,31 @@ namespace CustomJSONData
             return dictioanry;
         }
 
+        // TODO: remove all dictionary copying and make it immutable
         public static Dictionary<string, object?> Copy(this Dictionary<string, object?>? dictionary)
         {
             return dictionary != null ? new Dictionary<string, object?>(dictionary) : new Dictionary<string, object?>();
+        }
+
+        [PublicAPI]
+        public static CustomBeatmapSaveData? GetBeatmapSaveData(this IDifficultyBeatmap difficultyBeatmap)
+        {
+            return difficultyBeatmap is CustomDifficultyBeatmap { beatmapSaveData: CustomBeatmapSaveData customBeatmapSaveData }
+                ? customBeatmapSaveData : null;
+        }
+
+        [PublicAPI]
+        public static Dictionary<string, object?> GetBeatmapCustomData(this IDifficultyBeatmap difficultyBeatmap)
+        {
+            return difficultyBeatmap is CustomDifficultyBeatmap { beatmapSaveData: CustomBeatmapSaveData customBeatmapSaveData }
+                ? customBeatmapSaveData.beatmapCustomData : new Dictionary<string, object?>();
+        }
+
+        [PublicAPI]
+        public static Dictionary<string, object?> GetLevelCustomData(this IDifficultyBeatmap difficultyBeatmap)
+        {
+            return difficultyBeatmap is CustomDifficultyBeatmap { beatmapSaveData: CustomBeatmapSaveData customBeatmapSaveData }
+                ? customBeatmapSaveData.levelCustomData : new Dictionary<string, object?>();
         }
 
         public static T? Get<T>(this Dictionary<string, object?> dictionary, string key)
@@ -67,7 +90,7 @@ namespace CustomJSONData
             }
 
             Type resultType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
-            if (IsNumericType(value!))
+            if (IsNumericType(value))
             {
                 return (T)Convert.ChangeType(value, resultType);
             }

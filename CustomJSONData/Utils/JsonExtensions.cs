@@ -7,7 +7,16 @@ namespace CustomJSONData
 {
     public static class JsonExtensions
     {
-        public static void ReadToDictionary(this JsonReader reader, Dictionary<string, object?> dictionary, Func<string, bool>? specialCase = null)
+        public static bool? ReadIntAsBoolean(this JsonReader reader)
+        {
+            int? result = reader.ReadAsInt32();
+            return result.HasValue ? result.Value > 0 : null;
+        }
+
+        public static void ReadToDictionary(
+            this JsonReader reader,
+            Dictionary<string, object?> dictionary,
+            [InstantHandle] Func<string, bool>? specialCase = null)
         {
             ObjectReadObject(reader, dictionary, specialCase);
         }

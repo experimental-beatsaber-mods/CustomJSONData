@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using BeatmapSaveDataVersion3;
 using CustomJSONData.CustomBeatmap;
 using HarmonyLib;
 

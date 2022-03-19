@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BeatmapSaveDataVersion3;
 using JetBrains.Annotations;
 using BpmProcessor = BeatmapDataLoader.BpmTimeProcessor;
@@ -8,25 +9,21 @@ namespace CustomJSONData.CustomBeatmap
     // TODO: event boxes
     public static class Converters
     {
-        public static NoteLineLayer GetLayer(this int layer)
-        {
-            return layer switch
-            {
-                1 => NoteLineLayer.Upper,
-                2 => NoteLineLayer.Top,
-                _ => NoteLineLayer.Base
-            };
-        }
+        private static readonly Func<int, NoteLineLayer> _convertNoteLineLayer =
+            (Func<int, NoteLineLayer>)Delegate.CreateDelegate(
+                typeof(Func<int, NoteLineLayer>),
+                typeof(BeatmapDataLoader),
+                "ConvertNoteLineLayer",
+                false,
+                true)!;
 
-        public static ColorType GetColor(this BeatmapSaveData.NoteColorType color)
-        {
-            return color switch
-            {
-                BeatmapSaveData.NoteColorType.ColorA => ColorType.ColorA,
-                BeatmapSaveData.NoteColorType.ColorB => ColorType.ColorB,
-                _ => ColorType.None
-            };
-        }
+        private static readonly Func<BeatmapSaveData.NoteColorType, ColorType> _convertColorType =
+            (Func<BeatmapSaveData.NoteColorType, ColorType>)Delegate.CreateDelegate(
+                typeof(Func<BeatmapSaveData.NoteColorType, ColorType>),
+                typeof(BeatmapDataLoader),
+                "ConvertColorType",
+                false,
+                true)!;
 
         public static Dictionary<string, object?> GetData(this BeatmapSaveData.BeatmapSaveDataItem dataItem)
         {
@@ -59,8 +56,8 @@ namespace CustomJSONData.CustomBeatmap
                 NoteData noteData = CustomNoteData.CreateCustomBasicNoteData(
                     BeatToTime(data.beat),
                     data.line,
-                    data.layer.GetLayer(),
-                    data.color.GetColor(),
+                    _convertNoteLineLayer(data.layer),
+                    _convertColorType(data.color),
                     data.cutDirection,
                     data.GetData());
                 noteData.SetCutDirectionAngleOffset(data.angleOffset);
@@ -82,7 +79,7 @@ namespace CustomJSONData.CustomBeatmap
                 return CustomNoteData.CreateCustomBombNoteData(
                     BeatToTime(data.beat),
                     data.line,
-                    data.layer.GetLayer(),
+                    _convertNoteLineLayer(data.layer),
                     data.GetData());
             }
         }
@@ -90,6 +87,14 @@ namespace CustomJSONData.CustomBeatmap
         public class CustomObstacleConverter
             : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapObjectData, BeatmapSaveData.ObstacleData, ObstacleData>
         {
+            private static readonly Func<int, NoteLineLayer> _getNoteLineLayer =
+                (Func<int, NoteLineLayer>)Delegate.CreateDelegate(
+                    typeof(Func<int, NoteLineLayer>),
+                    typeof(BeatmapDataLoader.ObstacleConvertor),
+                    "GetNoteLineLayer",
+                    false,
+                    true)!;
+
             [UsedImplicitly]
             public CustomObstacleConverter(BpmProcessor bpmTimeProcessor)
                 : base(bpmTimeProcessor)
@@ -102,7 +107,7 @@ namespace CustomJSONData.CustomBeatmap
                 return new CustomObstacleData(
                     beat,
                     data.line,
-                    data.layer.GetLayer(),
+                    _getNoteLineLayer(data.layer),
                     BeatToTime(data.beat + data.duration) - beat,
                     data.width,
                     data.height,
@@ -122,17 +127,17 @@ namespace CustomJSONData.CustomBeatmap
             protected override SliderData Convert(BeatmapSaveData.SliderData data)
             {
                 return CustomSliderData.CreateCustomSliderData(
-                    data.colorType.GetColor(),
+                    _convertColorType(data.colorType),
                     BeatToTime(data.beat),
                     data.headLine,
-                    data.headLayer.GetLayer(),
-                    data.headLayer.GetLayer(),
+                    _convertNoteLineLayer(data.headLayer),
+                    _convertNoteLineLayer(data.headLayer),
                     data.headControlPointLengthMultiplier,
                     data.headCutDirection,
                     BeatToTime(data.tailBeat),
                     data.tailLine,
-                    data.tailLayer.GetLayer(),
-                    data.tailLayer.GetLayer(),
+                    _convertNoteLineLayer(data.tailLayer),
+                    _convertNoteLineLayer(data.tailLayer),
                     data.tailControlPointLengthMultiplier,
                     data.tailCutDirection,
                     data.sliderMidAnchorMode,
@@ -152,16 +157,16 @@ namespace CustomJSONData.CustomBeatmap
             protected override SliderData Convert(BeatmapSaveData.BurstSliderData data)
             {
                 return CustomSliderData.CreateCustomBurstSliderData(
-                    data.colorType.GetColor(),
+                    _convertColorType(data.colorType),
                     BeatToTime(data.beat),
                     data.headLine,
-                    data.headLayer.GetLayer(),
-                    data.headLayer.GetLayer(),
+                    _convertNoteLineLayer(data.headLayer),
+                    _convertNoteLineLayer(data.headLayer),
                     data.headCutDirection,
                     BeatToTime(data.tailBeat),
                     data.tailLine,
-                    data.tailLayer.GetLayer(),
-                    data.tailLayer.GetLayer(),
+                    _convertNoteLineLayer(data.tailLayer),
+                    _convertNoteLineLayer(data.tailLayer),
                     NoteCutDirection.Any,
                     data.sliceCount,
                     data.squishAmount,
@@ -183,7 +188,7 @@ namespace CustomJSONData.CustomBeatmap
                 return new CustomWaypointData(
                     BeatToTime(data.beat),
                     data.line,
-                    data.layer.GetLayer(),
+                    _convertNoteLineLayer(data.layer),
                     data.offsetDirection,
                     data.GetData());
             }

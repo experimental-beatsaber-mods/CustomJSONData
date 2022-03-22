@@ -24,7 +24,7 @@ namespace CustomJSONData.CustomBeatmap
         private const string _beatDistributionParam = "w";
         private const string _beatDistributionParamType = "d";
 
-        private const string _customData = "cd";
+        private const string _customData = "customData";
 
         public CustomBeatmapSaveData(
             List<BeatmapSaveData.BpmChangeEventData> bpmEvents,
@@ -186,7 +186,7 @@ namespace CustomJSONData.CustomBeatmap
                             useNormalEventsAsCompatibleEvents = reader.ReadAsBoolean() ?? useNormalEventsAsCompatibleEvents;
                             break;
 
-                        case "customData":
+                        case _customData:
                             reader.ReadToDictionary(data, propertyName =>
                             {
                                 if (propertyName.Equals("customEvents"))

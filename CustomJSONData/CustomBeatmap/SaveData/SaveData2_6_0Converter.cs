@@ -9,17 +9,46 @@ namespace CustomJSONData.CustomBeatmap
     // TODO: Deserialize JSON -> V3 rather than using a converter.
     public static class SaveData2_6_0Converter
     {
-        private static readonly float[] _spawnRotations =
-        {
-            -60f,
-            -45f,
-            -30f,
-            -15f,
-            15f,
-            30f,
-            45f,
-            60f
-        };
+        // shows me for trying to be lazy i guess
+        private static readonly Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.NoteType, BeatmapSaveData.NoteColorType> _getNoteColorTypeNoteType =
+            (Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.NoteType, BeatmapSaveData.NoteColorType>)Delegate.CreateDelegate(
+                typeof(Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.NoteType, BeatmapSaveData.NoteColorType>),
+                typeof(BeatmapSaveData),
+                "GetNoteColorType",
+                false,
+                true)!;
+
+        private static readonly Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ColorType, BeatmapSaveData.NoteColorType> _getNoteColorTypeColorType =
+            (Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ColorType, BeatmapSaveData.NoteColorType>)Delegate.CreateDelegate(
+                typeof(Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ColorType, BeatmapSaveData.NoteColorType>),
+                typeof(BeatmapSaveData),
+                "GetNoteColorType",
+                false,
+                true)!;
+
+        private static readonly Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int> _getHeightForObstacleType =
+            (Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int>)Delegate.CreateDelegate(
+                typeof(Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int>),
+                typeof(BeatmapSaveData),
+                "GetHeightForObstacleType",
+                false,
+                true)!;
+
+        private static readonly Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int> _getLayerForObstacleType =
+            (Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int>)Delegate.CreateDelegate(
+                typeof(Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int>),
+                typeof(BeatmapSaveData),
+                "GetLayerForObstacleType",
+                false,
+                true)!;
+
+        private static readonly Func<int, float> _spawnRotationForEventValue =
+            (Func<int, float>)Delegate.CreateDelegate(
+                typeof(Func<int, float>),
+                typeof(BeatmapSaveData),
+                "SpawnRotationForEventValue",
+                false,
+                true)!;
 
         public static CustomBeatmapSaveData Convert2_6_0AndEarlier(
             Version version,
@@ -38,7 +67,7 @@ namespace CustomJSONData.CustomBeatmap
                     n.time,
                     n.lineIndex,
                     (int)n.lineLayer,
-                    n.type.GetNoteColorType(),
+                    _getNoteColorTypeNoteType(n.type),
                     n.cutDirection,
                     0,
                     n.customData))
@@ -59,10 +88,10 @@ namespace CustomJSONData.CustomBeatmap
                 .Select(n => new CustomBeatmapSaveData.ObstacleData(
                     n.time,
                     n.lineIndex,
-                    n.type.GetLayerForObstacleType(),
+                    _getLayerForObstacleType(n.type),
                     n.duration,
                     n.width,
-                    n.type.GetHeightForObstacleType(),
+                    _getHeightForObstacleType(n.type),
                     n.customData))
                 .Cast<BeatmapSaveData.ObstacleData>()
                 .ToList();
@@ -71,7 +100,7 @@ namespace CustomJSONData.CustomBeatmap
             List<BeatmapSaveData.SliderData> sliders = oldSaveData.sliders
                 .OrderBy(n => n)
                 .Select(n => new CustomBeatmapSaveData.SliderData(
-                    n.colorType.GetNoteColorType(),
+                    _getNoteColorTypeColorType(n.colorType),
                     n.time,
                     n.headLineIndex,
                     (int)n.headLineLayer,
@@ -120,7 +149,7 @@ namespace CustomJSONData.CustomBeatmap
                     .Select(n => new CustomBeatmapSaveData.RotationEventData(
                         n.time,
                         n.type == BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType.Event14 ? BeatmapSaveData.ExecutionTime.Early : BeatmapSaveData.ExecutionTime.Late,
-                        n.value.SpawnRotationForEventValue(),
+                        _spawnRotationForEventValue(n.value),
                         n.customData))
                     .Cast<BeatmapSaveData.RotationEventData>()
                     .ToList();
@@ -166,40 +195,6 @@ namespace CustomJSONData.CustomBeatmap
                 oldSaveData.customData,
                 beatmapData,
                 levelData);
-        }
-
-        private static BeatmapSaveData.NoteColorType GetNoteColorType(this BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.NoteType noteType)
-        {
-            return noteType == BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.NoteType.NoteB
-                ? BeatmapSaveData.NoteColorType.ColorB
-                : BeatmapSaveData.NoteColorType.ColorA;
-        }
-
-        private static BeatmapSaveData.NoteColorType GetNoteColorType(this BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ColorType colorType)
-        {
-            return colorType == BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ColorType.ColorB
-                ? BeatmapSaveData.NoteColorType.ColorB
-                : BeatmapSaveData.NoteColorType.ColorA;
-        }
-
-        private static int GetHeightForObstacleType(this BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType obstacleType)
-        {
-            return obstacleType != BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType.Top ? 5 : 3;
-        }
-
-        private static int GetLayerForObstacleType(this BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType obstacleType)
-        {
-            return obstacleType != BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType.Top ? 0 : 2;
-        }
-
-        private static float SpawnRotationForEventValue(this int index)
-        {
-            if (index >= 0 && index < _spawnRotations.Length)
-            {
-                return _spawnRotations[index];
-            }
-
-            return 0f;
         }
     }
 }

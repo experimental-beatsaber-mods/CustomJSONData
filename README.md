@@ -1,5 +1,7 @@
+# Many parts of this README are outdated as of 2.2.0
+
 # CustomJSONData
-CustomJSONData is a library that allows the loading of arbitrary data from specific locations in beatmap JSON files. Custom data can be attached to levels (songs), individual difficulties of songs, and individual notes, obstacles, and lighting events within difficulties. In addition, entirely new event types can be added. 
+CustomJSONData is a library that allows the loading of arbitrary data from specific locations in beatmap JSON files. Custom data can be attached to levels (songs), individual difficulties of songs, and individual notes, obstacles, and lighting events within difficulties. In addition, entirely new event types can be added.
 
 NOTE: CustomJSONData does NOT work for OST maps and will not convert them to their `CustomBeatmap` counterparts. To add on to that, CustomJSONData completely overwrites how custom maps are deserialized from JSON.
 
@@ -38,11 +40,11 @@ Custom data can also be placed on entire levels (songs) and on individual diffic
         }
 // ...
 ```
-This data can be accessed by casting a `BeatmapData` to `CustomJSONData.CustomBeatmap.CustomBeatmapData`. The first "_customData" section (the one for the whole level) is provided as `levelCustomData`, and the second (the one for the Easy difficulty) is provided as `beatmapCustomData`. 
+This data can be accessed by casting a `BeatmapData` to `CustomJSONData.CustomBeatmap.CustomBeatmapData`. The first "_customData" section (the one for the whole level) is provided as `levelCustomData`, and the second (the one for the Easy difficulty) is provided as `beatmapCustomData`.
 
 Example (For more about reading custom data, see [Reading custom data](#Reading-custom-data)):
 ```csharp
-if (beatmapData is CustomBeatmapData customBeatmapData) 
+if (beatmapData is CustomBeatmapData customBeatmapData)
 {
     string customEnvironment = customBeatmapData.levelCustomData.Get<string>("_customEnvironment"); // "CoolCustomEnv"
     string label = customBeatmapData.beatmapCustomData.Get<string>("_difficultyLabel"); // "Nightmare"
@@ -53,7 +55,7 @@ The custom data section is also available from a `StandardLevelInfoSaveData` by 
 
 Example:
 ```csharp
-if (standardLevelInfoSaveData is CustomLevelInfoSaveData customLevelInfoSaveData) 
+if (standardLevelInfoSaveData is CustomLevelInfoSaveData customLevelInfoSaveData)
 {
     string customEnvironment = customLevelInfoSaveData.customData.Get<string>("_customEnvironment"); // "CoolCustomEnv"
 
@@ -95,7 +97,7 @@ In CustomJSONData, all JSON objects are converted to a `Dictionary<string, objec
 
 After getting your customData (see above), accessing your data is as simple as accessing from a dictionary.
 ```csharp
-if (beatmapData is CustomBeatmapData customBeatmapData) 
+if (beatmapData is CustomBeatmapData customBeatmapData)
 {
     string label = customBeatmapData.beatmapCustomData["_difficultyLabel"]; // possible null reference, dont actually do this!
 }
@@ -103,7 +105,7 @@ if (beatmapData is CustomBeatmapData customBeatmapData)
 
 To help with this, CustomJSONData provides the extension method `Get<T>(this Dictionary<string, object> dictionary, string key)`. This will return the value as `T` if it exists, else it will return `default(T)`.
 
-Full example of getting a color from an array: 
+Full example of getting a color from an array:
 ```csharp
 
 /* json:
@@ -171,7 +173,7 @@ From there you can invoke `AddCustomEventCallback(CustomEventCallback callback, 
 
 Example:
 ```csharp
-internal void OnEnable() 
+internal void OnEnable()
 {
     CustomEventCallbackController.didInitEvent += OnCustomEventCallbackControllerInit;
 }
@@ -182,7 +184,7 @@ internal static void OnCustomEventCallbackControllerInit(CustomEventCallbackCont
     ////customEventCallbackController.RemoveBeatmapEventCallback(callback);
 }
 
-internal static void Callback(ustomEventData customEventData) 
+internal static void Callback(ustomEventData customEventData)
 {
     if (customEventData.type == "HelloWorld")
     {
@@ -191,7 +193,7 @@ internal static void Callback(ustomEventData customEventData)
 }
 ```
 
-`CustomEventCallbackController` also exposes some useful properties. 
+`CustomEventCallbackController` also exposes some useful properties.
 * `BeatmapData` (This is a `CustomBeatmapData`)
 * `BeatmapObjectCallbackController`
 * `AudioTimeSource`

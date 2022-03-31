@@ -11,6 +11,7 @@ namespace CustomJSONData.HarmonyPatches
     internal static class BeatmapDataLoaderCustomify
     {
         private static readonly ConstructorInfo _beatmapDataCtor = AccessTools.FirstConstructor(typeof(BeatmapData), _ => true);
+        private static readonly ConstructorInfo _bpmTimeProcessorCtor = AccessTools.FirstConstructor(typeof(BeatmapDataLoader.BpmTimeProcessor), _ => true);
         private static readonly MethodInfo _createCustomBeatmapData = AccessTools.Method(typeof(BeatmapDataLoaderCustomify), nameof(CreateCustomBeatmapData));
         private static readonly MethodInfo _addCustomEvent = AccessTools.Method(typeof(BeatmapDataLoaderCustomify), nameof(AddCustomEvents));
 
@@ -23,11 +24,11 @@ namespace CustomJSONData.HarmonyPatches
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
                 .Set(OpCodes.Call, _createCustomBeatmapData)
 
-                .MatchForward(false, new CodeMatch(OpCodes.Stloc_3))
-                .Advance(1)
+                .MatchForward(false, new CodeMatch(OpCodes.Newobj, _bpmTimeProcessorCtor))
+                .Advance(2)
                 .InsertAndAdvance(
-                    new CodeInstruction(OpCodes.Ldloc_3),
-                    new CodeInstruction(OpCodes.Ldloc_1),
+                    new CodeInstruction(OpCodes.Ldloc_S, 4),
+                    new CodeInstruction(OpCodes.Ldloc_2),
                     new CodeInstruction(OpCodes.Ldarg_0),
                     new CodeInstruction(OpCodes.Call, _addCustomEvent))
 

@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
   "author": "Aeroluna",
   "description": "Lets mappers include arbitrary data in beatmaps, and lets modders access that data. Why did I make this? Good question.",
-  "gameVersion": "1.20.0",
+  "gameVersion": "1.21.0",
   "dependsOn": {
     "BSIPA": "^4.2.2"
   },
@@ -11,6 +11,6 @@
   },
   "id": "CustomJSONData",
   "name": "CustomJSONData",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "icon": "CustomJSONData.icon.png"
 }

@@ -6,11 +6,8 @@
   "dependsOn": {
     "BSIPA": "^4.2.2"
   },
-  "conflictsWith": {
-    "Arcgap": "<0.0.3"
-  },
   "id": "CustomJSONData",
   "name": "CustomJSONData",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "icon": "CustomJSONData.icon.png"
 }

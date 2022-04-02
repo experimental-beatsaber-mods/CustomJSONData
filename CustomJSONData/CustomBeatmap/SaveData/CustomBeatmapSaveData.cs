@@ -189,7 +189,7 @@ namespace CustomJSONData.CustomBeatmap
                         case _customData:
                             reader.ReadToDictionary(data, propertyName =>
                             {
-                                if (propertyName.Equals("customEvents"))
+                                if (!propertyName.Equals("customEvents"))
                                 {
                                     return true;
                                 }

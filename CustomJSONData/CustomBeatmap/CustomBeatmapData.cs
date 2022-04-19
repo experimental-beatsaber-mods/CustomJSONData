@@ -11,6 +11,7 @@ namespace CustomJSONData.CustomBeatmap
 
         public CustomBeatmapData(
             int numberOfLines,
+            bool version2_6_0AndEarlier,
             Dictionary<string, object?> customData,
             Dictionary<string, object?> beatmapCustomData,
             Dictionary<string, object?> levelCustomData)
@@ -20,10 +21,13 @@ namespace CustomJSONData.CustomBeatmap
             _beatmapDataItemsPerTypeAccessor(ref @this) =
                 new CustomBeatmapDataSortedListForTypes<BeatmapDataItem>(_beatmapDataItemsPerTypeAccessor(ref @this));
             _beatmapDataItemsPerType.AddList(new SortedList<CustomEventData, BeatmapDataItem>(null));
+            this.version2_6_0AndEarlier = version2_6_0AndEarlier;
             this.customData = customData;
             this.beatmapCustomData = beatmapCustomData;
             this.levelCustomData = levelCustomData;
         }
+
+        public bool version2_6_0AndEarlier { get; }
 
         public Dictionary<string, object?> customData { get; }
 
@@ -53,6 +57,7 @@ namespace CustomJSONData.CustomBeatmap
         {
             CustomBeatmapData beatmapData = new(
                 _numberOfLines,
+                version2_6_0AndEarlier,
                 customData.Copy(),
                 beatmapCustomData.Copy(),
                 levelCustomData.Copy());
@@ -80,6 +85,7 @@ namespace CustomJSONData.CustomBeatmap
             _isCreatingFilteredCopy = true;
             CustomBeatmapData beatmapData = new(
                 _numberOfLines,
+                version2_6_0AndEarlier,
                 customData.Copy(),
                 beatmapCustomData.Copy(),
                 levelCustomData.Copy());

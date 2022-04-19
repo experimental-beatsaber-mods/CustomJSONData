@@ -41,6 +41,7 @@ namespace CustomJSONData.CustomBeatmap
             List<BeatmapSaveData.LightRotationEventBoxGroup> lightRotationEventBoxGroups,
             BasicEventTypesWithKeywords basicEventTypesWithKeywords,
             bool useNormalEventsAsCompatibleEvents,
+            bool version2_6_0AndEarlier,
             List<CustomEventData> customEvents,
             Dictionary<string, object?> customData,
             Dictionary<string, object?> beatmapCustomData,
@@ -61,11 +62,14 @@ namespace CustomJSONData.CustomBeatmap
                 basicEventTypesWithKeywords,
                 useNormalEventsAsCompatibleEvents)
         {
+            this.version2_6_0AndEarlier = version2_6_0AndEarlier;
             this.customEvents = customEvents;
             this.customData = customData;
             this.beatmapCustomData = beatmapCustomData;
             this.levelCustomData = levelCustomData;
         }
+
+        public bool version2_6_0AndEarlier { get; }
 
         public List<CustomEventData> customEvents { get; }
 
@@ -107,6 +111,28 @@ namespace CustomJSONData.CustomBeatmap
             List<CustomEventData> customEvents = new();
 
             using JsonTextReader reader = new(new StreamReader(path));
+
+            object[] inputs =
+            {
+                reader,
+                bpmEvents,
+                rotationEvents,
+                colorNotes,
+                bombNotes,
+                obstacles,
+                sliders,
+                burstSliders,
+                waypoints,
+                basicBeatmapEvents,
+                colorBoostBeatmapEvents,
+                lightColorEventBoxGroups,
+                lightRotationEventBoxGroups,
+                basicEventTypesForKeyword,
+                useNormalEventsAsCompatibleEvents,
+                customEvents,
+                new CustomData(data, beatmapData, levelData)
+            };
+
             while (reader.Read())
             {
                 if (reader.TokenType == JsonToken.PropertyName)
@@ -191,7 +217,7 @@ namespace CustomJSONData.CustomBeatmap
                             {
                                 if (!propertyName.Equals("customEvents"))
                                 {
-                                    return true;
+                                    return CustomJSONDataDeserializer.Activate(inputs, propertyName);
                                 }
 
                                 reader.ReadObjectArray(() => customEvents.Add(DeserializeCustomEvent(reader)));
@@ -218,6 +244,7 @@ namespace CustomJSONData.CustomBeatmap
                 lightRotationEventBoxGroups,
                 new BasicEventTypesWithKeywords(basicEventTypesForKeyword),
                 useNormalEventsAsCompatibleEvents,
+                false,
                 customEvents,
                 data,
                 beatmapData,
@@ -1131,6 +1158,28 @@ namespace CustomJSONData.CustomBeatmap
             });
 
             return new BasicEventTypesWithKeywords.BasicEventTypesForKeyword(keyword, eventTypes);
+        }
+
+        public readonly struct CustomData
+        {
+            internal CustomData(
+                Dictionary<string, object?> customData,
+                Dictionary<string, object?> beatmapCustomData,
+                Dictionary<string, object?> levelCustomData)
+            {
+                this.customData = customData;
+                this.beatmapCustomData = beatmapCustomData;
+                this.levelCustomData = levelCustomData;
+            }
+
+            [PublicAPI]
+            public Dictionary<string, object?> customData { get; }
+
+            [PublicAPI]
+            public Dictionary<string, object?> beatmapCustomData { get; }
+
+            [PublicAPI]
+            public Dictionary<string, object?> levelCustomData { get; }
         }
     }
 }

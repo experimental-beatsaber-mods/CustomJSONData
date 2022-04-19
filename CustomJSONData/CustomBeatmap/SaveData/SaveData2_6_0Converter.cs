@@ -191,6 +191,7 @@ namespace CustomJSONData.CustomBeatmap
                 new List<BeatmapSaveData.LightRotationEventBoxGroup>(),
                 basicEventTypesWithKeywords,
                 true,
+                true,
                 customEvents,
                 oldSaveData.customData,
                 beatmapData,

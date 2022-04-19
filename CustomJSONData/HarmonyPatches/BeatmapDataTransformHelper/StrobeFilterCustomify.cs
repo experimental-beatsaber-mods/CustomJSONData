@@ -44,6 +44,7 @@ namespace CustomJSONData.HarmonyPatches
         {
             CustomBeatmapData newBeatmapData = new(
                 numberOfLines,
+                beatmapData.version2_6_0AndEarlier,
                 beatmapData.customData,
                 beatmapData.beatmapCustomData,
                 beatmapData.levelCustomData);

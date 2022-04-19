@@ -7,7 +7,7 @@ namespace CustomJSONData
     [Plugin(RuntimeOptions.DynamicInit)]
     internal class Plugin
     {
-        private readonly Harmony _harmonyInstance = new("com.aeroluna.CustomJSONData");
+        private readonly Harmony _harmonyInstance = new("aeroluna.CustomJSONData");
 
 #pragma warning disable CA1822
         [UsedImplicitly]

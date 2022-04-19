@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using BeatmapSaveDataVersion3;
@@ -67,6 +68,7 @@ namespace CustomJSONData.HarmonyPatches
             {
                 return new CustomBeatmapData(
                     numberOfLines,
+                    customBeatmapSaveData.version2_6_0AndEarlier,
                     customBeatmapSaveData.customData,
                     customBeatmapSaveData.beatmapCustomData,
                     customBeatmapSaveData.levelCustomData);
@@ -74,6 +76,7 @@ namespace CustomJSONData.HarmonyPatches
 
             return new CustomBeatmapData(
                 4,
+                false,
                 new Dictionary<string, object?>(),
                 new Dictionary<string, object?>(),
                 new Dictionary<string, object?>());

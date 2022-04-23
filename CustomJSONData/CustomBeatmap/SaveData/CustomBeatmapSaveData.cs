@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using BeatmapSaveDataVersion3;
+using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -25,6 +26,8 @@ namespace CustomJSONData.CustomBeatmap
         private const string _beatDistributionParamType = "d";
 
         private const string _customData = "customData";
+
+        private static readonly Version _version2_6_0 = (Version)AccessTools.Field(typeof(BeatmapSaveData), "version2_6_0").GetValue(null);
 
         public CustomBeatmapSaveData(
             List<BeatmapSaveData.BpmChangeEventData> bpmEvents,
@@ -86,7 +89,7 @@ namespace CustomJSONData.CustomBeatmap
         {
             Version version = GetVersionFromPath(path);
 
-            if (version.CompareTo(version2_6_0) <= 0)
+            if (version.CompareTo(_version2_6_0) <= 0)
             {
                 return SaveData2_6_0Converter.Convert2_6_0AndEarlier(
                     version, path, beatmapData, levelData);

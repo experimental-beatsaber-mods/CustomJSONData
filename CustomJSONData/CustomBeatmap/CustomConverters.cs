@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using BeatmapSaveDataVersion3;
 using JetBrains.Annotations;
 using BpmProcessor = BeatmapDataLoader.BpmTimeProcessor;
@@ -25,10 +24,10 @@ namespace CustomJSONData.CustomBeatmap
                 false,
                 true)!;
 
-        public static Dictionary<string, object?> GetData(this BeatmapSaveData.BeatmapSaveDataItem dataItem)
+        public static CustomData GetData(this BeatmapSaveData.BeatmapSaveDataItem dataItem)
         {
             return dataItem is ICustomData customData
-                ? customData.customData : new Dictionary<string, object?>();
+                ? customData.customData : new CustomData();
         }
 
         [UsedImplicitly]

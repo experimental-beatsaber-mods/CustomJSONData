@@ -57,14 +57,14 @@ namespace CustomJSONData.HarmonyPatches
             return newBeatmapData;
         }
 
-        private static Dictionary<string, object?> GetEventCustomData(BeatmapEventData beatmapEventData)
+        private static CustomData GetEventCustomData(BeatmapEventData beatmapEventData)
         {
             if (beatmapEventData is ICustomData customBeatmapEventData)
             {
                 return customBeatmapEventData.customData;
             }
 
-            return new Dictionary<string, object?>();
+            return new CustomData();
         }
     }
 }

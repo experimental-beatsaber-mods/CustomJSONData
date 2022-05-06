@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace CustomJSONData.CustomBeatmap
+﻿namespace CustomJSONData.CustomBeatmap
 {
     public class CustomSliderData : SliderData, ICustomData
     {
@@ -26,7 +24,7 @@ namespace CustomJSONData.CustomBeatmap
             SliderMidAnchorMode midAnchorMode,
             int sliceCount,
             float squishAmount,
-            Dictionary<string, object?> customData)
+            CustomData customData)
             : base(
                 sliderType,
                 colorType,
@@ -53,7 +51,7 @@ namespace CustomJSONData.CustomBeatmap
             this.customData = customData;
         }
 
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
 
         public static SliderData CreateCustomSliderData(
             ColorType colorType,
@@ -70,7 +68,7 @@ namespace CustomJSONData.CustomBeatmap
             float tailControlPointLengthMultiplier,
             NoteCutDirection tailCutDirection,
             SliderMidAnchorMode midAnchorMode,
-            Dictionary<string, object?> customData)
+            CustomData customData)
         {
             return new CustomSliderData(
                 Type.Normal,
@@ -111,7 +109,7 @@ namespace CustomJSONData.CustomBeatmap
             NoteCutDirection tailCutDirection,
             int sliceCount,
             float squishAmount,
-            Dictionary<string, object?> customData)
+            CustomData customData)
         {
             return new CustomSliderData(
                 Type.Burst,

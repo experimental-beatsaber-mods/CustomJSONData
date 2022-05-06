@@ -53,8 +53,8 @@ namespace CustomJSONData.CustomBeatmap
         public static CustomBeatmapSaveData Convert2_6_0AndEarlier(
             Version version,
             string path,
-            Dictionary<string, object?> beatmapData,
-            Dictionary<string, object?> levelData)
+            CustomData beatmapData,
+            CustomData levelData)
         {
             Custom2_6_0AndEarlierBeatmapSaveData oldSaveData = Custom2_6_0AndEarlierBeatmapSaveData.Deserialize(version, path);
 

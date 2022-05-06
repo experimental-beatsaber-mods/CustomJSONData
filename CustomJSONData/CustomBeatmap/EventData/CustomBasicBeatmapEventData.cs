@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace CustomJSONData.CustomBeatmap
+﻿namespace CustomJSONData.CustomBeatmap
 {
     public class CustomBasicBeatmapEventData : BasicBeatmapEventData, ICustomData
     {
@@ -9,13 +7,13 @@ namespace CustomJSONData.CustomBeatmap
             BasicBeatmapEventType basicBeatmapEventType,
             int value,
             float floatValue,
-            Dictionary<string, object?> customData)
+            CustomData customData)
             : base(time, basicBeatmapEventType, value, floatValue)
         {
             this.customData = customData;
         }
 
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
 
         public override BeatmapDataItem GetCopy()
         {

@@ -11,7 +11,7 @@ namespace CustomJSONData.HarmonyPatches
     {
         private static readonly ConstructorInfo _eventDataCtor = AccessTools.FirstConstructor(typeof(BasicBeatmapEventData), _ => true);
         private static readonly ConstructorInfo _customEventDataCtor = AccessTools.FirstConstructor(typeof(CustomBasicBeatmapEventData), _ => true);
-        private static readonly ConstructorInfo _customDataCtor = AccessTools.Constructor(typeof(Dictionary<string, object?>));
+        private static readonly ConstructorInfo _customDataCtor = AccessTools.Constructor(typeof(CustomData));
 
         [HarmonyTranspiler]
         [HarmonyPatch("InsertDefaultEnvironmentEvents")]

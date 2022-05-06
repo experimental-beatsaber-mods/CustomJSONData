@@ -25,8 +25,8 @@ namespace CustomJSONData.CustomBeatmap
             string environmentName,
             string allDirectionsEnvironmentName,
             DifficultyBeatmapSet[] difficultyBeatmapSets,
-            Dictionary<string, object?> customData,
-            Dictionary<string, Dictionary<string, object?>> beatmapCustomDatasByFilename)
+            CustomData customData,
+            Dictionary<string, CustomData> beatmapCustomDatasByFilename)
             : base(
                   songName,
                   songSubName,
@@ -49,9 +49,9 @@ namespace CustomJSONData.CustomBeatmap
             this.beatmapCustomDatasByFilename = beatmapCustomDatasByFilename;
         }
 
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
 
-        public Dictionary<string, Dictionary<string, object?>> beatmapCustomDatasByFilename { get; }
+        public Dictionary<string, CustomData> beatmapCustomDatasByFilename { get; }
 
         // SongCore 3.9.0 skips past the CustomLevelLoader, so we just use the string data instead
         // Unfortunately no reading from a stream, but info.dat's should never be big enough to matter
@@ -73,8 +73,8 @@ namespace CustomJSONData.CustomBeatmap
             string environmentName = string.Empty;
             string allDirectionsEnvrionmentName = string.Empty;
             List<DifficultyBeatmapSet> difficultyBeatmapSets = new();
-            Dictionary<string, object?> customData = new();
-            Dictionary<string, Dictionary<string, object?>> beatmapCustomDatasByFilename = new();
+            CustomData customData = new();
+            Dictionary<string, CustomData> beatmapCustomDatasByFilename = new();
 
             using JsonTextReader reader = new(new StringReader(stringData));
             while (reader.Read())
@@ -168,7 +168,7 @@ namespace CustomJSONData.CustomBeatmap
                                                 string beatmapFilename = string.Empty;
                                                 float noteJumpMovementSpeed = default;
                                                 float noteJumpStartBeatOffset = default;
-                                                Dictionary<string, object?> data = new();
+                                                CustomData data = new();
                                                 reader.ReadObject(difficultyBeatmapObjectName =>
                                                 {
                                                     switch (difficultyBeatmapObjectName)
@@ -252,14 +252,14 @@ namespace CustomJSONData.CustomBeatmap
 
         public new class DifficultyBeatmap : StandardLevelInfoSaveData.DifficultyBeatmap
         {
-            internal DifficultyBeatmap(string difficultyName, int difficultyRank, string beatmapFilename, float noteJumpMovementSpeed, float noteJumpStartBeatOffset, Dictionary<string, object?> customData)
+            internal DifficultyBeatmap(string difficultyName, int difficultyRank, string beatmapFilename, float noteJumpMovementSpeed, float noteJumpStartBeatOffset, CustomData customData)
             : base(difficultyName, difficultyRank, beatmapFilename, noteJumpMovementSpeed, noteJumpStartBeatOffset)
             {
                 this.customData = customData;
             }
 
             [PublicAPI]
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
     }
 }

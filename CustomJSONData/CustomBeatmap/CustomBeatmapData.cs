@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using IPA.Utilities;
 
 namespace CustomJSONData.CustomBeatmap
@@ -12,9 +11,9 @@ namespace CustomJSONData.CustomBeatmap
         public CustomBeatmapData(
             int numberOfLines,
             bool version2_6_0AndEarlier,
-            Dictionary<string, object?> customData,
-            Dictionary<string, object?> beatmapCustomData,
-            Dictionary<string, object?> levelCustomData)
+            CustomData customData,
+            CustomData beatmapCustomData,
+            CustomData levelCustomData)
             : base(numberOfLines)
         {
             BeatmapData @this = this;
@@ -29,11 +28,11 @@ namespace CustomJSONData.CustomBeatmap
 
         public bool version2_6_0AndEarlier { get; }
 
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
 
-        public Dictionary<string, object?> beatmapCustomData { get; }
+        public CustomData beatmapCustomData { get; }
 
-        public Dictionary<string, object?> levelCustomData { get; }
+        public CustomData levelCustomData { get; }
 
         public static Type GetCustomType(object item)
         {

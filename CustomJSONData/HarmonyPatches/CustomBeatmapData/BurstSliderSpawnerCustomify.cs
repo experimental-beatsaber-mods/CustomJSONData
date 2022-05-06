@@ -26,7 +26,7 @@ namespace CustomJSONData.HarmonyPatches
                 .InstructionEnumeration();
         }
 
-        private static Dictionary<string, object?> GetSliderData(CustomSliderData sliderData)
+        private static CustomData GetSliderData(CustomSliderData sliderData)
         {
             return sliderData.customData;
         }

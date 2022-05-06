@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using BeatmapSaveDataVersion3;
 using CustomJSONData.CustomBeatmap;
@@ -25,8 +24,8 @@ namespace CustomJSONData.HarmonyPatches
                 return false;
             }
 
-            Dictionary<string, object?> beatmapData;
-            Dictionary<string, object?> levelData;
+            CustomData beatmapData;
+            CustomData levelData;
             if (standardLevelInfoSaveData is CustomLevelInfoSaveData customLevelInfoSaveData)
             {
                 beatmapData = customLevelInfoSaveData.beatmapCustomDatasByFilename[difficultyFileName];
@@ -34,8 +33,8 @@ namespace CustomJSONData.HarmonyPatches
             }
             else
             {
-                beatmapData = new Dictionary<string, object?>();
-                levelData = new Dictionary<string, object?>();
+                beatmapData = new CustomData();
+                levelData = new CustomData();
             }
 
             CustomBeatmapSaveData saveData = CustomBeatmapSaveData.Deserialize(path, beatmapData, levelData);

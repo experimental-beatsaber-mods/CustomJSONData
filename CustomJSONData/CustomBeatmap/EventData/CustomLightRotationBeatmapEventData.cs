@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace CustomJSONData.CustomBeatmap
+﻿namespace CustomJSONData.CustomBeatmap
 {
     public class CustomLightRotationBeatmapEventData : LightRotationBeatmapEventData, ICustomData
     {
@@ -14,13 +12,13 @@ namespace CustomJSONData.CustomBeatmap
             float rotation,
             int loopCount,
             LightRotationDirection rotationDirection,
-            Dictionary<string, object?> customData)
+            CustomData customData)
             : base(time, groupId, elementId, usePreviousEventValue, easeType, axis, rotation, loopCount, rotationDirection)
         {
             this.customData = customData;
         }
 
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
 
         public override BeatmapDataItem GetCopy()
         {

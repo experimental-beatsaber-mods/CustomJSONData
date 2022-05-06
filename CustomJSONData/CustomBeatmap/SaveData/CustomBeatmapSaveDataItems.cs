@@ -7,7 +7,7 @@ namespace CustomJSONData.CustomBeatmap
     {
         public class CustomEventData : BeatmapSaveDataItem, ICustomData
         {
-            internal CustomEventData(float beat, string type, Dictionary<string, object?> data)
+            internal CustomEventData(float beat, string type, CustomData data)
                 : base(beat)
             {
                 this.type = type;
@@ -16,7 +16,7 @@ namespace CustomJSONData.CustomBeatmap
 
             public string type { get; }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class BasicEventData : BeatmapSaveData.BasicEventData, ICustomData
@@ -26,13 +26,13 @@ namespace CustomJSONData.CustomBeatmap
                 BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType eventType,
                 int value,
                 float floatValue,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, eventType, value, floatValue)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class ColorBoostEventData : BeatmapSaveData.ColorBoostEventData, ICustomData
@@ -40,13 +40,13 @@ namespace CustomJSONData.CustomBeatmap
             public ColorBoostEventData(
                 float beat,
                 bool boost,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, boost)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class BpmChangeEventData : BeatmapSaveData.BpmChangeEventData, ICustomData
@@ -54,13 +54,13 @@ namespace CustomJSONData.CustomBeatmap
             public BpmChangeEventData(
                 float beat,
                 float bpm,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, bpm)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class RotationEventData : BeatmapSaveData.RotationEventData, ICustomData
@@ -69,13 +69,13 @@ namespace CustomJSONData.CustomBeatmap
                 float beat,
                 ExecutionTime executionTime,
                 float rotation,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, executionTime, rotation)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class LightColorEventBoxGroup : BeatmapSaveData.LightColorEventBoxGroup, ICustomData
@@ -84,13 +84,13 @@ namespace CustomJSONData.CustomBeatmap
                 float beat,
                 int groupId,
                 List<LightColorEventBox> eventBoxes,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, groupId, eventBoxes)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class LightRotationEventBoxGroup : BeatmapSaveData.LightRotationEventBoxGroup, ICustomData
@@ -99,13 +99,13 @@ namespace CustomJSONData.CustomBeatmap
                 float beat,
                 int groupId,
                 List<LightRotationEventBox> eventBoxes,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, groupId, eventBoxes)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class ColorNoteData : BeatmapSaveData.ColorNoteData, ICustomData
@@ -117,13 +117,13 @@ namespace CustomJSONData.CustomBeatmap
                 NoteColorType color,
                 NoteCutDirection cutDirection,
                 int angleOffset,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, line, layer, color, cutDirection, angleOffset)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class BombNoteData : BeatmapSaveData.BombNoteData, ICustomData
@@ -132,13 +132,13 @@ namespace CustomJSONData.CustomBeatmap
                 float beat,
                 int line,
                 int layer,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, line, layer)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class WaypointData : BeatmapSaveData.WaypointData, ICustomData
@@ -148,13 +148,13 @@ namespace CustomJSONData.CustomBeatmap
                 int line,
                 int layer,
                 OffsetDirection offsetDirection,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, line, layer, offsetDirection)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class SliderData : BeatmapSaveData.SliderData, ICustomData
@@ -172,7 +172,7 @@ namespace CustomJSONData.CustomBeatmap
                 float tailControlPointLengthMultiplier,
                 NoteCutDirection tailCutDirection,
                 SliderMidAnchorMode sliderMidAnchorMode,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(
                     colorType,
                     headBeat,
@@ -190,7 +190,7 @@ namespace CustomJSONData.CustomBeatmap
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class BurstSliderData : BeatmapSaveData.BurstSliderData, ICustomData
@@ -206,7 +206,7 @@ namespace CustomJSONData.CustomBeatmap
                 int tailLayer,
                 int sliceCount,
                 float squishAmount,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(
                     colorType,
                     headBeat,
@@ -222,7 +222,7 @@ namespace CustomJSONData.CustomBeatmap
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public new class ObstacleData : BeatmapSaveData.ObstacleData, ICustomData
@@ -234,13 +234,13 @@ namespace CustomJSONData.CustomBeatmap
                 float duration,
                 int width,
                 int height,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(beat, line, layer, duration, width, height)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CustomJSONData.CustomBeatmap;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -15,7 +16,7 @@ namespace CustomJSONData
 
         public static void ReadToDictionary(
             this JsonReader reader,
-            Dictionary<string, object?> dictionary,
+            CustomData dictionary,
             [InstantHandle] Func<string, bool>? specialCase = null)
         {
             ObjectReadObject(reader, dictionary, specialCase);
@@ -87,9 +88,9 @@ namespace CustomJSONData
             throw new JsonSerializationException("Unexpected end when reading Dictionary.");
         }
 
-        private static object ObjectReadObject(JsonReader reader, Dictionary<string, object?>? dictionary = null, Func<string, bool>? specialCase = null)
+        private static object ObjectReadObject(JsonReader reader, CustomData? dictionary = null, Func<string, bool>? specialCase = null)
         {
-            dictionary ??= new Dictionary<string, object?>();
+            dictionary ??= new CustomData();
 
             while (reader.Read())
             {

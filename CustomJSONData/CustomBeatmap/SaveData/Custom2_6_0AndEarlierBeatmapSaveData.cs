@@ -16,7 +16,7 @@ namespace CustomJSONData.CustomBeatmap
             List<WaypointData> waypoints,
             List<ObstacleData> obstacles,
             BeatmapSaveData.SpecialEventKeywordFiltersData specialEventsKeywordFilters,
-            Dictionary<string, object?> customData,
+            CustomData customData,
             List<CustomEventData> customEvents)
         {
             this.events = events;
@@ -43,11 +43,11 @@ namespace CustomJSONData.CustomBeatmap
 
         public List<CustomEventData> customEvents { get; }
 
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
 
         public static Custom2_6_0AndEarlierBeatmapSaveData Deserialize(Version version, string path)
         {
-            Dictionary<string, object?> customData = new();
+            CustomData customData = new();
             List<CustomEventData> customEvents = new();
             List<EventData> events = new();
             List<NoteData> notes = new();
@@ -145,7 +145,7 @@ namespace CustomJSONData.CustomBeatmap
             BeatmapSaveData.BeatmapEventType type = default;
             int value = default;
             float floatValue = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -186,7 +186,7 @@ namespace CustomJSONData.CustomBeatmap
             NoteLineLayer lineLayer = default;
             BeatmapSaveData.NoteType type = default;
             NoteCutDirection cutDirection = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -238,7 +238,7 @@ namespace CustomJSONData.CustomBeatmap
             float tailControlPointLengthMultiplier = default;
             NoteCutDirection tailCutDirection = default;
             SliderMidAnchorMode sliderMidAnchorMode = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -323,7 +323,7 @@ namespace CustomJSONData.CustomBeatmap
             int lineIndex = default;
             NoteLineLayer lineLayer = default;
             OffsetDirection offsetDirection = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -364,7 +364,7 @@ namespace CustomJSONData.CustomBeatmap
             BeatmapSaveData.ObstacleType type = default;
             float duration = default;
             int width = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -454,7 +454,7 @@ namespace CustomJSONData.CustomBeatmap
         {
             float time = default;
             string type = string.Empty;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -511,18 +511,18 @@ namespace CustomJSONData.CustomBeatmap
 
         public class EventData : BeatmapSaveData.EventData
         {
-            internal EventData(float time, BeatmapSaveData.BeatmapEventType type, int value, float floatValue, Dictionary<string, object?> customData)
+            internal EventData(float time, BeatmapSaveData.BeatmapEventType type, int value, float floatValue, CustomData customData)
                 : base(time, type, value, floatValue)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public class CustomEventData : BeatmapSaveDataItem
         {
-            internal CustomEventData(float time, string type, Dictionary<string, object?> data)
+            internal CustomEventData(float time, string type, CustomData data)
             {
                 this.time = time;
                 this.type = type;
@@ -533,18 +533,18 @@ namespace CustomJSONData.CustomBeatmap
 
             public string type { get; }
 
-            public Dictionary<string, object?> data { get; }
+            public CustomData data { get; }
         }
 
         public class NoteData : BeatmapSaveData.NoteData
         {
-            internal NoteData(float time, int lineIndex, NoteLineLayer lineLayer, BeatmapSaveData.NoteType type, NoteCutDirection cutDirection, Dictionary<string, object?> customData)
+            internal NoteData(float time, int lineIndex, NoteLineLayer lineLayer, BeatmapSaveData.NoteType type, NoteCutDirection cutDirection, CustomData customData)
                 : base(time, lineIndex, lineLayer, type, cutDirection)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public class SliderData : BeatmapSaveData.SliderData
@@ -562,7 +562,7 @@ namespace CustomJSONData.CustomBeatmap
                 float tailControlPointLengthMultiplier,
                 NoteCutDirection tailCutDirection,
                 SliderMidAnchorMode sliderMidAnchorMode,
-                Dictionary<string, object?> customData)
+                CustomData customData)
                 : base(
                     colorType,
                     headTime,
@@ -580,29 +580,29 @@ namespace CustomJSONData.CustomBeatmap
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public class WaypointData : BeatmapSaveData.WaypointData
         {
-            public WaypointData(float time, int lineIndex, NoteLineLayer lineLayer, OffsetDirection offsetDirection, Dictionary<string, object?> customData)
+            public WaypointData(float time, int lineIndex, NoteLineLayer lineLayer, OffsetDirection offsetDirection, CustomData customData)
                 : base(time, lineIndex, lineLayer, offsetDirection)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
 
         public class ObstacleData : BeatmapSaveData.ObstacleData
         {
-            public ObstacleData(float time, int lineIndex, BeatmapSaveData.ObstacleType type, float duration, int width, Dictionary<string, object?> customData)
+            public ObstacleData(float time, int lineIndex, BeatmapSaveData.ObstacleType type, float duration, int width, CustomData customData)
                 : base(time, lineIndex, type, duration, width)
             {
                 this.customData = customData;
             }
 
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
         }
     }
 }

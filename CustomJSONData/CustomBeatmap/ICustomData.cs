@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace CustomJSONData.CustomBeatmap
+﻿namespace CustomJSONData.CustomBeatmap
 {
     public interface ICustomData
     {
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
     }
 }

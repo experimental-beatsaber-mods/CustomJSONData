@@ -46,9 +46,9 @@ namespace CustomJSONData.CustomBeatmap
             bool useNormalEventsAsCompatibleEvents,
             bool version2_6_0AndEarlier,
             List<CustomEventData> customEvents,
-            Dictionary<string, object?> customData,
-            Dictionary<string, object?> beatmapCustomData,
-            Dictionary<string, object?> levelCustomData)
+            CustomData customData,
+            CustomData beatmapCustomData,
+            CustomData levelCustomData)
             : base(
                 bpmEvents,
                 rotationEvents,
@@ -76,16 +76,16 @@ namespace CustomJSONData.CustomBeatmap
 
         public List<CustomEventData> customEvents { get; }
 
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
 
-        public Dictionary<string, object?> beatmapCustomData { get; }
+        public CustomData beatmapCustomData { get; }
 
-        public Dictionary<string, object?> levelCustomData { get; }
+        public CustomData levelCustomData { get; }
 
         public static CustomBeatmapSaveData Deserialize(
             string path,
-            Dictionary<string, object?> beatmapData,
-            Dictionary<string, object?> levelData)
+            CustomData beatmapData,
+            CustomData levelData)
         {
             Version version = GetVersionFromPath(path);
 
@@ -110,7 +110,7 @@ namespace CustomJSONData.CustomBeatmap
             List<BeatmapSaveData.LightRotationEventBoxGroup> lightRotationEventBoxGroups = new();
             List<BasicEventTypesWithKeywords.BasicEventTypesForKeyword> basicEventTypesForKeyword = new();
             bool useNormalEventsAsCompatibleEvents = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             List<CustomEventData> customEvents = new();
 
             using JsonTextReader reader = new(new StreamReader(path));
@@ -133,7 +133,7 @@ namespace CustomJSONData.CustomBeatmap
                 basicEventTypesForKeyword,
                 useNormalEventsAsCompatibleEvents,
                 customEvents,
-                new CustomData(data, beatmapData, levelData)
+                new SaveDataCustomDatas(data, beatmapData, levelData)
             };
 
             while (reader.Read())
@@ -286,7 +286,7 @@ namespace CustomJSONData.CustomBeatmap
         {
             float beat = default;
             string type = string.Empty;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -316,7 +316,7 @@ namespace CustomJSONData.CustomBeatmap
         {
             float beat = default;
             float bpm = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -347,7 +347,7 @@ namespace CustomJSONData.CustomBeatmap
             float beat = default;
             ExecutionTime executionTime = default;
             float rotation = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -385,7 +385,7 @@ namespace CustomJSONData.CustomBeatmap
             NoteColorType color = default;
             NoteCutDirection cutDirection = default;
             int angleOffset = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -432,7 +432,7 @@ namespace CustomJSONData.CustomBeatmap
             float beat = default;
             int line = default;
             int layer = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -470,7 +470,7 @@ namespace CustomJSONData.CustomBeatmap
             float duration = default;
             int width = default;
             int height = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -526,7 +526,7 @@ namespace CustomJSONData.CustomBeatmap
             float tailControlPointLengthMultiplier = default;
             NoteCutDirection tailCutDirection = default;
             SliderMidAnchorMode sliderMidAnchorMode = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -617,7 +617,7 @@ namespace CustomJSONData.CustomBeatmap
             int tailLayer = default;
             int sliceCount = default;
             float squishAmount = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -692,7 +692,7 @@ namespace CustomJSONData.CustomBeatmap
             int line = default;
             int layer = default;
             OffsetDirection offsetDirection = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -732,7 +732,7 @@ namespace CustomJSONData.CustomBeatmap
             BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType eventType = default;
             int value = default;
             float floatValue = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -770,7 +770,7 @@ namespace CustomJSONData.CustomBeatmap
         {
             float beat = default;
             bool boost = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -836,7 +836,7 @@ namespace CustomJSONData.CustomBeatmap
             float beat = default;
             List<LightColorEventBox> eventBoxes = new();
             int groupId = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -969,7 +969,7 @@ namespace CustomJSONData.CustomBeatmap
             float beat = default;
             List<LightRotationEventBox> eventBoxes = new();
             int groupId = default;
-            Dictionary<string, object?> data = new();
+            CustomData data = new();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -1163,12 +1163,12 @@ namespace CustomJSONData.CustomBeatmap
             return new BasicEventTypesWithKeywords.BasicEventTypesForKeyword(keyword, eventTypes);
         }
 
-        public readonly struct CustomData
+        public readonly struct SaveDataCustomDatas
         {
-            internal CustomData(
-                Dictionary<string, object?> customData,
-                Dictionary<string, object?> beatmapCustomData,
-                Dictionary<string, object?> levelCustomData)
+            internal SaveDataCustomDatas(
+                CustomData customData,
+                CustomData beatmapCustomData,
+                CustomData levelCustomData)
             {
                 this.customData = customData;
                 this.beatmapCustomData = beatmapCustomData;
@@ -1176,13 +1176,13 @@ namespace CustomJSONData.CustomBeatmap
             }
 
             [PublicAPI]
-            public Dictionary<string, object?> customData { get; }
+            public CustomData customData { get; }
 
             [PublicAPI]
-            public Dictionary<string, object?> beatmapCustomData { get; }
+            public CustomData beatmapCustomData { get; }
 
             [PublicAPI]
-            public Dictionary<string, object?> levelCustomData { get; }
+            public CustomData levelCustomData { get; }
         }
     }
 }

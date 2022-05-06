@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using IPA.Utilities;
+﻿using IPA.Utilities;
 
 namespace CustomJSONData.CustomBeatmap
 {
@@ -15,13 +14,13 @@ namespace CustomJSONData.CustomBeatmap
             float time,
             SpawnRotationEventType spawnRotationEventType,
             float deltaRotation,
-            Dictionary<string, object?> customData)
+            CustomData customData)
             : base(time, spawnRotationEventType, deltaRotation)
         {
             this.customData = customData;
         }
 
-        public Dictionary<string, object?> customData { get; }
+        public CustomData customData { get; }
 
         public override BeatmapDataItem GetCopy()
         {

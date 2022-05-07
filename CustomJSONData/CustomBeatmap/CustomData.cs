@@ -100,6 +100,18 @@ namespace CustomJSONData.CustomBeatmap
         }
 
         [PublicAPI]
+        public Quaternion? GetQuaternion(string key)
+        {
+            Vector3? final = GetVector3(key);
+            if (final.HasValue)
+            {
+                return Quaternion.Euler(final.Value);
+            }
+
+            return null;
+        }
+
+        [PublicAPI]
         public T? GetStringToEnum<T>(string key)
         {
             if (!TryGetValue(key, out object? value) || value == null)

@@ -178,7 +178,7 @@ namespace CustomJSONData.CustomBeatmap
                                                             break;
 
                                                         case "_difficultyRank":
-                                                            difficultyRank = reader.ReadAsInt32() ?? difficultyRank;
+                                                            difficultyRank = reader.ReadAsInt32Safe() ?? difficultyRank;
                                                             break;
 
                                                         case "_beatmapFilename":

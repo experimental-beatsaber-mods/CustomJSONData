@@ -10,8 +10,25 @@ namespace CustomJSONData
     {
         public static bool? ReadIntAsBoolean(this JsonReader reader)
         {
-            int? result = reader.ReadAsInt32();
+            int? result = reader.ReadAsInt32Safe();
             return result.HasValue ? result.Value > 0 : null;
+        }
+
+        // Allows reading "-31.0" as "-31"
+        public static int? ReadAsInt32Safe(this JsonReader reader)
+        {
+            double? result = reader.ReadAsDouble();
+            if (!result.HasValue)
+            {
+                return null;
+            }
+
+            if (result.Value % 1 == 0)
+            {
+                return Convert.ToInt32(result.Value);
+            }
+
+            throw new JsonReaderException(reader.FormatMessage($"Input string '{result}' is not a valid integer."));
         }
 
         public static void ReadToDictionary(
@@ -19,6 +36,13 @@ namespace CustomJSONData
             CustomData dictionary,
             [InstantHandle] Func<string, bool>? specialCase = null)
         {
+            reader.Read();
+            if (reader.TokenType != JsonToken.StartObject)
+            {
+                Logger.Log(reader.FormatMessage($"Unexpected token when reading dictionary: [{reader.TokenType}], expected: [{JsonToken.StartObject}]."), IPA.Logging.Logger.Level.Error);
+                return;
+            }
+
             ObjectReadObject(reader, dictionary, specialCase);
         }
 
@@ -38,7 +62,7 @@ namespace CustomJSONData
             reader.Read(); // StartArray
             if (reader.TokenType != JsonToken.StartArray)
             {
-                throw new JsonSerializationException("Was not array.");
+                throw reader.CreateException($"Unexpected token when reading object array: [{reader.TokenType}], expected: [{JsonToken.StartArray}].");
             }
 
             reader.Read(); // StartObject (hopefully)
@@ -51,8 +75,29 @@ namespace CustomJSONData
 
             if (reader.TokenType != JsonToken.EndArray)
             {
-                throw new JsonSerializationException("Unexpected end when reading array.");
+                throw reader.CreateException($"Unexpected token when reading object array: {reader.TokenType}, expected: [{JsonToken.EndArray}].");
             }
+        }
+
+        public static string FormatMessage(this JsonReader reader, string message)
+        {
+            IJsonLineInfo? lineInfo = reader as IJsonLineInfo;
+            message += $" Path {reader.Path}";
+
+            if (lineInfo != null && lineInfo.HasLineInfo())
+            {
+                message += $", line {lineInfo.LineNumber}, position {lineInfo.LinePosition}";
+            }
+
+            message += ".";
+
+            return message;
+        }
+
+        // this is internal in json.net for some reason.
+        public static JsonSerializationException CreateException(this JsonReader reader, string message)
+        {
+            return new JsonSerializationException(reader.FormatMessage(message));
         }
 
         private static object? ObjectReadValue(JsonReader reader)
@@ -85,7 +130,7 @@ namespace CustomJSONData
                 }
             }
 
-            throw new JsonSerializationException("Unexpected end when reading Dictionary.");
+            throw reader.CreateException("Unexpected end when reading dictionary.");
         }
 
         private static object ObjectReadObject(JsonReader reader, CustomData? dictionary = null, Func<string, bool>? specialCase = null)
@@ -107,7 +152,7 @@ namespace CustomJSONData
 
                         if (!reader.Read())
                         {
-                            throw new JsonSerializationException("Unexpected end when reading Dictionary.");
+                            throw reader.CreateException("Unexpected end when reading dictionary.");
                         }
 
                         dictionary[propertyName] = ObjectReadValue(reader);
@@ -122,7 +167,7 @@ namespace CustomJSONData
                 }
             }
 
-            throw new JsonSerializationException("Unexpected end when reading Dictionary.");
+            throw reader.CreateException("Unexpected end when reading dictionary.");
         }
     }
 }

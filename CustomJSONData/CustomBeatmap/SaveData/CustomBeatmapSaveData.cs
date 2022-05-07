@@ -357,7 +357,7 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case "e":
-                        executionTime = (ExecutionTime?)reader.ReadAsInt32() ?? executionTime;
+                        executionTime = (ExecutionTime?)reader.ReadAsInt32Safe() ?? executionTime;
                         break;
 
                     case "r":
@@ -395,23 +395,23 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _line:
-                        line = reader.ReadAsInt32() ?? line;
+                        line = reader.ReadAsInt32Safe() ?? line;
                         break;
 
                     case _layer:
-                        layer = reader.ReadAsInt32() ?? layer;
+                        layer = reader.ReadAsInt32Safe() ?? layer;
                         break;
 
                     case _colorType:
-                        color = (NoteColorType?)reader.ReadAsInt32() ?? color;
+                        color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
                         break;
 
                     case _cutDirection:
-                        cutDirection = (NoteCutDirection?)reader.ReadAsInt32() ?? cutDirection;
+                        cutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? cutDirection;
                         break;
 
                     case "a":
-                        angleOffset = reader.ReadAsInt32() ?? angleOffset;
+                        angleOffset = reader.ReadAsInt32Safe() ?? angleOffset;
                         break;
 
                     case _customData:
@@ -442,11 +442,11 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _line:
-                        line = reader.ReadAsInt32() ?? line;
+                        line = reader.ReadAsInt32Safe() ?? line;
                         break;
 
                     case _layer:
-                        layer = reader.ReadAsInt32() ?? layer;
+                        layer = reader.ReadAsInt32Safe() ?? layer;
                         break;
 
                     case _customData:
@@ -480,11 +480,11 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _line:
-                        line = reader.ReadAsInt32() ?? line;
+                        line = reader.ReadAsInt32Safe() ?? line;
                         break;
 
                     case _layer:
-                        layer = reader.ReadAsInt32() ?? layer;
+                        layer = reader.ReadAsInt32Safe() ?? layer;
                         break;
 
                     case "d":
@@ -492,11 +492,11 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case "w":
-                        width = reader.ReadAsInt32() ?? width;
+                        width = reader.ReadAsInt32Safe() ?? width;
                         break;
 
                     case "h":
-                        height = reader.ReadAsInt32() ?? height;
+                        height = reader.ReadAsInt32Safe() ?? height;
                         break;
 
                     case _customData:
@@ -532,7 +532,7 @@ namespace CustomJSONData.CustomBeatmap
                 switch (objectName)
                 {
                     case _colorType:
-                        color = (NoteColorType?)reader.ReadAsInt32() ?? color;
+                        color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
                         break;
 
                     case _beat:
@@ -540,11 +540,11 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _line:
-                        headLine = reader.ReadAsInt32() ?? headLine;
+                        headLine = reader.ReadAsInt32Safe() ?? headLine;
                         break;
 
                     case _layer:
-                        headLayer = reader.ReadAsInt32() ?? headLayer;
+                        headLayer = reader.ReadAsInt32Safe() ?? headLayer;
                         break;
 
                     case "mu":
@@ -552,7 +552,7 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _cutDirection:
-                        headCutDirection = (NoteCutDirection?)reader.ReadAsInt32() ?? headCutDirection;
+                        headCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? headCutDirection;
                         break;
 
                     case _tailBeat:
@@ -560,11 +560,11 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _tailLine:
-                        tailLine = reader.ReadAsInt32() ?? tailLine;
+                        tailLine = reader.ReadAsInt32Safe() ?? tailLine;
                         break;
 
                     case _tailLayer:
-                        tailLayer = reader.ReadAsInt32() ?? tailLayer;
+                        tailLayer = reader.ReadAsInt32Safe() ?? tailLayer;
                         break;
 
                     case "tmu":
@@ -572,11 +572,11 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case "tc":
-                        tailCutDirection = (NoteCutDirection?)reader.ReadAsInt32() ?? tailCutDirection;
+                        tailCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? tailCutDirection;
                         break;
 
                     case "m":
-                        sliderMidAnchorMode = (SliderMidAnchorMode?)reader.ReadAsInt32() ?? sliderMidAnchorMode;
+                        sliderMidAnchorMode = (SliderMidAnchorMode?)reader.ReadAsInt32Safe() ?? sliderMidAnchorMode;
                         break;
 
                     case _customData:
@@ -623,7 +623,7 @@ namespace CustomJSONData.CustomBeatmap
                 switch (objectName)
                 {
                     case _colorType:
-                        color = (NoteColorType?)reader.ReadAsInt32() ?? color;
+                        color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
                         break;
 
                     case _beat:
@@ -631,15 +631,15 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _line:
-                        headLine = reader.ReadAsInt32() ?? headLine;
+                        headLine = reader.ReadAsInt32Safe() ?? headLine;
                         break;
 
                     case _layer:
-                        headLayer = reader.ReadAsInt32() ?? headLayer;
+                        headLayer = reader.ReadAsInt32Safe() ?? headLayer;
                         break;
 
                     case _cutDirection:
-                        headCutDirection = (NoteCutDirection?)reader.ReadAsInt32() ?? headCutDirection;
+                        headCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? headCutDirection;
                         break;
 
                     case _tailBeat:
@@ -647,15 +647,15 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _tailLine:
-                        tailLine = reader.ReadAsInt32() ?? tailLine;
+                        tailLine = reader.ReadAsInt32Safe() ?? tailLine;
                         break;
 
                     case _tailLayer:
-                        tailLayer = reader.ReadAsInt32() ?? tailLayer;
+                        tailLayer = reader.ReadAsInt32Safe() ?? tailLayer;
                         break;
 
                     case "sc":
-                        sliceCount = reader.ReadAsInt32() ?? sliceCount;
+                        sliceCount = reader.ReadAsInt32Safe() ?? sliceCount;
                         break;
 
                     case "s":
@@ -702,15 +702,15 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _line:
-                        line = reader.ReadAsInt32() ?? line;
+                        line = reader.ReadAsInt32Safe() ?? line;
                         break;
 
                     case _layer:
-                        layer = reader.ReadAsInt32() ?? layer;
+                        layer = reader.ReadAsInt32Safe() ?? layer;
                         break;
 
                     case _cutDirection:
-                        offsetDirection = (OffsetDirection?)reader.ReadAsInt32() ?? offsetDirection;
+                        offsetDirection = (OffsetDirection?)reader.ReadAsInt32Safe() ?? offsetDirection;
                         break;
 
                     case _customData:
@@ -742,11 +742,11 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case "et":
-                        eventType = (BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType?)reader.ReadAsInt32() ?? eventType;
+                        eventType = (BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType?)reader.ReadAsInt32Safe() ?? eventType;
                         break;
 
                     case "i":
-                        value = reader.ReadAsInt32() ?? value;
+                        value = reader.ReadAsInt32Safe() ?? value;
                         break;
 
                     case "f":
@@ -807,15 +807,15 @@ namespace CustomJSONData.CustomBeatmap
                 switch (objectName)
                 {
                     case "f":
-                        type = (IndexFilter.IndexFilterType?)reader.ReadAsInt32() ?? type;
+                        type = (IndexFilter.IndexFilterType?)reader.ReadAsInt32Safe() ?? type;
                         break;
 
                     case "p":
-                        param0 = reader.ReadAsInt32() ?? param0;
+                        param0 = reader.ReadAsInt32Safe() ?? param0;
                         break;
 
                     case "t":
-                        param1 = reader.ReadAsInt32() ?? param1;
+                        param1 = reader.ReadAsInt32Safe() ?? param1;
                         break;
 
                     case "r":
@@ -846,7 +846,7 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _groupId:
-                        groupId = reader.ReadAsInt32() ?? groupId;
+                        groupId = reader.ReadAsInt32Safe() ?? groupId;
                         break;
 
                     case _eventBoxes:
@@ -872,7 +872,7 @@ namespace CustomJSONData.CustomBeatmap
                                         break;
 
                                     case _beatDistributionParamType:
-                                        beatDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32() ?? beatDistributionParamType;
+                                        beatDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? beatDistributionParamType;
                                         break;
 
                                     case "r":
@@ -884,7 +884,7 @@ namespace CustomJSONData.CustomBeatmap
                                         break;
 
                                     case "t":
-                                        brightnessDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32() ?? brightnessDistributionParamType;
+                                        brightnessDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? brightnessDistributionParamType;
                                         break;
 
                                     case "e":
@@ -904,11 +904,11 @@ namespace CustomJSONData.CustomBeatmap
                                                         break;
 
                                                     case "i":
-                                                        transitionType = (TransitionType?)reader.ReadAsInt32() ?? transitionType;
+                                                        transitionType = (TransitionType?)reader.ReadAsInt32Safe() ?? transitionType;
                                                         break;
 
                                                     case _colorType:
-                                                        colorType = (EnvironmentColorType?)reader.ReadAsInt32() ?? colorType;
+                                                        colorType = (EnvironmentColorType?)reader.ReadAsInt32Safe() ?? colorType;
                                                         break;
 
                                                     case "s":
@@ -916,7 +916,7 @@ namespace CustomJSONData.CustomBeatmap
                                                         break;
 
                                                     case "f":
-                                                        strobeFrequency = reader.ReadAsInt32() ?? strobeFrequency;
+                                                        strobeFrequency = reader.ReadAsInt32Safe() ?? strobeFrequency;
                                                         break;
 
                                                     default:
@@ -979,7 +979,7 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case _groupId:
-                        groupId = reader.ReadAsInt32() ?? groupId;
+                        groupId = reader.ReadAsInt32Safe() ?? groupId;
                         break;
 
                     case _eventBoxes:
@@ -1007,7 +1007,7 @@ namespace CustomJSONData.CustomBeatmap
                                         break;
 
                                     case _beatDistributionParamType:
-                                        beatDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32() ?? beatDistributionParamType;
+                                        beatDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? beatDistributionParamType;
                                         break;
 
                                     case "s":
@@ -1015,7 +1015,7 @@ namespace CustomJSONData.CustomBeatmap
                                         break;
 
                                     case "t":
-                                        rotationDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32() ?? rotationDistributionParamType;
+                                        rotationDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? rotationDistributionParamType;
                                         break;
 
                                     case "b":
@@ -1023,7 +1023,7 @@ namespace CustomJSONData.CustomBeatmap
                                         break;
 
                                     case "a":
-                                        axis = (Axis?)reader.ReadAsInt32() ?? axis;
+                                        axis = (Axis?)reader.ReadAsInt32Safe() ?? axis;
                                         break;
 
                                     case "r":
@@ -1052,11 +1052,11 @@ namespace CustomJSONData.CustomBeatmap
                                                         break;
 
                                                     case "e":
-                                                        easeType = (EaseType?)reader.ReadAsInt32() ?? easeType;
+                                                        easeType = (EaseType?)reader.ReadAsInt32Safe() ?? easeType;
                                                         break;
 
                                                     case "l":
-                                                        loopsCount = reader.ReadAsInt32() ?? loopsCount;
+                                                        loopsCount = reader.ReadAsInt32Safe() ?? loopsCount;
                                                         break;
 
                                                     case "r":
@@ -1064,7 +1064,7 @@ namespace CustomJSONData.CustomBeatmap
                                                         break;
 
                                                     case "o":
-                                                        rotationDirection = (LightRotationBaseData.RotationDirection?)reader.ReadAsInt32() ?? rotationDirection;
+                                                        rotationDirection = (LightRotationBaseData.RotationDirection?)reader.ReadAsInt32Safe() ?? rotationDirection;
                                                         break;
 
                                                     default:
@@ -1136,7 +1136,7 @@ namespace CustomJSONData.CustomBeatmap
 
                         while (true)
                         {
-                            int? specialEvent = reader.ReadAsInt32();
+                            int? specialEvent = reader.ReadAsInt32Safe();
                             if (specialEvent.HasValue)
                             {
                                 eventTypes.Add((BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType)specialEvent);

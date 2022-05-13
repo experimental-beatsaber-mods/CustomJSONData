@@ -15,6 +15,45 @@ namespace CustomJSONData.HarmonyPatches
         private static readonly MethodInfo _createCustomBeatmapData = AccessTools.Method(typeof(BeatmapDataLoaderCustomify), nameof(CreateCustomBeatmapData));
         private static readonly MethodInfo _addCustomEvent = AccessTools.Method(typeof(BeatmapDataLoaderCustomify), nameof(AddCustomEvents));
 
+        private static readonly MethodInfo _getBeatmapDataFromBeatmapSaveData = AccessTools.Method(typeof(BeatmapDataLoader), "GetBeatmapDataFromBeatmapSaveData");
+        private static readonly MethodInfo _lockedMethod = AccessTools.Method(typeof(BeatmapDataLoaderCustomify), nameof(GetBeatmapDataLock));
+        private static readonly object _lock = new();
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(nameof(BeatmapDataLoader.GetBeatmapDataFromSaveData))]
+        private static IEnumerable<CodeInstruction> LockTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+            return new CodeMatcher(instructions)
+
+                // ReSharper disable once InconsistentlySynchronizedField
+                .MatchForward(false, new CodeMatch(OpCodes.Call, _getBeatmapDataFromBeatmapSaveData))
+                .SetOperandAndAdvance(_lockedMethod)
+                .InstructionEnumeration();
+        }
+
+        // TODO: figure out what causes a race condition in the first place.
+        private static BeatmapData GetBeatmapDataLock(
+            BeatmapSaveData beatmapSaveData,
+            BeatmapDifficulty beatmapDifficulty,
+            float startBpm,
+            bool loadingForDesignatedEnvironment,
+            EnvironmentKeywords environmentKeywords,
+            EnvironmentLightGroups environmentLightGroups,
+            DefaultEnvironmentEvents defaultEnvironmentEvents,
+            PlayerSpecificSettings playerSpecificSettings)
+        {
+            lock (_lock)
+            {
+                return (BeatmapData)_getBeatmapDataFromBeatmapSaveData.Invoke(
+                    null,
+                    new object[]
+                    {
+                        beatmapSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment, environmentKeywords, environmentLightGroups,
+                        defaultEnvironmentEvents, playerSpecificSettings
+                    });
+            }
+        }
+
         [HarmonyTranspiler]
         [HarmonyPatch("GetBeatmapDataFromBeatmapSaveData")]
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)

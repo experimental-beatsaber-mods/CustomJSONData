@@ -37,17 +37,15 @@ namespace CustomJSONData
             [InstantHandle] Func<string, bool>? specialCase = null)
         {
             reader.Read();
-            if (reader.TokenType != JsonToken.StartObject)
-            {
-                Logger.Log(reader.FormatMessage($"Unexpected token when reading dictionary: [{reader.TokenType}], expected: [{JsonToken.StartObject}]."), IPA.Logging.Logger.Level.Error);
-                return;
-            }
+            reader.AssertToken(JsonToken.StartObject, false);
 
             ObjectReadObject(reader, dictionary, specialCase);
         }
 
         public static void ReadObject(this JsonReader reader, [InstantHandle] Action<string> action)
         {
+            reader.AssertToken(JsonToken.StartObject);
+
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
             {
@@ -60,10 +58,7 @@ namespace CustomJSONData
         public static void ReadObjectArray(this JsonReader reader, [InstantHandle] Action action)
         {
             reader.Read(); // StartArray
-            if (reader.TokenType != JsonToken.StartArray)
-            {
-                throw reader.CreateException($"Unexpected token when reading object array: [{reader.TokenType}], expected: [{JsonToken.StartArray}].");
-            }
+            reader.AssertToken(JsonToken.StartArray);
 
             reader.Read(); // StartObject (hopefully)
 
@@ -73,10 +68,7 @@ namespace CustomJSONData
                 reader.Read();
             }
 
-            if (reader.TokenType != JsonToken.EndArray)
-            {
-                throw reader.CreateException($"Unexpected token when reading object array: {reader.TokenType}, expected: [{JsonToken.EndArray}].");
-            }
+            reader.AssertToken(JsonToken.EndArray);
         }
 
         public static string FormatMessage(this JsonReader reader, string message)
@@ -92,6 +84,22 @@ namespace CustomJSONData
             message += ".";
 
             return message;
+        }
+
+        public static void AssertToken(this JsonReader reader, JsonToken expectedToken, bool doThrow = true)
+        {
+            if (reader.TokenType == expectedToken)
+            {
+                return;
+            }
+
+            string message = reader.FormatMessage($"Unexpected token when reading: [{reader.TokenType}], expected: [{expectedToken}].");
+            if (doThrow)
+            {
+                throw new JsonSerializationException(message);
+            }
+
+            Logger.Log(message, IPA.Logging.Logger.Level.Error);
         }
 
         // this is internal in json.net for some reason.

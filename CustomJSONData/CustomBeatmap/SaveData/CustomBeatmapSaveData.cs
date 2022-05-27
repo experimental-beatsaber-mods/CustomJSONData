@@ -195,6 +195,7 @@ namespace CustomJSONData.CustomBeatmap
                             break;
 
                         case "basicEventTypesWithKeywords":
+                            reader.Read();
                             reader.ReadObject(objectName =>
                             {
                                 switch (objectName)
@@ -802,6 +803,7 @@ namespace CustomJSONData.CustomBeatmap
             int param0 = default;
             int param1 = default;
             bool reversed = default;
+            reader.Read();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)

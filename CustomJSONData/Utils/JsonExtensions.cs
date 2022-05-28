@@ -28,7 +28,7 @@ namespace CustomJSONData
                 return Convert.ToInt32(result.Value);
             }
 
-            throw new JsonReaderException(reader.FormatMessage($"Input string '{result}' is not a valid integer."));
+            throw new JsonReaderException(reader.FormatMessage($"Input string [{result}] is not a valid integer."));
         }
 
         public static void ReadToDictionary(
@@ -37,14 +37,20 @@ namespace CustomJSONData
             [InstantHandle] Func<string, bool>? specialCase = null)
         {
             reader.Read();
-            reader.AssertToken(JsonToken.StartObject, false);
+            if (!reader.AssertToken("dictionary", JsonToken.StartObject, false))
+            {
+                return;
+            }
 
             ObjectReadObject(reader, dictionary, specialCase);
         }
 
-        public static void ReadObject(this JsonReader reader, [InstantHandle] Action<string> action)
+        public static void ReadObject(this JsonReader reader, [InstantHandle] Action<string> action, bool doThrow = true)
         {
-            reader.AssertToken(JsonToken.StartObject);
+            if (!reader.AssertToken("object", JsonToken.StartObject, doThrow))
+            {
+                return;
+            }
 
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
@@ -55,30 +61,32 @@ namespace CustomJSONData
             }
         }
 
-        public static void ReadObjectArray(this JsonReader reader, [InstantHandle] Action action)
+        public static void ReadObjectArray(this JsonReader reader, [InstantHandle] Action action, bool doThrow = true)
         {
             reader.Read(); // StartArray
-            reader.AssertToken(JsonToken.StartArray);
+            if (!reader.AssertToken("object array", JsonToken.StartArray, doThrow))
+            {
+                return;
+            }
 
             reader.Read(); // StartObject (hopefully)
-
             while (reader.TokenType == JsonToken.StartObject)
             {
                 action();
                 reader.Read();
             }
 
-            reader.AssertToken(JsonToken.EndArray);
+            reader.AssertToken("object array", JsonToken.EndArray);
         }
 
         public static string FormatMessage(this JsonReader reader, string message)
         {
             IJsonLineInfo? lineInfo = reader as IJsonLineInfo;
-            message += $" Path {reader.Path}";
+            message += $" Path [{reader.Path}]";
 
             if (lineInfo != null && lineInfo.HasLineInfo())
             {
-                message += $", line {lineInfo.LineNumber}, position {lineInfo.LinePosition}";
+                message += $", line [{lineInfo.LineNumber}], position [{lineInfo.LinePosition}]";
             }
 
             message += ".";
@@ -86,20 +94,23 @@ namespace CustomJSONData
             return message;
         }
 
-        public static void AssertToken(this JsonReader reader, JsonToken expectedToken, bool doThrow = true)
+        public static bool AssertToken(this JsonReader reader, string readMessage, JsonToken expectedToken, bool doThrow = true)
         {
             if (reader.TokenType == expectedToken)
             {
-                return;
+                return true;
             }
 
-            string message = reader.FormatMessage($"Unexpected token when reading: [{reader.TokenType}], expected: [{expectedToken}].");
+            string message = reader
+                .FormatMessage($"Unexpected token when reading {readMessage}: [{reader.TokenType}], expected: [{expectedToken}].");
             if (doThrow)
             {
                 throw new JsonSerializationException(message);
             }
 
-            Logger.Log(message, IPA.Logging.Logger.Level.Error);
+            Logger.Log(message + " Error while reading customData, exception skipped.", IPA.Logging.Logger.Level.Error);
+            reader.Skip();
+            return false;
         }
 
         // this is internal in json.net for some reason.

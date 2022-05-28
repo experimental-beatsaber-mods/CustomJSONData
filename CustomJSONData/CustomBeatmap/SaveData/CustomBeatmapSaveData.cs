@@ -224,7 +224,7 @@ namespace CustomJSONData.CustomBeatmap
                                     return CustomJSONDataDeserializer.Activate(inputs, propertyName);
                                 }
 
-                                reader.ReadObjectArray(() => customEvents.Add(DeserializeCustomEvent(reader)));
+                                reader.ReadObjectArray(() => customEvents.Add(DeserializeCustomEvent(reader)), false);
                                 return false;
                             });
 
@@ -288,7 +288,8 @@ namespace CustomJSONData.CustomBeatmap
             float beat = default;
             string type = string.Empty;
             CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadObject(
+                objectName =>
             {
                 switch (objectName)
                 {
@@ -308,7 +309,8 @@ namespace CustomJSONData.CustomBeatmap
                         reader.Skip();
                         break;
                 }
-            });
+            },
+                false);
 
             return new CustomEventData(beat, type, data);
         }

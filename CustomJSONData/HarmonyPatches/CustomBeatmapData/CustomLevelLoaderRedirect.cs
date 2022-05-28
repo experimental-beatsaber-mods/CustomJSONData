@@ -37,11 +37,18 @@ namespace CustomJSONData.HarmonyPatches
                 levelData = new CustomData();
             }
 
-            CustomBeatmapSaveData saveData = CustomBeatmapSaveData.Deserialize(path, beatmapData, levelData);
-
-            __result = new Tuple<BeatmapSaveData, BeatmapDataBasicInfo>(
-                saveData,
-                BeatmapDataLoader.GetBeatmapDataBasicInfoFromSaveData(saveData));
+            try
+            {
+                CustomBeatmapSaveData saveData = CustomBeatmapSaveData.Deserialize(path, beatmapData, levelData);
+                __result = new Tuple<BeatmapSaveData, BeatmapDataBasicInfo>(
+                    saveData,
+                    BeatmapDataLoader.GetBeatmapDataBasicInfoFromSaveData(saveData));
+            }
+            catch
+            {
+                Logger.Log($"Exception while deserializing [{path}].", IPA.Logging.Logger.Level.Critical);
+                throw;
+            }
 
             return false;
         }

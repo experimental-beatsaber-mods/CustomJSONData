@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using BeatmapSaveDataVersion3;
@@ -130,7 +131,7 @@ namespace CustomJSONData.HarmonyPatches
                 return;
             }
 
-            foreach (CustomBeatmapSaveData.CustomEventData customEventSaveData in customSaveData.customEvents)
+            foreach (CustomBeatmapSaveData.CustomEventData customEventSaveData in customSaveData.customEvents.OrderBy(n => n))
             {
                 beatmapData.InsertCustomEventData(new CustomEventData(
                     timeProcessor.ConvertBeatToTime(customEventSaveData.beat),

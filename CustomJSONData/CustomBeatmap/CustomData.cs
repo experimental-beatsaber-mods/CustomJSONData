@@ -43,6 +43,12 @@ namespace CustomJSONData.CustomBeatmap
             return new CustomData(this);
         }
 
+        [PublicAPI]
+        public T GetRequired<T>(string key)
+        {
+            return Get<T>(key) ?? throw new JsonNotDefinedException(key);
+        }
+
         public T? Get<T>(string key)
         {
             static bool IsNumericType(object o)
@@ -67,12 +73,7 @@ namespace CustomJSONData.CustomBeatmap
             }
 
             // trygetvalue missing [notnullwhen] attribute :(
-            if (!TryGetValue(key, out object? value))
-            {
-                return default;
-            }
-
-            if (value == null)
+            if (!TryGetValue(key, out object? value) || value == null)
             {
                 return default;
             }
@@ -83,7 +84,7 @@ namespace CustomJSONData.CustomBeatmap
                 return (T)Convert.ChangeType(value, resultType);
             }
 
-            return (T?)value;
+            return (T)value;
         }
 
         [PublicAPI]
@@ -109,6 +110,12 @@ namespace CustomJSONData.CustomBeatmap
             }
 
             return null;
+        }
+
+        [PublicAPI]
+        public T GetStringToEnumRequired<T>(string key)
+        {
+            return GetStringToEnum<T>(key) ?? throw new JsonNotDefinedException(key);
         }
 
         [PublicAPI]

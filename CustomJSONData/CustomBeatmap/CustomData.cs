@@ -115,7 +115,7 @@ namespace CustomJSONData.CustomBeatmap
         [PublicAPI]
         public T GetStringToEnumRequired<T>(string key)
         {
-            return GetStringToEnum<T>(key) ?? throw new JsonNotDefinedException(key);
+            return GetStringToEnum<T?>(key) ?? throw new JsonNotDefinedException(key);
         }
 
         [PublicAPI]

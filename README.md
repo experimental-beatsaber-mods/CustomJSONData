@@ -1,9 +1,7 @@
-# Many parts of this README are outdated as of 2.2.0
-
 # CustomJSONData
-CustomJSONData is a library that allows the loading of arbitrary data from specific locations in beatmap JSON files. Custom data can be attached to levels (songs), individual difficulties of songs, and individual notes, obstacles, and lighting events within difficulties. In addition, entirely new event types can be added.
+CustomJSONData is a library that allows the loading of arbitrary data from specific locations in beatmap JSON files. Custom data can be attached to levels (songs), individual difficulties of songs, and individual notes, obstacles, and lighting events within difficulties. In addition, entirely new event types can be added. CustomJSONData completely overwrites how custom maps are deserialized from JSON.
 
-NOTE: CustomJSONData does NOT work for OST maps and will not convert them to their `CustomBeatmap` counterparts. To add on to that, CustomJSONData completely overwrites how custom maps are deserialized from JSON.
+This README is for modders, end users just need to install the mod!
 
 # Custom data in info.dat
 Custom data can also be placed on entire levels (songs) and on individual difficulties. For example:
@@ -51,7 +49,7 @@ if (beatmapData is CustomBeatmapData customBeatmapData)
 }
 ```
 
-The custom data section is also available from a `StandardLevelInfoSaveData` by casting to `CustomJSONData.CustomLevelInfo.CustomLevelInfoSaveData` and accessing the customData property. `beatmapCustomData` is a little more complicated. In order to do so, cast a `StandardLevelInfoSaveData.DifficultyBeatmap` to a `CustomLevelInfoSaveData.DifficultyBeatmap`.
+Although not as recommended, the custom data section is also available from a `StandardLevelInfoSaveData` by casting to `CustomJSONData.CustomLevelInfo.CustomLevelInfoSaveData` and accessing the customData property. `beatmapCustomData` is a little more complicated. In order to do so, cast a `StandardLevelInfoSaveData.DifficultyBeatmap` to a `CustomLevelInfoSaveData.DifficultyBeatmap`.
 
 Example:
 ```csharp
@@ -60,27 +58,27 @@ if (standardLevelInfoSaveData is CustomLevelInfoSaveData customLevelInfoSaveData
     string customEnvironment = customLevelInfoSaveData.customData.Get<string>("_customEnvironment"); // "CoolCustomEnv"
 
     CustomLevelInfoSaveData.DifficultyBeatmap difficultyBeatmap = (CustomLevelInfoSaveData.DifficultyBeatmap)customBeatmapData.difficultyBeatmapSets.First().difficultyBeatmaps.First();
-    string label = difficultyBeatmap.Get<string>("_difficultyLabel"); // "Nightmare"
+    string label = difficultyBeatmap.customData.Get<string>("_difficultyLabel"); // "Nightmare"
 }
 ```
 
 # Custom data on notes, obstacles, waypoints, and lighting events
-Custom data can be attached to notes (including bombs), obstacles, waypoints, and lighting events simply by adding a `_customData` property to the event/note/obstacle/waypoint object in the difficulty JSON file. For example, adding some custom fields to a note:
+Custom data can be attached to notes (including bombs), obstacles, waypoints, and lighting events simply by adding a `customData` (or `_customData` if v2) property to the event/note/obstacle/waypoint object in the difficulty JSON file. For example, adding some custom fields to a note:
 ```json
-"_notes": [{
-    "_time": 8.0,
-    "_lineIndex": 2,
-    "_lineLayer": 0,
-    "_type": 1,
-    "_cutDirection": 1,
-    "_customData": {
+"colorNotes": [{
+    "b": 8.0,
+    "x": 2,
+    "y": 0,
+    "c": 1,
+    "d": 1,
+    "customData": {
       "foo": 3,
       "bar": "Hello, BSMG!"
     }
   }
 ]
 ```
-To get this data from a `NoteData`, `ObstacleData`, `WaypointData`, or `BeatmapEventData` object in your plugin code, cast it to the appropriate type from the `CustomJSONData.CustomBeatmap` namespace (`CustomNoteData`, `CustomObstacleData`, `CustomWaypointData`, or `CustomBeatmapEventData`) and access the resulting object's customData property.
+To get this data from a `NoteData`, `ObstacleData`, `WaypointData`, `SliderData`, or `BasicBeatmapEventData` object in your plugin code, cast it to the appropriate type from the `CustomJSONData.CustomBeatmap` namespace (`CustomNoteData`, `CustomObstacleData`, `CustomWaypointData`, `SliderData`, or `CustomBasicBeatmapEventData`) and access the resulting object's customData property. Alternatively, all of these classes inherit the `ICustomData` interface, which requires the `customData` property.
 
 Example (For more about reading custom data, see [Reading custom data](#Reading-custom-data)):
 ```csharp
@@ -88,35 +86,62 @@ if (noteData is CustomNoteData customNoteData)
 {
     int foo = customNoteData.customData.Get<int>("foo"); // 3
 }
+
+if (noteData is ICustomData customDataInterface)
+{
+    int foo = customDataInterface.customData.Get<int>("foo"); // 3
+}
 ```
 
 *Note: The recommended way to create custom events to trigger plugin functionality is with CustomJSONData's [custom events](#Custom-events) feature. Custom data on lighting events should be used when your plugin does something related to the Beat Saber lighting event the data is placed on (e.g. changing the color of a group of lights or the direction of a ring spin), not to create new event types.*
 
+# Burst Sliders
+Unlike other objects, burst sliders (or chains) are handled by creating many `NoteData`s from one `SliderData`. All of these `NoteData`s will inherit the same `CustomData` object as their own.
+```json
+"burstSliders": [
+  {
+    "b": 15,
+    "c": 0,
+    "x": 0,
+    "y": 0,
+    "d": 2,
+    "tb": 16,
+    "tx": 0,
+    "ty": 0,
+    "sc": 10, // slice count, this will create 10 notes
+    "s": 1,
+    "customData": {
+      "color": [0, 1, 0] // all 10 notes will point to the same CustomData
+    }
+  }
+]
+```
+
 # Reading custom data
-In CustomJSONData, all JSON objects are converted to a `Dictionary<string, object>` and all JSON arrays are converted to a `List<object>`.
+In CustomJSONData, all JSON objects are converted to the `CustomData` class, which inherits from `ConcurrentDictionary<string, object?>`, and all JSON arrays are converted to a `List<object?>`.
 
 After getting your customData (see above), accessing your data is as simple as accessing from a dictionary.
 ```csharp
 if (beatmapData is CustomBeatmapData customBeatmapData)
 {
-    string label = customBeatmapData.beatmapCustomData["_difficultyLabel"]; // possible null reference, dont actually do this!
+    string label = customBeatmapData.beatmapCustomData["_difficultyLabel"]; // possible KeyNotfoundException, dont actually do this!
 }
 ```
 
-To help with this, CustomJSONData provides the extension method `Get<T>(this Dictionary<string, object> dictionary, string key)`. This will return the value as `T` if it exists, else it will return `default(T)`.
+To help with this, the `CustomData` class provide the method `Get<T>(string key)`. This will return the value as `T` if it exists, else it will return `default(T)`. `Get` will convert numeric types between each other but will not convert `string`s or `boolean`s to numeric types.
 
 Full example of getting a color from an array:
 ```csharp
 
 /* json:
-  "_notes": [{
-      "_time": 10,
-      "_lineIndex": 1,
-      "_lineLayer": 0,
-      "_type": 0,
-      "_cutDirection": 1,
-      "_customData": {
-        "_color": [0.5, 1, 0]
+  "colorNotes": [{
+      "b": 10,
+      "x": 1,
+      "y": 0,
+      "c": 0,
+      "d": 1,
+      "customData": {
+        "color": [0.5, 1, 0]
       }
     }
   ]
@@ -129,7 +154,12 @@ if (noteData is CustomNoteData customNoteData)
 
     // get the _color array
     // remember that arrays are always a List<object> and must be casted
-    List<object> colorArray = dictionary.Get<List<object>>("_color");
+    List<object>? colorArray = dictionary.Get<List<object>>("color");
+
+    if (colorArray == null || colorArray.Count < 3)
+    {
+      return;
+    }
 
     // Convert to floats and save color
     IEnumerable<float> colorFloats = colorArray.Select(n => Convert.ToSingle(n));
@@ -144,57 +174,110 @@ customNoteData.customData["colorz"] = new Color(0, 0, 1);
 Color noteColor = customNotedata.Get<Color>("colorz"); // (0, 0, 1);
 ```
 
+If your mod reads v2 and v3 maps, it may be desirable to have different property names depending on what kind of map you are reading. Which version you are working with can be found with the `version2_6_0AndEarlier` bool property of `CustomBeatmapData`
+```csharp
+bool v2 = customBeatmapData.version2_6_0AndEarlier;
+bool? foo = dictionary.Get<bool>(v2 ? "_foo" : "f");
+```
+
+# CustomData extensions
+To aid with reading CustomData, there are many extensions for frequently used methods.
+
+`CustomData` methods:
+* `Get<T>(string key)` - As described before.
+* `GetVector3(string key)` - Runs `Get<List<object>>` and if found, converts result to a `Vector3`, otherwise returns null.
+* `GetQuaternion(string key)` - As above but with a `Quaternion`.
+* `GetStringToEnum<T>(string key)` - Runs `Get<string>` and converts result to `T` or `default(T)`. `T` must be an enum. Must be nullable to return null or will return default.
+* `GetRequired<T>(string key)` - Runs `Get<T>` but throws a `JsonNotDefinedException` if it returns null. `T` should not be nullable.
+* `GetStringToEnumRequired<T>(string key)` - See above. `T` should not be nullable.
+* `ToString()` - ToString is overriden to help print object contents in a human readable format.
+
+`IDifficultyBeatmap` extensions:
+* `GetBeatmapSaveData(this IDifficultyBeatmapData difficultyBeatmap)` - Returns the map's `CustomBeatmapSaveData` or null if not a Custom Level.
+* `GetBeatmapCustomData(this IDifficultyBeatmapData difficultyBeatmap)` - Returns the map's `beatmapCustomData` or a new `CustomData`.
+* `GetLevelCustomData(this IDifficultyBeatmapData difficultyBeatmap)` - Returns the map's `levelCustomData ` or a new `CustomData`.
+
 # Custom events
-In addition to providing access to the custom data found in info.dat, `CustomJSONData.CustomBeatmap.CustomBeatmapData` provides a new list of `CustomEventData` objects. Not to be confused with `CustomBeatmapEventDatas`, which are Beat Saber lighting events with custom data added, this is a place for entirely new events added to the game by plugins. These events are stored in difficulty `.dat` files. Here's an example of what a custom event might look like inside a difficulty:
+In addition to providing access to the custom data found in info.dat, `CustomJSONData.CustomBeatmap.CustomBeatmapData` provides a new list of `CustomEventData` objects. Not to be confused with `CustomBasicBeatmapEventData`, which are vanilla Beat Saber lighting events with custom data added, this is a place for entirely new events added to the game by plugins. These events are stored in difficulty `.dat` files. Here's an example of what a custom event might look like inside a difficulty:
 ```json
-"_version": "2.0.0",
-"_customEvents": [{
-      "_time": 0.0,
-      "_type": "HelloWorld",
-      "_data": {
+"version": "3.0.0",
+"customData": {
+  "customEvents": [{
+      "b": 0.0,
+      "t": "HelloWorld",
+      "d": {
         "foo": 1.0,
         "message": "Hello from a custom event!"
+      }
     }
-  }
-],
-"_events":[
+  ]
+}
+"basicBeatmapEvents": [
 // ...
 ```
 A CustomEventData object has three fields.
-* `time` functions identically to the `time` field on notes/obstacles/lighting events.
-* `type`, unlike in lighting events, is a string; use it to specify what sort of event this is. Event types are de-facto defined/standardized by the first plugin to make use of them.
-* `data` is custom data. To see how to access it, see [Reading custom data](#Reading-custom-data))
+* `b` (or `_time` in v2) functions identically to the `b` field on notes/obstacles/lighting events.
+* `t` (or `_type`) Unlike in lighting events, this is a string; use it to specify what sort of event this is. Event types are de-facto defined/standardized by the first plugin to make use of them.
+* `d` (or `_data`) is custom data. To see how to access it, see [Reading custom data](#Reading-custom-data))
 
-To subscribe to these events, you must register a callback through the `CustomEventCallbackController`. When a `CustomEventCallbackController` is instantiated, it will invoke the `didInitEvent` event.
+To subscribe to these events, you must register a callback through vanilla class the `BeatmapCallbacksController`. You can get this through any means, but I personally use Zenject.
 
-From there you can invoke `AddCustomEventCallback(CustomEventCallback callback, float aheadTime = 0, bool callIfBeforeStartTime = true)`. `aheadTime` is how long in seconds before the event you want the callback to trigger. `callIfBeforeStartTime` is whether or not to trigger callbacks for events that happen before the song start, for example if the player starts in the middle using practice mode.
-
-`AddCustomEventCallback` will return a `CustomEventCallbackData` object which you can use to deregister your callback if you wish using `RemoveBeatmapEventCallback(CustomEventCallbackData callbackData)`
+From there you can invoke `AddBeatmapCallback<CustomEventData>(BeatmapDataCallback<T> callback)`. You can also call `AddBeatmapCallback<CustomEventData>(float aheadTime, BeatmapDataCallback<CustomEventData> callback)` if you want an `aheadTime`, which is how long in seconds before the event you want the callback to trigger.
 
 Example:
 ```csharp
-internal void OnEnable()
+[Inject]
+private BeatmapCallbacksController _beatmapCallbacksController;
+
+private BeatmapDataCallbackWrapper? _callbackWrapper;
+
+public void Initialize()
 {
-    CustomEventCallbackController.didInitEvent += OnCustomEventCallbackControllerInit;
+    _callbackWrapper = _beatmapCallbacksController.AddBeatmapCallback<CustomEventData>(HandleCallback);
 }
 
-internal static void OnCustomEventCallbackControllerInit(CustomEventCallbackController customEventCallbackController)
+public void Dispose()
 {
-    CustomEventCallbackData callback = customEventCallbackController.AddCustomEventCallback(Callback);
-    ////customEventCallbackController.RemoveBeatmapEventCallback(callback);
+    _beatmapCallbacksController?.RemoveBeatmapCallback(_callbackWrapper);
 }
 
-internal static void Callback(ustomEventData customEventData)
+private void Callback(CustomEventData customEventData)
 {
     if (customEventData.type == "HelloWorld")
     {
-        string message = customEventData.data.Get<string>("message"); // "Hello from a custom event!"
+        string message = customEventData.customData.Get<string>("message"); // "Hello from a custom event!"
     }
 }
 ```
 
-`CustomEventCallbackController` also exposes some useful properties.
-* `BeatmapData` (This is a `CustomBeatmapData`)
-* `BeatmapObjectCallbackController`
-* `AudioTimeSource`
-* `SpawningStartTime`
+# CustomJSONDataDeserializer
+## For advanced use only!
+CustomJSONDataDeserializers allow you to modify how data is read within the `customData` field of a beatmap. These only work on v3 maps. Currently one is used to read fake notes from a separate array in Noodle Extensions and will be used as an example (it has been slightly simplified). First, one must be registered to a class with the `[JSONDeserializer]` attribute on a method. This created CustomJSONDataDeserializer can be enabled and disabled with the `Enabled` property.
+```csharp
+public static CustomJSONDataDeserializer JSONDeserializer { get; } = CustomJSONDataDeserializer.Register<FakeNotesJSON>();
+```
+
+FakeNotesJSON looks like this. When CustomJSONData comes across the string parameter defined in `[JSONDeserializer]`, it will redirect to this method. Returning false indicates do not add to the beatmap custom data while returning true mean do add.
+```csharp
+[CustomJSONDataDeserializer.JSONDeserializer("fakeColorNotes")]
+private static bool HandleFakeNotes(CustomBeatmapSaveData.SaveDataCustomDatas customDatas, List<BeatmapSaveData.ColorNoteData> colorNotes, JsonTextReader reader)
+{
+    // Basic check to make sure this only runs for NE maps
+    if (!(customDatas.beatmapCustomData.Get<List<object>>("_requirements")?.Contains("Noodle Extensions") ?? false))
+    {
+        return true;
+    }
+
+    // More info: https://www.newtonsoft.com/json/help/html/readjsonwithjsontextreader.htm
+    // See CustomBeatmapSaveData and JsonExtensions to see how CJD uses helper methods
+    reader.ReadObjectArray(() =>
+    {
+        CustomBeatmapSaveData.ColorNoteData data = CustomBeatmapSaveData.DeserializeColorNote(reader); // Read from reader head to create a new note save data
+        data.customData["NE_fake"] = true; // tags as fake to be read later
+        colorNotes.Add(data); // Add to the injected colorNotes list, which will be fed back to CJD
+    });
+    return false;
+}
+```
+
+A `[JSONDeserializer]` method may request the following types to be injected: `JsonTextReader`, `List<BeatmapSaveData.BpmChangeEventData>`, `List<BeatmapSaveData.RotationEventData>`, `List<BeatmapSaveData.ColorNoteData>`, `List<BeatmapSaveData.BombNoteData>`, `List<BeatmapSaveData.ObstacleData>`, `List<BeatmapSaveData.SliderData>`, `List<BeatmapSaveData.BurstSliderData>`, `List<BeatmapSaveData.WaypointData>`, `List<BeatmapSaveData.BasicEventData>`, `List<BeatmapSaveData.ColorBoostEventData>`, `List<BeatmapSaveData.LightColorEventBoxGroup>`, `List<BeatmapSaveData.LightRotationEventBoxGroup>`, `List<BasicEventTypesWithKeywords.BasicEventTypesForKeyword>`, `bool`(useNormalEventsAsCompatibleEvents), `List<CustomEventData>`, `CustomBeatmapSaveData.SaveDataCustomDatas`

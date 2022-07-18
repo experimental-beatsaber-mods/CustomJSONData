@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using BeatmapSaveDataVersion3;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -234,22 +235,22 @@ namespace CustomJSONData.CustomBeatmap
             }
 
             return new CustomBeatmapSaveData(
-                bpmEvents,
-                rotationEvents,
-                colorNotes,
-                bombNotes,
-                obstacles,
-                sliders,
-                burstSliders,
-                waypoints,
-                basicBeatmapEvents,
-                colorBoostBeatmapEvents,
-                lightColorEventBoxGroups,
-                lightRotationEventBoxGroups,
+                bpmEvents.OrderBy(n => n).ToList(),
+                rotationEvents.OrderBy(n => n).ToList(),
+                colorNotes.OrderBy(n => n).ToList(),
+                bombNotes.OrderBy(n => n).ToList(),
+                obstacles.OrderBy(n => n).ToList(),
+                sliders.OrderBy(n => n).ToList(),
+                burstSliders.OrderBy(n => n).ToList(),
+                waypoints.OrderBy(n => n).ToList(),
+                basicBeatmapEvents.OrderBy(n => n).ToList(),
+                colorBoostBeatmapEvents.OrderBy(n => n).ToList(),
+                lightColorEventBoxGroups.OrderBy(n => n).ToList(),
+                lightRotationEventBoxGroups.OrderBy(n => n).ToList(),
                 new BasicEventTypesWithKeywords(basicEventTypesForKeyword),
                 useNormalEventsAsCompatibleEvents,
                 false,
-                customEvents,
+                customEvents.OrderBy(n => n).ToList(),
                 data,
                 beatmapData,
                 levelData);

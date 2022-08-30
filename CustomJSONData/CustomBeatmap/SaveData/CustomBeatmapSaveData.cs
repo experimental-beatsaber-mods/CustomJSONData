@@ -284,7 +284,7 @@ namespace CustomJSONData.CustomBeatmap
             return new Version(fallback);
         }
 
-        public static CustomEventData DeserializeCustomEvent([InstantHandle] JsonTextReader reader)
+        public static CustomEventData DeserializeCustomEvent([InstantHandle] JsonReader reader)
         {
             float beat = default;
             string type = string.Empty;
@@ -316,7 +316,7 @@ namespace CustomJSONData.CustomBeatmap
             return new CustomEventData(beat, type, data);
         }
 
-        public static BpmChangeEventData DeserializeBpmChange([InstantHandle] JsonTextReader reader)
+        public static BpmChangeEventData DeserializeBpmChange([InstantHandle] JsonReader reader)
         {
             float beat = default;
             float bpm = default;
@@ -346,7 +346,7 @@ namespace CustomJSONData.CustomBeatmap
             return new BpmChangeEventData(beat, bpm, data);
         }
 
-        public static RotationEventData DeserializeRotation([InstantHandle] JsonTextReader reader)
+        public static RotationEventData DeserializeRotation([InstantHandle] JsonReader reader)
         {
             float beat = default;
             ExecutionTime executionTime = default;
@@ -381,7 +381,7 @@ namespace CustomJSONData.CustomBeatmap
             return new RotationEventData(beat, executionTime, rotation, data);
         }
 
-        public static ColorNoteData DeserializeColorNote([InstantHandle] JsonTextReader reader)
+        public static ColorNoteData DeserializeColorNote([InstantHandle] JsonReader reader)
         {
             float beat = default;
             int line = default;
@@ -431,7 +431,7 @@ namespace CustomJSONData.CustomBeatmap
             return new ColorNoteData(beat, line, layer, color, cutDirection, angleOffset, data);
         }
 
-        public static BombNoteData DeserializeBombNote([InstantHandle] JsonTextReader reader)
+        public static BombNoteData DeserializeBombNote([InstantHandle] JsonReader reader)
         {
             float beat = default;
             int line = default;
@@ -466,7 +466,7 @@ namespace CustomJSONData.CustomBeatmap
             return new BombNoteData(beat, line, layer, data);
         }
 
-        public static ObstacleData DeserializeObstacle([InstantHandle] JsonTextReader reader)
+        public static ObstacleData DeserializeObstacle([InstantHandle] JsonReader reader)
         {
             float beat = default;
             int line = default;
@@ -516,7 +516,7 @@ namespace CustomJSONData.CustomBeatmap
             return new ObstacleData(beat, line, layer, duration, width, height, data);
         }
 
-        public static SliderData DeserializeSlider([InstantHandle] JsonTextReader reader)
+        public static SliderData DeserializeSlider([InstantHandle] JsonReader reader)
         {
             NoteColorType color = default;
             float headBeat = default;
@@ -609,7 +609,7 @@ namespace CustomJSONData.CustomBeatmap
                 data);
         }
 
-        public static BurstSliderData DeserializeBurstSlider([InstantHandle] JsonTextReader reader)
+        public static BurstSliderData DeserializeBurstSlider([InstantHandle] JsonReader reader)
         {
             NoteColorType color = default;
             float headBeat = default;
@@ -690,7 +690,7 @@ namespace CustomJSONData.CustomBeatmap
                 data);
         }
 
-        public static WaypointData DeserializeWaypoint([InstantHandle] JsonTextReader reader)
+        public static WaypointData DeserializeWaypoint([InstantHandle] JsonReader reader)
         {
             float beat = default;
             int line = default;
@@ -730,7 +730,7 @@ namespace CustomJSONData.CustomBeatmap
             return new WaypointData(beat, line, layer, offsetDirection, data);
         }
 
-        public static BasicEventData DeserializeBasicEvent([InstantHandle] JsonTextReader reader)
+        public static BasicEventData DeserializeBasicEvent([InstantHandle] JsonReader reader)
         {
             float beat = default;
             BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType eventType = default;
@@ -770,7 +770,7 @@ namespace CustomJSONData.CustomBeatmap
             return new BasicEventData(beat, eventType, value, floatValue, data);
         }
 
-        public static ColorBoostEventData DeserializeColorBoost([InstantHandle] JsonTextReader reader)
+        public static ColorBoostEventData DeserializeColorBoost([InstantHandle] JsonReader reader)
         {
             float beat = default;
             bool boost = default;
@@ -800,7 +800,7 @@ namespace CustomJSONData.CustomBeatmap
             return new ColorBoostEventData(beat, boost, data);
         }
 
-        public static IndexFilter DeserializeIndexFilter([InstantHandle] JsonTextReader reader)
+        public static IndexFilter DeserializeIndexFilter([InstantHandle] JsonReader reader)
         {
             IndexFilter.IndexFilterType type = default;
             int param0 = default;
@@ -836,7 +836,7 @@ namespace CustomJSONData.CustomBeatmap
             return new IndexFilter(type, param0, param1, reversed);
         }
 
-        public static LightColorEventBoxGroup DeserializeLightColorEventBoxGroup([InstantHandle] JsonTextReader reader)
+        public static LightColorEventBoxGroup DeserializeLightColorEventBoxGroup([InstantHandle] JsonReader reader)
         {
             float beat = default;
             List<LightColorEventBox> eventBoxes = new();
@@ -969,7 +969,7 @@ namespace CustomJSONData.CustomBeatmap
             return new LightColorEventBoxGroup(beat, groupId, eventBoxes, data);
         }
 
-        public static LightRotationEventBoxGroup DeserializeLightRotationEventBoxGroup([InstantHandle] JsonTextReader reader)
+        public static LightRotationEventBoxGroup DeserializeLightRotationEventBoxGroup([InstantHandle] JsonReader reader)
         {
             float beat = default;
             List<LightRotationEventBox> eventBoxes = new();
@@ -1120,7 +1120,7 @@ namespace CustomJSONData.CustomBeatmap
             return new LightRotationEventBoxGroup(beat, groupId, eventBoxes, data);
         }
 
-        public static BasicEventTypesWithKeywords.BasicEventTypesForKeyword DeserializeBasicEventTypesForKeyword(JsonTextReader reader)
+        public static BasicEventTypesWithKeywords.BasicEventTypesForKeyword DeserializeBasicEventTypesForKeyword(JsonReader reader)
         {
             string keyword = string.Empty;
             List<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType> eventTypes = new();

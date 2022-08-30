@@ -119,42 +119,11 @@ namespace CustomJSONData
             return new JsonSerializationException(reader.FormatMessage(message));
         }
 
-        private static object? ObjectReadValue(JsonReader reader)
-        {
-            return reader.TokenType switch
-            {
-                JsonToken.StartObject => ObjectReadObject(reader),
-                JsonToken.StartArray => ObjectReadList(reader),
-                _ => reader.Value
-            };
-        }
-
-        private static IList<object?> ObjectReadList(JsonReader reader)
-        {
-            IList<object?> list = new List<object?>();
-
-            while (reader.Read())
-            {
-                switch (reader.TokenType)
-                {
-                    case JsonToken.Comment:
-                        break;
-
-                    default:
-                        list.Add(ObjectReadValue(reader));
-                        break;
-
-                    case JsonToken.EndArray:
-                        return list;
-                }
-            }
-
-            throw reader.CreateException("Unexpected end when reading dictionary.");
-        }
-
-        private static object ObjectReadObject(JsonReader reader, CustomData? dictionary = null, Func<string, bool>? specialCase = null)
+        internal static object ObjectReadObject(JsonReader reader, CustomData? dictionary = null, Func<string, bool>? specialCase = null)
         {
             dictionary ??= new CustomData();
+
+            reader.AssertToken("dictionary", JsonToken.StartObject);
 
             while (reader.Read())
             {
@@ -183,6 +152,39 @@ namespace CustomJSONData
 
                     case JsonToken.EndObject:
                         return dictionary;
+                }
+            }
+
+            throw reader.CreateException("Unexpected end when reading dictionary.");
+        }
+
+        private static object? ObjectReadValue(JsonReader reader)
+        {
+            return reader.TokenType switch
+            {
+                JsonToken.StartObject => ObjectReadObject(reader),
+                JsonToken.StartArray => ObjectReadList(reader),
+                _ => reader.Value
+            };
+        }
+
+        private static IList<object?> ObjectReadList(JsonReader reader)
+        {
+            IList<object?> list = new List<object?>();
+
+            while (reader.Read())
+            {
+                switch (reader.TokenType)
+                {
+                    case JsonToken.Comment:
+                        break;
+
+                    default:
+                        list.Add(ObjectReadValue(reader));
+                        break;
+
+                    case JsonToken.EndArray:
+                        return list;
                 }
             }
 

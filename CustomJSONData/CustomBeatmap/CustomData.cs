@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace CustomJSONData.CustomBeatmap
 {
+    [JsonConverter(typeof(CustomDataConverter))]
     public class CustomData : ConcurrentDictionary<string, object?>
     {
         public CustomData()
@@ -33,7 +34,7 @@ namespace CustomJSONData.CustomBeatmap
         public static CustomData FromJSON(JsonReader reader, Func<string, bool>? specialCase = null)
         {
             CustomData dictioanry = new();
-            reader.ReadToDictionary(dictioanry, specialCase);
+            JsonExtensions.ObjectReadObject(reader, dictioanry, specialCase);
             return dictioanry;
         }
 

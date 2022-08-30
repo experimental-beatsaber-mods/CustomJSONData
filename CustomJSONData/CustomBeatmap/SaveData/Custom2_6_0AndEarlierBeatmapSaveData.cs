@@ -139,7 +139,7 @@ namespace CustomJSONData.CustomBeatmap
             return beatmapSaveData;
         }
 
-        public static EventData DeserializeEvent([InstantHandle] JsonTextReader reader)
+        public static EventData DeserializeEvent([InstantHandle] JsonReader reader)
         {
             float time = default;
             BeatmapSaveData.BeatmapEventType type = default;
@@ -179,7 +179,7 @@ namespace CustomJSONData.CustomBeatmap
             return new EventData(time, type, value, floatValue, data);
         }
 
-        public static NoteData DeserializeNote([InstantHandle] JsonTextReader reader)
+        public static NoteData DeserializeNote([InstantHandle] JsonReader reader)
         {
             float time = default;
             int lineIndex = default;
@@ -224,7 +224,7 @@ namespace CustomJSONData.CustomBeatmap
             return new NoteData(time, lineIndex, lineLayer, type, cutDirection, data);
         }
 
-        public static SliderData DeserializeSlider([InstantHandle] JsonTextReader reader)
+        public static SliderData DeserializeSlider([InstantHandle] JsonReader reader)
         {
             float time = default;
             BeatmapSaveData.ColorType colorType = default;
@@ -317,7 +317,7 @@ namespace CustomJSONData.CustomBeatmap
                 data);
         }
 
-        public static WaypointData DeserializeWaypoint([InstantHandle] JsonTextReader reader)
+        public static WaypointData DeserializeWaypoint([InstantHandle] JsonReader reader)
         {
             float time = default;
             int lineIndex = default;
@@ -357,7 +357,7 @@ namespace CustomJSONData.CustomBeatmap
             return new WaypointData(time, lineIndex, lineLayer, offsetDirection, data);
         }
 
-        public static ObstacleData DeserializeObstacle([InstantHandle] JsonTextReader reader)
+        public static ObstacleData DeserializeObstacle([InstantHandle] JsonReader reader)
         {
             float time = default;
             int lineIndex = default;
@@ -402,7 +402,7 @@ namespace CustomJSONData.CustomBeatmap
             return new ObstacleData(time, lineIndex, type, duration, width, data);
         }
 
-        public static BeatmapSaveData.SpecialEventsForKeyword DeserializeKeyword([InstantHandle] JsonTextReader reader)
+        public static BeatmapSaveData.SpecialEventsForKeyword DeserializeKeyword([InstantHandle] JsonReader reader)
         {
             string keyword = string.Empty;
             List<BeatmapSaveData.BeatmapEventType> specialEvents = new();
@@ -450,7 +450,7 @@ namespace CustomJSONData.CustomBeatmap
             return new BeatmapSaveData.SpecialEventsForKeyword(keyword, specialEvents);
         }
 
-        public static CustomEventData DeserializeCustomEvent(JsonTextReader reader)
+        public static CustomEventData DeserializeCustomEvent(JsonReader reader)
         {
             float time = default;
             string type = string.Empty;

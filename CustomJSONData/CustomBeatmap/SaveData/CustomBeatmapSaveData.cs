@@ -806,6 +806,11 @@ namespace CustomJSONData.CustomBeatmap
             int param0 = default;
             int param1 = default;
             bool reversed = default;
+            IndexFilterRandomType random = default;
+            int seed = default;
+            int chunks = default;
+            float limit = default;
+            IndexFilterLimitAlsoAffectsType limitAlsoAffectsType = default;
             reader.Read();
             reader.ReadObject(objectName =>
             {
@@ -827,13 +832,33 @@ namespace CustomJSONData.CustomBeatmap
                         reversed = reader.ReadIntAsBoolean() ?? reversed;
                         break;
 
+                    case "c":
+                        chunks = reader.ReadAsInt32Safe() ?? chunks;
+                        break;
+
+                    case "l":
+                        limit = (float?)reader.ReadAsDouble() ?? limit;
+                        break;
+
+                    case "d":
+                        limitAlsoAffectsType = (IndexFilterLimitAlsoAffectsType?)reader.ReadAsInt32Safe() ?? limitAlsoAffectsType;
+                        break;
+
+                    case "n":
+                        random = (IndexFilterRandomType?)reader.ReadAsInt32Safe() ?? random;
+                        break;
+
+                    case "s":
+                        seed = reader.ReadAsInt32Safe() ?? seed;
+                        break;
+
                     default:
                         reader.Skip();
                         break;
                 }
             });
 
-            return new IndexFilter(type, param0, param1, reversed);
+            return new IndexFilter(type, param0, param1, reversed, random, seed, chunks, limit, limitAlsoAffectsType);
         }
 
         public static LightColorEventBoxGroup DeserializeLightColorEventBoxGroup([InstantHandle] JsonReader reader)

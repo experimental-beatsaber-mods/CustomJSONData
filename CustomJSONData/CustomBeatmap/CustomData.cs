@@ -47,7 +47,7 @@ namespace CustomJSONData.CustomBeatmap
         [PublicAPI]
         public T GetRequired<T>(string key)
         {
-            return Get<T>(key) ?? throw new JsonNotDefinedException(key);
+            return Get<T?>(key) ?? throw new JsonNotDefinedException(key);
         }
 
         public T? Get<T>(string key)

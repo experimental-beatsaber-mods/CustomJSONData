@@ -43,6 +43,7 @@ namespace CustomJSONData.CustomBeatmap
             List<BeatmapSaveData.ColorBoostEventData> colorBoostBeatmapEvents,
             List<BeatmapSaveData.LightColorEventBoxGroup> lightColorEventBoxGroups,
             List<BeatmapSaveData.LightRotationEventBoxGroup> lightRotationEventBoxGroups,
+            List<LightTranslationEventBoxGroup> lightTranslationEventBoxGroups,
             BasicEventTypesWithKeywords basicEventTypesWithKeywords,
             bool useNormalEventsAsCompatibleEvents,
             bool version2_6_0AndEarlier,
@@ -63,6 +64,7 @@ namespace CustomJSONData.CustomBeatmap
                 colorBoostBeatmapEvents,
                 lightColorEventBoxGroups,
                 lightRotationEventBoxGroups,
+                lightTranslationEventBoxGroups,
                 basicEventTypesWithKeywords,
                 useNormalEventsAsCompatibleEvents)
         {
@@ -109,6 +111,7 @@ namespace CustomJSONData.CustomBeatmap
             List<BeatmapSaveData.ColorBoostEventData> colorBoostBeatmapEvents = new();
             List<BeatmapSaveData.LightColorEventBoxGroup> lightColorEventBoxGroups = new();
             List<BeatmapSaveData.LightRotationEventBoxGroup> lightRotationEventBoxGroups = new();
+            List<LightTranslationEventBoxGroup> lightTranslationEventBoxGroups = new();
             List<BasicEventTypesWithKeywords.BasicEventTypesForKeyword> basicEventTypesForKeyword = new();
             bool useNormalEventsAsCompatibleEvents = default;
             CustomData data = new();
@@ -131,6 +134,7 @@ namespace CustomJSONData.CustomBeatmap
                 colorBoostBeatmapEvents,
                 lightColorEventBoxGroups,
                 lightRotationEventBoxGroups,
+                lightTranslationEventBoxGroups,
                 basicEventTypesForKeyword,
                 useNormalEventsAsCompatibleEvents,
                 customEvents,
@@ -195,6 +199,10 @@ namespace CustomJSONData.CustomBeatmap
                             reader.ReadObjectArray(() => lightRotationEventBoxGroups.Add(DeserializeLightRotationEventBoxGroup(reader)));
                             break;
 
+                        case "lightTranslationEventBoxGroups":
+                            reader.ReadObjectArray(() => lightTranslationEventBoxGroups.Add(DeserializeLightTranslationEventBoxGroup(reader)));
+                            break;
+
                         case "basicEventTypesWithKeywords":
                             reader.Read();
                             reader.ReadObject(objectName =>
@@ -247,6 +255,7 @@ namespace CustomJSONData.CustomBeatmap
                 colorBoostBeatmapEvents.OrderBy(n => n).ToList(),
                 lightColorEventBoxGroups.OrderBy(n => n).ToList(),
                 lightRotationEventBoxGroups.OrderBy(n => n).ToList(),
+                lightTranslationEventBoxGroups.OrderBy(n => n).ToList(),
                 new BasicEventTypesWithKeywords(basicEventTypesForKeyword),
                 useNormalEventsAsCompatibleEvents,
                 false,
@@ -888,6 +897,7 @@ namespace CustomJSONData.CustomBeatmap
                             float brightnessDistributionParam = default;
                             bool brightnessDistributionShouldAffectFirstBaseEvent = default;
                             EventBox.DistributionParamType brightnessDistributionParamType = default;
+                            EaseType brightnessDistributionEaseType = default;
                             List<LightColorBaseData> lightColorBaseDataList = new();
                             reader.ReadObject(eventName =>
                             {
@@ -915,6 +925,10 @@ namespace CustomJSONData.CustomBeatmap
 
                                     case "t":
                                         brightnessDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? brightnessDistributionParamType;
+                                        break;
+
+                                    case "i":
+                                        brightnessDistributionEaseType = (EaseType?)reader.ReadAsInt32Safe() ?? brightnessDistributionEaseType;
                                         break;
 
                                     case "e":
@@ -977,6 +991,7 @@ namespace CustomJSONData.CustomBeatmap
                                 brightnessDistributionParam,
                                 brightnessDistributionShouldAffectFirstBaseEvent,
                                 brightnessDistributionParamType,
+                                brightnessDistributionEaseType,
                                 lightColorBaseDataList));
                         });
                         break;
@@ -1021,6 +1036,7 @@ namespace CustomJSONData.CustomBeatmap
                             float rotationDistributionParam = default;
                             EventBox.DistributionParamType rotationDistributionParamType = default;
                             bool rotationDistributionShouldAffectFirstBaseEvent = default;
+                            EaseType rotationDistributionEaseType = default;
                             Axis axis = default;
                             bool flipRotation = default;
                             List<LightRotationBaseData> lightRotationBaseDataList = new();
@@ -1058,6 +1074,10 @@ namespace CustomJSONData.CustomBeatmap
 
                                     case "r":
                                         flipRotation = reader.ReadIntAsBoolean() ?? flipRotation;
+                                        break;
+
+                                    case "i":
+                                        rotationDistributionEaseType = (EaseType?)reader.ReadAsInt32() ?? rotationDistributionEaseType;
                                         break;
 
                                     case "l":
@@ -1126,6 +1146,7 @@ namespace CustomJSONData.CustomBeatmap
                                 rotationDistributionParam,
                                 rotationDistributionParamType,
                                 rotationDistributionShouldAffectFirstBaseEvent,
+                                rotationDistributionEaseType,
                                 axis,
                                 flipRotation,
                                 lightRotationBaseDataList));
@@ -1143,6 +1164,147 @@ namespace CustomJSONData.CustomBeatmap
             });
 
             return new LightRotationEventBoxGroup(beat, groupId, eventBoxes, data);
+        }
+
+        // TODO: figure out custom data for event boxes and co.
+        public static LightTranslationEventBoxGroup DeserializeLightTranslationEventBoxGroup([InstantHandle] JsonReader reader)
+        {
+            float beat = default;
+            List<LightTranslationEventBox> eventBoxes = new();
+            int groupId = default;
+            reader.ReadObject(objectName =>
+            {
+                switch (objectName)
+                {
+                    case _beat:
+                        beat = (float?)reader.ReadAsDouble() ?? beat;
+                        break;
+
+                    case _groupId:
+                        groupId = reader.ReadAsInt32Safe() ?? groupId;
+                        break;
+
+                    case _eventBoxes:
+                        reader.ReadObjectArray(() =>
+                        {
+                            IndexFilter? indexFilter = default;
+                            float beatDistributionParam = default;
+                            EventBox.DistributionParamType beatDistributionParamType = default;
+                            float gapDistributionParam = default;
+                            EventBox.DistributionParamType gapDistributionParamType = default;
+                            bool gapDistributionShouldAffectFirstBaseEvent = default;
+                            EaseType gapDistributionEaseType = default;
+                            Axis axis = default;
+                            bool flipRotation = default;
+                            List<LightTranslationBaseData> lightTranslationBaseDataList = new();
+                            reader.ReadObject(eventName =>
+                            {
+                                switch (eventName)
+                                {
+                                    case _indexFilter:
+                                        indexFilter = DeserializeIndexFilter(reader);
+                                        break;
+
+                                    case _beatDistributionParam:
+                                        beatDistributionParam = (float?)reader.ReadAsDouble() ?? beatDistributionParam;
+                                        break;
+
+                                    case _beatDistributionParamType:
+                                        beatDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? beatDistributionParamType;
+                                        break;
+
+                                    case "s":
+                                        gapDistributionParam = (float?)reader.ReadAsDouble() ?? gapDistributionParam;
+                                        break;
+
+                                    case "t":
+                                        gapDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? gapDistributionParamType;
+                                        break;
+
+                                    case "b":
+                                        gapDistributionShouldAffectFirstBaseEvent = reader.ReadIntAsBoolean() ?? gapDistributionShouldAffectFirstBaseEvent;
+                                        break;
+
+                                    case "a":
+                                        axis = (Axis?)reader.ReadAsInt32Safe() ?? axis;
+                                        break;
+
+                                    case "r":
+                                        flipRotation = reader.ReadIntAsBoolean() ?? flipRotation;
+                                        break;
+
+                                    case "i":
+                                        gapDistributionEaseType = (EaseType?)reader.ReadAsInt32() ?? gapDistributionEaseType;
+                                        break;
+
+                                    case "l":
+                                        reader.ReadObjectArray(() =>
+                                        {
+                                            float lightBeat = default;
+                                            bool usePreviousEventTransitionValue = default;
+                                            EaseType easeType = default;
+                                            float translation = default;
+                                            reader.ReadObject(lightName =>
+                                            {
+                                                switch (lightName)
+                                                {
+                                                    case _beat:
+                                                        lightBeat = (float?)reader.ReadAsDouble() ?? lightBeat;
+                                                        break;
+
+                                                    case "p":
+                                                        usePreviousEventTransitionValue = reader.ReadIntAsBoolean() ?? usePreviousEventTransitionValue;
+                                                        break;
+
+                                                    case "e":
+                                                        easeType = (EaseType?)reader.ReadAsInt32Safe() ?? easeType;
+                                                        break;
+
+                                                    case "t":
+                                                        translation = (float?)reader.ReadAsDouble() ?? translation;
+                                                        break;
+
+                                                    default:
+                                                        reader.Skip();
+                                                        break;
+                                                }
+                                            });
+
+                                            lightTranslationBaseDataList.Add(new LightTranslationBaseData(
+                                                lightBeat,
+                                                usePreviousEventTransitionValue,
+                                                easeType,
+                                                translation));
+                                        });
+                                        break;
+
+                                    default:
+                                        reader.Skip();
+                                        break;
+                                }
+                            });
+
+                            eventBoxes.Add(new LightTranslationEventBox(
+                                indexFilter,
+                                beatDistributionParam,
+                                beatDistributionParamType,
+                                gapDistributionParam,
+                                gapDistributionParamType,
+                                gapDistributionShouldAffectFirstBaseEvent,
+                                gapDistributionEaseType,
+                                axis,
+                                flipRotation,
+                                lightTranslationBaseDataList));
+                        });
+                        break;
+
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            });
+
+            return new LightTranslationEventBoxGroup(beat, groupId, eventBoxes);
         }
 
         public static BasicEventTypesWithKeywords.BasicEventTypesForKeyword DeserializeBasicEventTypesForKeyword(JsonReader reader)

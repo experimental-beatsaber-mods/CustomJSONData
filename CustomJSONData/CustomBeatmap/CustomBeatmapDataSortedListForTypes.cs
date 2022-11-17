@@ -4,29 +4,34 @@ using IPA.Utilities;
 
 namespace CustomJSONData.CustomBeatmap
 {
-    public class CustomBeatmapDataSortedListForTypes<T> : BeatmapDataSortedListForTypes<T>
-        where T : BeatmapDataItem
+    public class CustomBeatmapDataSortedListForTypeAndIds<TBase> : BeatmapDataSortedListForTypeAndIds<TBase>
+        where TBase : BeatmapDataItem
     {
-        private static readonly FieldAccessor<BeatmapDataSortedListForTypes<T>, Dictionary<Type, ISortedList<T>>>.Accessor _itemsAccessor =
-            FieldAccessor<BeatmapDataSortedListForTypes<T>, Dictionary<Type, ISortedList<T>>>.GetAccessor(nameof(_items));
+        private static readonly FieldAccessor<BeatmapDataSortedListForTypeAndIds<TBase>, Dictionary<ValueTuple<Type, int>, ISortedList<TBase>>>.Accessor _itemsAccessor =
+            FieldAccessor<BeatmapDataSortedListForTypeAndIds<TBase>, Dictionary<ValueTuple<Type, int>, ISortedList<TBase>>>.GetAccessor(nameof(_items));
 
-        public CustomBeatmapDataSortedListForTypes(BeatmapDataSortedListForTypes<T> original)
+        public CustomBeatmapDataSortedListForTypeAndIds(BeatmapDataSortedListForTypeAndIds<TBase> original)
         {
-            BeatmapDataSortedListForTypes<T> @this = this;
+            BeatmapDataSortedListForTypeAndIds<TBase> @this = this;
             _itemsAccessor(ref @this) = _itemsAccessor(ref original);
+            _sortedListsDataProcessors.Add(typeof(CustomEventData), null);
         }
 
         // GetType is a real stinky way of indexing stuff
-        public override void InsertItem(T item)
+        public override LinkedListNode<TBase> InsertItem(TBase item)
         {
-            GetList(CustomBeatmapData.GetCustomType(item)).Insert(item);
+            LinkedListNode<TBase> linkedListNode = GetList(CustomBeatmapData.GetCustomType(item), item.subtypeGroupIdentifier).Insert(item);
+            _itemToNodeMap[item] = linkedListNode;
+            return linkedListNode;
         }
 
-        public override void RemoveItem(T item)
+        public override void RemoveItem(TBase item)
         {
-            ISortedList<T> list = GetList(CustomBeatmapData.GetCustomType(item));
-            LinkedListNode<T> node = list.NodeForItem(item);
-            list.Remove(node);
+            ISortedList<TBase> list = GetList(CustomBeatmapData.GetCustomType(item), item.subtypeGroupIdentifier);
+            if (_itemToNodeMap.TryGetValue(item, out LinkedListNode<TBase> node))
+            {
+                list.Remove(node);
+            }
         }
     }
 }

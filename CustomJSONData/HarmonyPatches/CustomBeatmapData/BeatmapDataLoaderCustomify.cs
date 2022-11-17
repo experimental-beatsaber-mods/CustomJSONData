@@ -12,8 +12,10 @@ namespace CustomJSONData.HarmonyPatches
     internal static class BeatmapDataLoaderCustomify
     {
         private static readonly ConstructorInfo _beatmapDataCtor = AccessTools.FirstConstructor(typeof(BeatmapData), _ => true);
+        private static readonly ConstructorInfo _bpmChangeCtor = AccessTools.FirstConstructor(typeof(BPMChangeBeatmapEventData), _ => true);
         private static readonly ConstructorInfo _bpmTimeProcessorCtor = AccessTools.FirstConstructor(typeof(BeatmapDataLoader.BpmTimeProcessor), _ => true);
         private static readonly MethodInfo _createCustomBeatmapData = AccessTools.Method(typeof(BeatmapDataLoaderCustomify), nameof(CreateCustomBeatmapData));
+        private static readonly MethodInfo _createCustomBPMChangeData = AccessTools.Method(typeof(BeatmapDataLoaderCustomify), nameof(CreateCustomBPMChangeData));
         private static readonly MethodInfo _addCustomEvent = AccessTools.Method(typeof(BeatmapDataLoaderCustomify), nameof(AddCustomEvents));
 
         private static readonly MethodInfo _getBeatmapDataFromBeatmapSaveData = AccessTools.Method(typeof(BeatmapDataLoader), "GetBeatmapDataFromBeatmapSaveData");
@@ -63,6 +65,9 @@ namespace CustomJSONData.HarmonyPatches
                 .MatchForward(false, new CodeMatch(OpCodes.Newobj, _beatmapDataCtor))
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
                 .Set(OpCodes.Call, _createCustomBeatmapData)
+
+                .MatchForward(false, new CodeMatch(OpCodes.Newobj, _bpmChangeCtor))
+                .Set(OpCodes.Call, _createCustomBPMChangeData)
 
                 .MatchForward(false, new CodeMatch(OpCodes.Newobj, _bpmTimeProcessorCtor))
                 .Advance(2)
@@ -119,6 +124,11 @@ namespace CustomJSONData.HarmonyPatches
                 new CustomData(),
                 new CustomData(),
                 new CustomData());
+        }
+
+        private static BPMChangeBeatmapEventData CreateCustomBPMChangeData(float time, float bpm)
+        {
+            return new CustomBPMChangeBeatmapEventData(time, bpm, new CustomData());
         }
 
         private static void AddCustomEvents(

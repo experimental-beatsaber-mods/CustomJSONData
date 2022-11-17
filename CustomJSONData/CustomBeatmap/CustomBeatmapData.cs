@@ -1,12 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using HarmonyLib;
 using IPA.Utilities;
+using JetBrains.Annotations;
 
 namespace CustomJSONData.CustomBeatmap
 {
+    [HarmonyPatch(typeof(BeatmapData))]
     public sealed class CustomBeatmapData : BeatmapData
     {
-        private static readonly FieldAccessor<BeatmapData, BeatmapDataSortedListForTypes<BeatmapDataItem>>.Accessor _beatmapDataItemsPerTypeAccessor =
-            FieldAccessor<BeatmapData, BeatmapDataSortedListForTypes<BeatmapDataItem>>.GetAccessor(nameof(_beatmapDataItemsPerType));
+        private static readonly FieldAccessor<BeatmapData, BeatmapDataSortedListForTypeAndIds<BeatmapDataItem>>.Accessor _beatmapDataItemsPerTypeAccessor =
+            FieldAccessor<BeatmapData, BeatmapDataSortedListForTypeAndIds<BeatmapDataItem>>.GetAccessor(nameof(_beatmapDataItemsPerTypeAndId));
+
+        private readonly List<BeatmapObjectData> _beatmapObjectDatas = new();
+        private readonly List<BeatmapEventData> _beatmapEventDatas = new();
+        private readonly List<CustomEventData> _customEventDatas = new();
 
         public CustomBeatmapData(
             int numberOfLines,
@@ -18,8 +27,7 @@ namespace CustomJSONData.CustomBeatmap
         {
             BeatmapData @this = this;
             _beatmapDataItemsPerTypeAccessor(ref @this) =
-                new CustomBeatmapDataSortedListForTypes<BeatmapDataItem>(_beatmapDataItemsPerTypeAccessor(ref @this));
-            _beatmapDataItemsPerType.AddList(new SortedList<CustomEventData, BeatmapDataItem>(null));
+                new CustomBeatmapDataSortedListForTypeAndIds<BeatmapDataItem>(_beatmapDataItemsPerTypeAccessor(ref @this));
             this.version2_6_0AndEarlier = version2_6_0AndEarlier;
             this.customData = customData;
             this.beatmapCustomData = beatmapCustomData;
@@ -34,6 +42,15 @@ namespace CustomJSONData.CustomBeatmap
 
         public CustomData levelCustomData { get; }
 
+        [PublicAPI]
+        public IReadOnlyList<BeatmapObjectData> beatmapObjectDatas => _beatmapObjectDatas;
+
+        [PublicAPI]
+        public IReadOnlyList<BeatmapEventData> beatmapEventDatas => _beatmapEventDatas;
+
+        [PublicAPI]
+        public IReadOnlyList<CustomEventData> customEventDatas => _customEventDatas;
+
         public static Type GetCustomType(object item)
         {
             Type type = item.GetType();
@@ -46,10 +63,46 @@ namespace CustomJSONData.CustomBeatmap
             return type;
         }
 
+        public override void AddBeatmapObjectData(BeatmapObjectData beatmapObjectData)
+        {
+            _beatmapObjectDatas.Add(beatmapObjectData);
+            base.AddBeatmapObjectData(beatmapObjectData);
+        }
+
+        // InOrder variants do not use a virtual call to AddBeatmapObjectData so they will not call the above method
+        public override void AddBeatmapObjectDataInOrder(BeatmapObjectData beatmapObjectData)
+        {
+            _beatmapObjectDatas.Add(beatmapObjectData);
+            base.AddBeatmapObjectDataInOrder(beatmapObjectData);
+        }
+
+        public override void InsertBeatmapEventData(BeatmapEventData beatmapEventData)
+        {
+            _beatmapEventDatas.Add(beatmapEventData);
+            base.InsertBeatmapEventData(beatmapEventData);
+        }
+
+        public override void InsertBeatmapEventDataInOrder(BeatmapEventData beatmapEventData)
+        {
+            _beatmapEventDatas.Add(beatmapEventData);
+            base.InsertBeatmapEventDataInOrder(beatmapEventData);
+        }
+
         public void InsertCustomEventData(CustomEventData customEventData)
         {
-            _beatmapDataItemsPerType.InsertItem(customEventData);
-            _allBeatmapData.Insert(customEventData);
+            _customEventDatas.Add(customEventData);
+            LinkedListNode<BeatmapDataItem> node = _beatmapDataItemsPerTypeAndId.InsertItem(customEventData);
+            if (updateAllBeatmapDataOnInsert)
+            {
+                InsertToAllBeatmapData(customEventData, node);
+            }
+        }
+
+        // what in gods name is the point of this
+        public void InsertCustomEventDataInOrder(CustomEventData customEventData)
+        {
+            InsertCustomEventData(customEventData);
+            InsertToAllBeatmapData(customEventData);
         }
 
         public override BeatmapData GetCopy()
@@ -62,16 +115,17 @@ namespace CustomJSONData.CustomBeatmap
                 levelCustomData.Copy());
             foreach (BeatmapDataItem beatmapDataItem in allBeatmapDataItems)
             {
-                switch (beatmapDataItem)
+                BeatmapDataItem copy = beatmapDataItem.GetCopy();
+                switch (copy)
                 {
                     case BeatmapEventData beatmapEventData:
-                        beatmapData.InsertBeatmapEventData(beatmapEventData);
+                        beatmapData.InsertBeatmapEventDataInOrder(beatmapEventData);
                         break;
                     case BeatmapObjectData beatmapObjectData:
-                        beatmapData.AddBeatmapObjectData(beatmapObjectData);
+                        beatmapData.AddBeatmapObjectDataInOrder(beatmapObjectData);
                         break;
                     case CustomEventData customEventData:
-                        beatmapData.InsertCustomEventData(customEventData);
+                        beatmapData.InsertCustomEventDataInOrder(customEventData);
                         break;
                 }
             }
@@ -90,19 +144,19 @@ namespace CustomJSONData.CustomBeatmap
                 levelCustomData.Copy());
             foreach (BeatmapDataItem beatmapDataItem in allBeatmapDataItems)
             {
-                BeatmapDataItem beatmapDataItem2 = processDataItem(beatmapDataItem.GetCopy());
-                if (beatmapDataItem2 != null)
+                BeatmapDataItem copy = processDataItem(beatmapDataItem.GetCopy());
+                if (copy != null)
                 {
-                    switch (beatmapDataItem2)
+                    switch (copy)
                     {
                         case BeatmapEventData beatmapEventData:
-                            beatmapData.InsertBeatmapEventData(beatmapEventData);
+                            beatmapData.InsertBeatmapEventDataInOrder(beatmapEventData);
                             break;
                         case BeatmapObjectData beatmapObjectData:
-                            beatmapData.AddBeatmapObjectData(beatmapObjectData);
+                            beatmapData.AddBeatmapObjectDataInOrder(beatmapObjectData);
                             break;
                         case CustomEventData customEventData:
-                            beatmapData.InsertCustomEventData(customEventData);
+                            beatmapData.InsertCustomEventDataInOrder(customEventData);
                             break;
                     }
                 }

@@ -94,6 +94,12 @@ namespace CustomJSONData.HarmonyPatches
                 .ReplaceConverter<BeatmapDataLoader.BasicEventConvertor, Converters.CustomBasicEventConverter>()
                 .ReplaceConverter<BeatmapDataLoader.ColorBoostEventConvertor, Converters.CustomColorBoostEventConverter>()
 
+                // for reasons beyond my understanding, the leave will still take you to the InsertDefaultEnvironmentEvents, but inserting a nop fixes it...
+                .End()
+                .MatchBack(false, new CodeMatch(OpCodes.Leave))
+                .Advance(1)
+                .Insert(new CodeInstruction(OpCodes.Nop))
+
                 .InstructionEnumeration();
         }
 

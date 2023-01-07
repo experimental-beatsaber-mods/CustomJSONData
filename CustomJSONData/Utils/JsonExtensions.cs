@@ -96,14 +96,15 @@ namespace CustomJSONData
 
         public static bool AssertToken(this JsonReader reader, string readMessage, JsonToken expectedToken, bool doThrow = true)
         {
-            if (reader.TokenType == expectedToken)
+            JsonToken tokenType = reader.TokenType;
+            if (tokenType == expectedToken)
             {
                 return true;
             }
 
             string message = reader
-                .FormatMessage($"Unexpected token when reading {readMessage}: [{reader.TokenType}], expected: [{expectedToken}].");
-            if (doThrow)
+                .FormatMessage($"Unexpected token when reading {readMessage}: [{tokenType}], expected: [{expectedToken}].");
+            if (doThrow && tokenType != JsonToken.Null)
             {
                 throw new JsonSerializationException(message);
             }

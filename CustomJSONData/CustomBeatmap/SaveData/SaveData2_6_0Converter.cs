@@ -9,47 +9,6 @@ namespace CustomJSONData.CustomBeatmap
     // TODO: Deserialize JSON -> V3 rather than using a converter.
     public static class SaveData2_6_0Converter
     {
-        // shows me for trying to be lazy i guess
-        private static readonly Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.NoteType, BeatmapSaveData.NoteColorType> _getNoteColorTypeNoteType =
-            (Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.NoteType, BeatmapSaveData.NoteColorType>)Delegate.CreateDelegate(
-                typeof(Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.NoteType, BeatmapSaveData.NoteColorType>),
-                typeof(BeatmapSaveData),
-                "GetNoteColorType",
-                false,
-                true)!;
-
-        private static readonly Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ColorType, BeatmapSaveData.NoteColorType> _getNoteColorTypeColorType =
-            (Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ColorType, BeatmapSaveData.NoteColorType>)Delegate.CreateDelegate(
-                typeof(Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ColorType, BeatmapSaveData.NoteColorType>),
-                typeof(BeatmapSaveData),
-                "GetNoteColorType",
-                false,
-                true)!;
-
-        private static readonly Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int> _getHeightForObstacleType =
-            (Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int>)Delegate.CreateDelegate(
-                typeof(Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int>),
-                typeof(BeatmapSaveData),
-                "GetHeightForObstacleType",
-                false,
-                true)!;
-
-        private static readonly Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int> _getLayerForObstacleType =
-            (Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int>)Delegate.CreateDelegate(
-                typeof(Func<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.ObstacleType, int>),
-                typeof(BeatmapSaveData),
-                "GetLayerForObstacleType",
-                false,
-                true)!;
-
-        private static readonly Func<int, float> _spawnRotationForEventValue =
-            (Func<int, float>)Delegate.CreateDelegate(
-                typeof(Func<int, float>),
-                typeof(BeatmapSaveData),
-                "SpawnRotationForEventValue",
-                false,
-                true)!;
-
         public static CustomBeatmapSaveData Convert2_6_0AndEarlier(
             Version version,
             string path,
@@ -67,7 +26,7 @@ namespace CustomJSONData.CustomBeatmap
                     n.time,
                     n.lineIndex,
                     (int)n.lineLayer,
-                    _getNoteColorTypeNoteType(n.type),
+                    BeatmapSaveData.GetNoteColorType(n.type),
                     n.cutDirection,
                     0,
                     n.customData))
@@ -88,10 +47,10 @@ namespace CustomJSONData.CustomBeatmap
                 .Select(n => new CustomBeatmapSaveData.ObstacleData(
                     n.time,
                     n.lineIndex,
-                    _getLayerForObstacleType(n.type),
+                    BeatmapSaveData.GetLayerForObstacleType(n.type),
                     n.duration,
                     n.width,
-                    _getHeightForObstacleType(n.type),
+                    BeatmapSaveData.GetHeightForObstacleType(n.type),
                     n.customData))
                 .Cast<BeatmapSaveData.ObstacleData>()
                 .ToList();
@@ -100,7 +59,7 @@ namespace CustomJSONData.CustomBeatmap
             List<BeatmapSaveData.SliderData> sliders = oldSaveData.sliders
                 .OrderBy(n => n)
                 .Select(n => new CustomBeatmapSaveData.SliderData(
-                    _getNoteColorTypeColorType(n.colorType),
+                    BeatmapSaveData.GetNoteColorType(n.colorType),
                     n.time,
                     n.headLineIndex,
                     (int)n.headLineLayer,
@@ -149,7 +108,7 @@ namespace CustomJSONData.CustomBeatmap
                     .Select(n => new CustomBeatmapSaveData.RotationEventData(
                         n.time,
                         n.type == BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType.Event14 ? BeatmapSaveData.ExecutionTime.Early : BeatmapSaveData.ExecutionTime.Late,
-                        _spawnRotationForEventValue(n.value),
+                        BeatmapSaveData.SpawnRotationForEventValue(n.value),
                         n.customData))
                     .Cast<BeatmapSaveData.RotationEventData>()
                     .ToList();

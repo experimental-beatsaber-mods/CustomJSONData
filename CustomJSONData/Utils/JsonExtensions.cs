@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CustomJSONData.CustomBeatmap;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace CustomJSONData
 {
@@ -29,6 +30,37 @@ namespace CustomJSONData
             }
 
             throw new JsonReaderException(reader.FormatMessage($"Input string [{result}] is not a valid integer."));
+        }
+
+        public static Color ReadAsColor(this JsonReader reader)
+        {
+            float r = default;
+            float g = default;
+            float b = default;
+            float a = default;
+            reader.ReadObject(objectName =>
+            {
+                switch (objectName)
+                {
+                    case "r":
+                        r = (float?)reader.ReadAsDecimal() ?? r;
+                        break;
+
+                    case "g":
+                        g = (float?)reader.ReadAsDecimal() ?? g;
+                        break;
+
+                    case "b":
+                        b = (float?)reader.ReadAsDecimal() ?? b;
+                        break;
+
+                    case "a":
+                        a = (float?)reader.ReadAsDecimal() ?? a;
+                        break;
+                }
+            });
+
+            return new Color(r, g, b, a);
         }
 
         public static void ReadToDictionary(
@@ -59,6 +91,29 @@ namespace CustomJSONData
 
                 reader.Read();
             }
+        }
+
+        public static string[]? ReadStringArray(this JsonReader reader, bool doThrow = true)
+        {
+            reader.Read(); // StartArray
+            if (!reader.AssertToken("string array", JsonToken.StartArray, doThrow))
+            {
+                return null;
+            }
+
+            reader.Read(); // StartObject (hopefully)
+            List<string> result = new();
+            while (reader.TokenType == JsonToken.String)
+            {
+                string? cur = reader.ReadAsString();
+                if (cur != null)
+                {
+                    result.Add(cur);
+                }
+            }
+
+            reader.AssertToken("string array", JsonToken.EndArray);
+            return result.ToArray();
         }
 
         public static void ReadObjectArray(this JsonReader reader, [InstantHandle] Action action, bool doThrow = true)

@@ -58,11 +58,6 @@ namespace CustomJSONData.HarmonyPatches
                 beatmapData.beatmapCustomData.Copy(),
                 beatmapData.levelCustomData.Copy());
 
-            foreach (CustomEventData customEventData in beatmapData.customEventDatas)
-            {
-                newBeatmapData.InsertCustomEventData(customEventData);
-            }
-
             return newBeatmapData;
         }
 

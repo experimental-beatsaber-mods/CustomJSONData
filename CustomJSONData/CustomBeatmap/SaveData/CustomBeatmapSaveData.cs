@@ -152,65 +152,64 @@ namespace CustomJSONData.CustomBeatmap
                             break;
 
                         case "bpmEvents":
-                            reader.ReadObjectArray(() => bpmEvents.Add(DeserializeBpmChange(reader)));
+                            DeserializeBpmChangeArray(reader, bpmEvents);
                             break;
 
                         case "rotationEvents":
-                            reader.ReadObjectArray(() => rotationEvents.Add(DeserializeRotation(reader)));
+                            DeserializeRotationArray(reader, rotationEvents);
                             break;
 
                         case "colorNotes":
-                            reader.ReadObjectArray(() => colorNotes.Add(DeserializeColorNote(reader)));
+                            DeserializeColorNoteArray(reader, colorNotes);
                             break;
 
                         case "bombNotes":
-                            reader.ReadObjectArray(() => bombNotes.Add(DeserializeBombNote(reader)));
+                            DeserializeBombNoteArray(reader, bombNotes);
                             break;
 
                         case "obstacles":
-                            reader.ReadObjectArray(() => obstacles.Add(DeserializeObstacle(reader)));
+                            DeserializeObstacleArray(reader, obstacles);
                             break;
 
                         case "sliders":
-                            reader.ReadObjectArray(() => sliders.Add(DeserializeSlider(reader)));
+                            DeserializeSliderArray(reader, sliders);
                             break;
 
                         case "burstSliders":
-                            reader.ReadObjectArray(() => burstSliders.Add(DeserializeBurstSlider(reader)));
+                            DeserializeBurstSliderArray(reader, burstSliders);
                             break;
 
                         case "waypoints":
-                            reader.ReadObjectArray(() => waypoints.Add(DeserializeWaypoint(reader)));
+                            DeserializeWaypointArray(reader, waypoints);
                             break;
 
                         case "basicBeatmapEvents":
-                            reader.ReadObjectArray(() => basicBeatmapEvents.Add(DeserializeBasicEvent(reader)));
+                            DeserializeBasicEventArray(reader, basicBeatmapEvents);
                             break;
 
                         case "colorBoostBeatmapEvents":
-                            reader.ReadObjectArray(() => colorBoostBeatmapEvents.Add(DeserializeColorBoost(reader)));
+                            DeserializeColorBoostArray(reader, colorBoostBeatmapEvents);
                             break;
 
                         case "lightColorEventBoxGroups":
-                            reader.ReadObjectArray(() => lightColorEventBoxGroups.Add(DeserializeLightColorEventBoxGroup(reader)));
+                            DeserializeLightColorEventBoxGroupArray(reader, lightColorEventBoxGroups);
                             break;
 
                         case "lightRotationEventBoxGroups":
-                            reader.ReadObjectArray(() => lightRotationEventBoxGroups.Add(DeserializeLightRotationEventBoxGroup(reader)));
+                            DeserializeLightRotationEventBoxGroupArray(reader, lightRotationEventBoxGroups);
                             break;
 
                         case "lightTranslationEventBoxGroups":
-                            reader.ReadObjectArray(() => lightTranslationEventBoxGroups.Add(DeserializeLightTranslationEventBoxGroup(reader)));
+                            DeserializeLightTranslationEventBoxGroupArray(reader, lightTranslationEventBoxGroups);
                             break;
 
                         case "basicEventTypesWithKeywords":
-                            reader.Read();
                             reader.ReadObject(objectName =>
                             {
                                 switch (objectName)
                                 {
                                     case "d":
-                                        reader.ReadObjectArray(() => basicEventTypesForKeyword.Add(DeserializeBasicEventTypesForKeyword(reader)));
+                                        DeserializeBasicEventTypesForKeywordArray(reader, basicEventTypesForKeyword);
 
                                         break;
 
@@ -233,7 +232,7 @@ namespace CustomJSONData.CustomBeatmap
                                     return CustomJSONDataDeserializer.Activate(inputs, propertyName);
                                 }
 
-                                reader.ReadObjectArray(() => customEvents.Add(DeserializeCustomEvent(reader)), false);
+                                DeserializeCustomEventArray(reader, customEvents);
                                 return false;
                             });
 
@@ -293,523 +292,536 @@ namespace CustomJSONData.CustomBeatmap
             return new Version(fallback);
         }
 
-        public static CustomEventData DeserializeCustomEvent([InstantHandle] JsonReader reader)
+        public static void DeserializeCustomEventArray(JsonReader reader, List<CustomEventData> list)
         {
-            float beat = default;
-            string type = string.Empty;
-            CustomData data = new();
-            reader.ReadObject(
-                objectName =>
+            reader.ReadArray(
+                () =>
             {
-                switch (objectName)
+                float beat = default;
+                string type = string.Empty;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case "t":
-                        type = reader.ReadAsString() ?? type;
-                        break;
+                        case "t":
+                            type = reader.ReadAsString() ?? type;
+                            break;
 
-                    case "d":
-                        reader.ReadToDictionary(data);
-                        break;
+                        case "d":
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new CustomEventData(beat, type, data)));
             },
                 false);
-
-            return new CustomEventData(beat, type, data);
         }
 
-        public static BpmChangeEventData DeserializeBpmChange([InstantHandle] JsonReader reader)
+        public static void DeserializeBpmChangeArray(JsonReader reader, List<BeatmapSaveData.BpmChangeEventData> list)
         {
-            float beat = default;
-            float bpm = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                float bpm = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case "m":
-                        bpm = (float?)reader.ReadAsDouble() ?? bpm;
-                        break;
+                        case "m":
+                            bpm = (float?)reader.ReadAsDouble() ?? bpm;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new BpmChangeEventData(beat, bpm, data)));
             });
-
-            return new BpmChangeEventData(beat, bpm, data);
         }
 
-        public static RotationEventData DeserializeRotation([InstantHandle] JsonReader reader)
+        public static void DeserializeRotationArray(JsonReader reader, List<BeatmapSaveData.RotationEventData> list)
         {
-            float beat = default;
-            ExecutionTime executionTime = default;
-            float rotation = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                ExecutionTime executionTime = default;
+                float rotation = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case "e":
-                        executionTime = (ExecutionTime?)reader.ReadAsInt32Safe() ?? executionTime;
-                        break;
+                        case "e":
+                            executionTime = (ExecutionTime?)reader.ReadAsInt32Safe() ?? executionTime;
+                            break;
 
-                    case "r":
-                        rotation = (float?)reader.ReadAsDouble() ?? rotation;
-                        break;
+                        case "r":
+                            rotation = (float?)reader.ReadAsDouble() ?? rotation;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new RotationEventData(beat, executionTime, rotation, data)));
             });
-
-            return new RotationEventData(beat, executionTime, rotation, data);
         }
 
-        public static ColorNoteData DeserializeColorNote([InstantHandle] JsonReader reader)
+        public static void DeserializeColorNoteArray(JsonReader reader, List<BeatmapSaveData.ColorNoteData> list)
         {
-            float beat = default;
-            int line = default;
-            int layer = default;
-            NoteColorType color = default;
-            NoteCutDirection cutDirection = default;
-            int angleOffset = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                int line = default;
+                int layer = default;
+                NoteColorType color = default;
+                NoteCutDirection cutDirection = default;
+                int angleOffset = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case _line:
-                        line = reader.ReadAsInt32Safe() ?? line;
-                        break;
+                        case _line:
+                            line = reader.ReadAsInt32Safe() ?? line;
+                            break;
 
-                    case _layer:
-                        layer = reader.ReadAsInt32Safe() ?? layer;
-                        break;
+                        case _layer:
+                            layer = reader.ReadAsInt32Safe() ?? layer;
+                            break;
 
-                    case _colorType:
-                        color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
-                        break;
+                        case _colorType:
+                            color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
+                            break;
 
-                    case _cutDirection:
-                        cutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? cutDirection;
-                        break;
+                        case _cutDirection:
+                            cutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? cutDirection;
+                            break;
 
-                    case "a":
-                        angleOffset = reader.ReadAsInt32Safe() ?? angleOffset;
-                        break;
+                        case "a":
+                            angleOffset = reader.ReadAsInt32Safe() ?? angleOffset;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new ColorNoteData(beat, line, layer, color, cutDirection, angleOffset, data)));
             });
-
-            return new ColorNoteData(beat, line, layer, color, cutDirection, angleOffset, data);
         }
 
-        public static BombNoteData DeserializeBombNote([InstantHandle] JsonReader reader)
+        public static void DeserializeBombNoteArray(JsonReader reader, List<BeatmapSaveData.BombNoteData> list)
         {
-            float beat = default;
-            int line = default;
-            int layer = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                int line = default;
+                int layer = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case _line:
-                        line = reader.ReadAsInt32Safe() ?? line;
-                        break;
+                        case _line:
+                            line = reader.ReadAsInt32Safe() ?? line;
+                            break;
 
-                    case _layer:
-                        layer = reader.ReadAsInt32Safe() ?? layer;
-                        break;
+                        case _layer:
+                            layer = reader.ReadAsInt32Safe() ?? layer;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new BombNoteData(beat, line, layer, data)));
             });
-
-            return new BombNoteData(beat, line, layer, data);
         }
 
-        public static ObstacleData DeserializeObstacle([InstantHandle] JsonReader reader)
+        public static void DeserializeObstacleArray(JsonReader reader, List<BeatmapSaveData.ObstacleData> list)
         {
-            float beat = default;
-            int line = default;
-            int layer = default;
-            float duration = default;
-            int width = default;
-            int height = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                int line = default;
+                int layer = default;
+                float duration = default;
+                int width = default;
+                int height = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case _line:
-                        line = reader.ReadAsInt32Safe() ?? line;
-                        break;
+                        case _line:
+                            line = reader.ReadAsInt32Safe() ?? line;
+                            break;
 
-                    case _layer:
-                        layer = reader.ReadAsInt32Safe() ?? layer;
-                        break;
+                        case _layer:
+                            layer = reader.ReadAsInt32Safe() ?? layer;
+                            break;
 
-                    case "d":
-                        duration = (float?)reader.ReadAsDouble() ?? duration;
-                        break;
+                        case "d":
+                            duration = (float?)reader.ReadAsDouble() ?? duration;
+                            break;
 
-                    case "w":
-                        width = reader.ReadAsInt32Safe() ?? width;
-                        break;
+                        case "w":
+                            width = reader.ReadAsInt32Safe() ?? width;
+                            break;
 
-                    case "h":
-                        height = reader.ReadAsInt32Safe() ?? height;
-                        break;
+                        case "h":
+                            height = reader.ReadAsInt32Safe() ?? height;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new ObstacleData(beat, line, layer, duration, width, height, data)));
             });
-
-            return new ObstacleData(beat, line, layer, duration, width, height, data);
         }
 
-        public static SliderData DeserializeSlider([InstantHandle] JsonReader reader)
+        public static void DeserializeSliderArray(JsonReader reader, List<BeatmapSaveData.SliderData> list)
         {
-            NoteColorType color = default;
-            float headBeat = default;
-            int headLine = default;
-            int headLayer = default;
-            float headControlPointLengthMultiplier = default;
-            NoteCutDirection headCutDirection = default;
-            float tailBeat = default;
-            int tailLine = default;
-            int tailLayer = default;
-            float tailControlPointLengthMultiplier = default;
-            NoteCutDirection tailCutDirection = default;
-            SliderMidAnchorMode sliderMidAnchorMode = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                NoteColorType color = default;
+                float headBeat = default;
+                int headLine = default;
+                int headLayer = default;
+                float headControlPointLengthMultiplier = default;
+                NoteCutDirection headCutDirection = default;
+                float tailBeat = default;
+                int tailLine = default;
+                int tailLayer = default;
+                float tailControlPointLengthMultiplier = default;
+                NoteCutDirection tailCutDirection = default;
+                SliderMidAnchorMode sliderMidAnchorMode = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _colorType:
-                        color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
-                        break;
+                    switch (objectName)
+                    {
+                        case _colorType:
+                            color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
+                            break;
 
-                    case _beat:
-                        headBeat = (float?)reader.ReadAsDouble() ?? headBeat;
-                        break;
+                        case _beat:
+                            headBeat = (float?)reader.ReadAsDouble() ?? headBeat;
+                            break;
 
-                    case _line:
-                        headLine = reader.ReadAsInt32Safe() ?? headLine;
-                        break;
+                        case _line:
+                            headLine = reader.ReadAsInt32Safe() ?? headLine;
+                            break;
 
-                    case _layer:
-                        headLayer = reader.ReadAsInt32Safe() ?? headLayer;
-                        break;
+                        case _layer:
+                            headLayer = reader.ReadAsInt32Safe() ?? headLayer;
+                            break;
 
-                    case "mu":
-                        headControlPointLengthMultiplier = (float?)reader.ReadAsDouble() ?? headControlPointLengthMultiplier;
-                        break;
+                        case "mu":
+                            headControlPointLengthMultiplier =
+                                (float?)reader.ReadAsDouble() ?? headControlPointLengthMultiplier;
+                            break;
 
-                    case _cutDirection:
-                        headCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? headCutDirection;
-                        break;
+                        case _cutDirection:
+                            headCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? headCutDirection;
+                            break;
 
-                    case _tailBeat:
-                        tailBeat = (float?)reader.ReadAsDouble() ?? tailBeat;
-                        break;
+                        case _tailBeat:
+                            tailBeat = (float?)reader.ReadAsDouble() ?? tailBeat;
+                            break;
 
-                    case _tailLine:
-                        tailLine = reader.ReadAsInt32Safe() ?? tailLine;
-                        break;
+                        case _tailLine:
+                            tailLine = reader.ReadAsInt32Safe() ?? tailLine;
+                            break;
 
-                    case _tailLayer:
-                        tailLayer = reader.ReadAsInt32Safe() ?? tailLayer;
-                        break;
+                        case _tailLayer:
+                            tailLayer = reader.ReadAsInt32Safe() ?? tailLayer;
+                            break;
 
-                    case "tmu":
-                        tailControlPointLengthMultiplier = (float?)reader.ReadAsDouble() ?? tailControlPointLengthMultiplier;
-                        break;
+                        case "tmu":
+                            tailControlPointLengthMultiplier =
+                                (float?)reader.ReadAsDouble() ?? tailControlPointLengthMultiplier;
+                            break;
 
-                    case "tc":
-                        tailCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? tailCutDirection;
-                        break;
+                        case "tc":
+                            tailCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? tailCutDirection;
+                            break;
 
-                    case "m":
-                        sliderMidAnchorMode = (SliderMidAnchorMode?)reader.ReadAsInt32Safe() ?? sliderMidAnchorMode;
-                        break;
+                        case "m":
+                            sliderMidAnchorMode = (SliderMidAnchorMode?)reader.ReadAsInt32Safe() ?? sliderMidAnchorMode;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new SliderData(
+                    color,
+                    headBeat,
+                    headLine,
+                    headLayer,
+                    headControlPointLengthMultiplier,
+                    headCutDirection,
+                    tailBeat,
+                    tailLine,
+                    tailLayer,
+                    tailControlPointLengthMultiplier,
+                    tailCutDirection,
+                    sliderMidAnchorMode,
+                    data)));
             });
-
-            return new SliderData(
-                color,
-                headBeat,
-                headLine,
-                headLayer,
-                headControlPointLengthMultiplier,
-                headCutDirection,
-                tailBeat,
-                tailLine,
-                tailLayer,
-                tailControlPointLengthMultiplier,
-                tailCutDirection,
-                sliderMidAnchorMode,
-                data);
         }
 
-        public static BurstSliderData DeserializeBurstSlider([InstantHandle] JsonReader reader)
+        public static void DeserializeBurstSliderArray(JsonReader reader, List<BeatmapSaveData.BurstSliderData> list)
         {
-            NoteColorType color = default;
-            float headBeat = default;
-            int headLine = default;
-            int headLayer = default;
-            NoteCutDirection headCutDirection = default;
-            float tailBeat = default;
-            int tailLine = default;
-            int tailLayer = default;
-            int sliceCount = default;
-            float squishAmount = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                NoteColorType color = default;
+                float headBeat = default;
+                int headLine = default;
+                int headLayer = default;
+                NoteCutDirection headCutDirection = default;
+                float tailBeat = default;
+                int tailLine = default;
+                int tailLayer = default;
+                int sliceCount = default;
+                float squishAmount = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _colorType:
-                        color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
-                        break;
+                    switch (objectName)
+                    {
+                        case _colorType:
+                            color = (NoteColorType?)reader.ReadAsInt32Safe() ?? color;
+                            break;
 
-                    case _beat:
-                        headBeat = (float?)reader.ReadAsDouble() ?? headBeat;
-                        break;
+                        case _beat:
+                            headBeat = (float?)reader.ReadAsDouble() ?? headBeat;
+                            break;
 
-                    case _line:
-                        headLine = reader.ReadAsInt32Safe() ?? headLine;
-                        break;
+                        case _line:
+                            headLine = reader.ReadAsInt32Safe() ?? headLine;
+                            break;
 
-                    case _layer:
-                        headLayer = reader.ReadAsInt32Safe() ?? headLayer;
-                        break;
+                        case _layer:
+                            headLayer = reader.ReadAsInt32Safe() ?? headLayer;
+                            break;
 
-                    case _cutDirection:
-                        headCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? headCutDirection;
-                        break;
+                        case _cutDirection:
+                            headCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? headCutDirection;
+                            break;
 
-                    case _tailBeat:
-                        tailBeat = (float?)reader.ReadAsDouble() ?? tailBeat;
-                        break;
+                        case _tailBeat:
+                            tailBeat = (float?)reader.ReadAsDouble() ?? tailBeat;
+                            break;
 
-                    case _tailLine:
-                        tailLine = reader.ReadAsInt32Safe() ?? tailLine;
-                        break;
+                        case _tailLine:
+                            tailLine = reader.ReadAsInt32Safe() ?? tailLine;
+                            break;
 
-                    case _tailLayer:
-                        tailLayer = reader.ReadAsInt32Safe() ?? tailLayer;
-                        break;
+                        case _tailLayer:
+                            tailLayer = reader.ReadAsInt32Safe() ?? tailLayer;
+                            break;
 
-                    case "sc":
-                        sliceCount = reader.ReadAsInt32Safe() ?? sliceCount;
-                        break;
+                        case "sc":
+                            sliceCount = reader.ReadAsInt32Safe() ?? sliceCount;
+                            break;
 
-                    case "s":
-                        squishAmount = (float?)reader.ReadAsDouble() ?? squishAmount;
-                        break;
+                        case "s":
+                            squishAmount = (float?)reader.ReadAsDouble() ?? squishAmount;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new BurstSliderData(
+                    color,
+                    headBeat,
+                    headLine,
+                    headLayer,
+                    headCutDirection,
+                    tailBeat,
+                    tailLine,
+                    tailLayer,
+                    sliceCount,
+                    squishAmount,
+                    data)));
             });
-
-            return new BurstSliderData(
-                color,
-                headBeat,
-                headLine,
-                headLayer,
-                headCutDirection,
-                tailBeat,
-                tailLine,
-                tailLayer,
-                sliceCount,
-                squishAmount,
-                data);
         }
 
-        public static WaypointData DeserializeWaypoint([InstantHandle] JsonReader reader)
+        public static void DeserializeWaypointArray(JsonReader reader, List<BeatmapSaveData.WaypointData> list)
         {
-            float beat = default;
-            int line = default;
-            int layer = default;
-            OffsetDirection offsetDirection = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                int line = default;
+                int layer = default;
+                OffsetDirection offsetDirection = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case _line:
-                        line = reader.ReadAsInt32Safe() ?? line;
-                        break;
+                        case _line:
+                            line = reader.ReadAsInt32Safe() ?? line;
+                            break;
 
-                    case _layer:
-                        layer = reader.ReadAsInt32Safe() ?? layer;
-                        break;
+                        case _layer:
+                            layer = reader.ReadAsInt32Safe() ?? layer;
+                            break;
 
-                    case _cutDirection:
-                        offsetDirection = (OffsetDirection?)reader.ReadAsInt32Safe() ?? offsetDirection;
-                        break;
+                        case _cutDirection:
+                            offsetDirection = (OffsetDirection?)reader.ReadAsInt32Safe() ?? offsetDirection;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new WaypointData(beat, line, layer, offsetDirection, data)));
             });
-
-            return new WaypointData(beat, line, layer, offsetDirection, data);
         }
 
-        public static BasicEventData DeserializeBasicEvent([InstantHandle] JsonReader reader)
+        public static void DeserializeBasicEventArray(JsonReader reader, List<BeatmapSaveData.BasicEventData> list)
         {
-            float beat = default;
-            BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType eventType = default;
-            int value = default;
-            float floatValue = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType eventType = default;
+                int value = default;
+                float floatValue = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case "et":
-                        eventType = (BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType?)reader.ReadAsInt32Safe() ?? eventType;
-                        break;
+                        case "et":
+                            eventType = (BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType?)reader.ReadAsInt32Safe() ?? eventType;
+                            break;
 
-                    case "i":
-                        value = reader.ReadAsInt32Safe() ?? value;
-                        break;
+                        case "i":
+                            value = reader.ReadAsInt32Safe() ?? value;
+                            break;
 
-                    case "f":
-                        floatValue = (float?)reader.ReadAsDouble() ?? floatValue;
-                        break;
+                        case "f":
+                            floatValue = (float?)reader.ReadAsDouble() ?? floatValue;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new BasicEventData(beat, eventType, value, floatValue, data)));
             });
-
-            return new BasicEventData(beat, eventType, value, floatValue, data);
         }
 
-        public static ColorBoostEventData DeserializeColorBoost([InstantHandle] JsonReader reader)
+        public static void DeserializeColorBoostArray(JsonReader reader, List<BeatmapSaveData.ColorBoostEventData> list)
         {
-            float beat = default;
-            bool boost = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                bool boost = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case "o":
-                        boost = reader.ReadAsBoolean() ?? boost;
-                        break;
+                        case "o":
+                            boost = reader.ReadAsBoolean() ?? boost;
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new ColorBoostEventData(beat, boost, data)));
             });
-
-            return new ColorBoostEventData(beat, boost, data);
         }
 
-        public static IndexFilter DeserializeIndexFilter([InstantHandle] JsonReader reader)
+        public static IndexFilter DeserializeIndexFilter(JsonReader reader)
         {
             IndexFilter.IndexFilterType type = default;
             int param0 = default;
@@ -820,7 +832,6 @@ namespace CustomJSONData.CustomBeatmap
             int chunks = default;
             float limit = default;
             IndexFilterLimitAlsoAffectsType limitAlsoAffectsType = default;
-            reader.Read();
             reader.ReadObject(objectName =>
             {
                 switch (objectName)
@@ -850,7 +861,8 @@ namespace CustomJSONData.CustomBeatmap
                         break;
 
                     case "d":
-                        limitAlsoAffectsType = (IndexFilterLimitAlsoAffectsType?)reader.ReadAsInt32Safe() ?? limitAlsoAffectsType;
+                        limitAlsoAffectsType = (IndexFilterLimitAlsoAffectsType?)reader.ReadAsInt32Safe() ??
+                                               limitAlsoAffectsType;
                         break;
 
                     case "n":
@@ -870,489 +882,518 @@ namespace CustomJSONData.CustomBeatmap
             return new IndexFilter(type, param0, param1, reversed, random, seed, chunks, limit, limitAlsoAffectsType);
         }
 
-        public static LightColorEventBoxGroup DeserializeLightColorEventBoxGroup([InstantHandle] JsonReader reader)
+        public static void DeserializeLightColorEventBoxGroupArray(JsonReader reader, List<BeatmapSaveData.LightColorEventBoxGroup> list)
         {
-            float beat = default;
-            List<LightColorEventBox> eventBoxes = new();
-            int groupId = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                List<LightColorEventBox> eventBoxes = new();
+                int groupId = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case _groupId:
-                        groupId = reader.ReadAsInt32Safe() ?? groupId;
-                        break;
+                        case _groupId:
+                            groupId = reader.ReadAsInt32Safe() ?? groupId;
+                            break;
 
-                    case _eventBoxes:
-                        reader.ReadObjectArray(() =>
-                        {
-                            IndexFilter? indexFilter = default;
-                            float beatDistributionParam = default;
-                            EventBox.DistributionParamType beatDistributionParamType = default;
-                            float brightnessDistributionParam = default;
-                            bool brightnessDistributionShouldAffectFirstBaseEvent = default;
-                            EventBox.DistributionParamType brightnessDistributionParamType = default;
-                            EaseType brightnessDistributionEaseType = default;
-                            List<LightColorBaseData> lightColorBaseDataList = new();
-                            reader.ReadObject(eventName =>
+                        case _eventBoxes:
+                            reader.ReadArray(() =>
                             {
-                                switch (eventName)
+                                IndexFilter? indexFilter = default;
+                                float beatDistributionParam = default;
+                                EventBox.DistributionParamType beatDistributionParamType = default;
+                                float brightnessDistributionParam = default;
+                                bool brightnessDistributionShouldAffectFirstBaseEvent = default;
+                                EventBox.DistributionParamType brightnessDistributionParamType = default;
+                                EaseType brightnessDistributionEaseType = default;
+                                List<LightColorBaseData> lightColorBaseDataList = new();
+                                return reader.ReadObject(eventName =>
                                 {
-                                    case _indexFilter:
-                                        indexFilter = DeserializeIndexFilter(reader);
-                                        break;
+                                    switch (eventName)
+                                    {
+                                        case _indexFilter:
+                                            indexFilter = DeserializeIndexFilter(reader);
+                                            break;
 
-                                    case _beatDistributionParam:
-                                        beatDistributionParam = (float?)reader.ReadAsDouble() ?? beatDistributionParam;
-                                        break;
+                                        case _beatDistributionParam:
+                                            beatDistributionParam =
+                                                (float?)reader.ReadAsDouble() ?? beatDistributionParam;
+                                            break;
 
-                                    case _beatDistributionParamType:
-                                        beatDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? beatDistributionParamType;
-                                        break;
+                                        case _beatDistributionParamType:
+                                            beatDistributionParamType =
+                                                (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ??
+                                                beatDistributionParamType;
+                                            break;
 
-                                    case "r":
-                                        brightnessDistributionParam = (float?)reader.ReadAsDouble() ?? brightnessDistributionParam;
-                                        break;
+                                        case "r":
+                                            brightnessDistributionParam = (float?)reader.ReadAsDouble() ??
+                                                                          brightnessDistributionParam;
+                                            break;
 
-                                    case "b":
-                                        brightnessDistributionShouldAffectFirstBaseEvent = reader.ReadIntAsBoolean() ?? brightnessDistributionShouldAffectFirstBaseEvent;
-                                        break;
+                                        case "b":
+                                            brightnessDistributionShouldAffectFirstBaseEvent =
+                                                reader.ReadIntAsBoolean() ??
+                                                brightnessDistributionShouldAffectFirstBaseEvent;
+                                            break;
 
-                                    case "t":
-                                        brightnessDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? brightnessDistributionParamType;
-                                        break;
+                                        case "t":
+                                            brightnessDistributionParamType =
+                                                (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ??
+                                                brightnessDistributionParamType;
+                                            break;
 
-                                    case "i":
-                                        brightnessDistributionEaseType = (EaseType?)reader.ReadAsInt32Safe() ?? brightnessDistributionEaseType;
-                                        break;
+                                        case "i":
+                                            brightnessDistributionEaseType = (EaseType?)reader.ReadAsInt32Safe() ??
+                                                                             brightnessDistributionEaseType;
+                                            break;
 
-                                    case "e":
-                                        reader.ReadObjectArray(() =>
-                                        {
-                                            float lightBeat = default;
-                                            TransitionType transitionType = default;
-                                            EnvironmentColorType colorType = default;
-                                            float brightness = default;
-                                            int strobeFrequency = default;
-                                            reader.ReadObject(lightName =>
+                                        case "e":
+                                            reader.ReadArray(() =>
                                             {
-                                                switch (lightName)
+                                                float lightBeat = default;
+                                                TransitionType transitionType = default;
+                                                EnvironmentColorType colorType = default;
+                                                float brightness = default;
+                                                int strobeFrequency = default;
+                                                return reader.ReadObject(lightName =>
                                                 {
-                                                    case _beat:
-                                                        lightBeat = (float?)reader.ReadAsDouble() ?? lightBeat;
-                                                        break;
+                                                    switch (lightName)
+                                                    {
+                                                        case _beat:
+                                                            lightBeat = (float?)reader.ReadAsDouble() ?? lightBeat;
+                                                            break;
 
-                                                    case "i":
-                                                        transitionType = (TransitionType?)reader.ReadAsInt32Safe() ?? transitionType;
-                                                        break;
+                                                        case "i":
+                                                            transitionType =
+                                                                (TransitionType?)reader.ReadAsInt32Safe() ??
+                                                                transitionType;
+                                                            break;
 
-                                                    case _colorType:
-                                                        colorType = (EnvironmentColorType?)reader.ReadAsInt32Safe() ?? colorType;
-                                                        break;
+                                                        case _colorType:
+                                                            colorType =
+                                                                (EnvironmentColorType?)reader.ReadAsInt32Safe() ??
+                                                                colorType;
+                                                            break;
 
-                                                    case "s":
-                                                        brightness = (float?)reader.ReadAsDouble() ?? brightness;
-                                                        break;
+                                                        case "s":
+                                                            brightness = (float?)reader.ReadAsDouble() ?? brightness;
+                                                            break;
 
-                                                    case "f":
-                                                        strobeFrequency = reader.ReadAsInt32Safe() ?? strobeFrequency;
-                                                        break;
+                                                        case "f":
+                                                            strobeFrequency = reader.ReadAsInt32Safe() ??
+                                                                              strobeFrequency;
+                                                            break;
 
-                                                    default:
-                                                        reader.Skip();
-                                                        break;
-                                                }
+                                                        default:
+                                                            reader.Skip();
+                                                            break;
+                                                    }
+                                                }).Finish(() => lightColorBaseDataList.Add(new LightColorBaseData(
+                                                    lightBeat,
+                                                    transitionType,
+                                                    colorType,
+                                                    brightness,
+                                                    strobeFrequency)));
                                             });
+                                            break;
 
-                                            lightColorBaseDataList.Add(new LightColorBaseData(
-                                                lightBeat,
-                                                transitionType,
-                                                colorType,
-                                                brightness,
-                                                strobeFrequency));
-                                        });
-                                        break;
-
-                                    default:
-                                        reader.Skip();
-                                        break;
-                                }
+                                        default:
+                                            reader.Skip();
+                                            break;
+                                    }
+                                }).Finish(() => eventBoxes.Add(new LightColorEventBox(
+                                    indexFilter,
+                                    beatDistributionParam,
+                                    beatDistributionParamType,
+                                    brightnessDistributionParam,
+                                    brightnessDistributionShouldAffectFirstBaseEvent,
+                                    brightnessDistributionParamType,
+                                    brightnessDistributionEaseType,
+                                    lightColorBaseDataList)));
                             });
+                            break;
 
-                            eventBoxes.Add(new LightColorEventBox(
-                                indexFilter,
-                                beatDistributionParam,
-                                beatDistributionParamType,
-                                brightnessDistributionParam,
-                                brightnessDistributionShouldAffectFirstBaseEvent,
-                                brightnessDistributionParamType,
-                                brightnessDistributionEaseType,
-                                lightColorBaseDataList));
-                        });
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
-
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new LightColorEventBoxGroup(beat, groupId, eventBoxes, data)));
             });
-
-            return new LightColorEventBoxGroup(beat, groupId, eventBoxes, data);
         }
 
-        public static LightRotationEventBoxGroup DeserializeLightRotationEventBoxGroup([InstantHandle] JsonReader reader)
+        public static void DeserializeLightRotationEventBoxGroupArray(JsonReader reader, List<BeatmapSaveData.LightRotationEventBoxGroup> list)
         {
-            float beat = default;
-            List<LightRotationEventBox> eventBoxes = new();
-            int groupId = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                List<LightRotationEventBox> eventBoxes = new();
+                int groupId = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case _groupId:
-                        groupId = reader.ReadAsInt32Safe() ?? groupId;
-                        break;
+                        case _groupId:
+                            groupId = reader.ReadAsInt32Safe() ?? groupId;
+                            break;
 
-                    case _eventBoxes:
-                        reader.ReadObjectArray(() =>
-                        {
-                            IndexFilter? indexFilter = default;
-                            float beatDistributionParam = default;
-                            EventBox.DistributionParamType beatDistributionParamType = default;
-                            float rotationDistributionParam = default;
-                            EventBox.DistributionParamType rotationDistributionParamType = default;
-                            bool rotationDistributionShouldAffectFirstBaseEvent = default;
-                            EaseType rotationDistributionEaseType = default;
-                            Axis axis = default;
-                            bool flipRotation = default;
-                            List<LightRotationBaseData> lightRotationBaseDataList = new();
-                            reader.ReadObject(eventName =>
+                        case _eventBoxes:
+                            reader.ReadArray(() =>
                             {
-                                switch (eventName)
+                                IndexFilter? indexFilter = default;
+                                float beatDistributionParam = default;
+                                EventBox.DistributionParamType beatDistributionParamType = default;
+                                float rotationDistributionParam = default;
+                                EventBox.DistributionParamType rotationDistributionParamType = default;
+                                bool rotationDistributionShouldAffectFirstBaseEvent = default;
+                                EaseType rotationDistributionEaseType = default;
+                                Axis axis = default;
+                                bool flipRotation = default;
+                                List<LightRotationBaseData> lightRotationBaseDataList = new();
+                                return reader.ReadObject(eventName =>
                                 {
-                                    case _indexFilter:
-                                        indexFilter = DeserializeIndexFilter(reader);
-                                        break;
+                                    switch (eventName)
+                                    {
+                                        case _indexFilter:
+                                            indexFilter = DeserializeIndexFilter(reader);
+                                            break;
 
-                                    case _beatDistributionParam:
-                                        beatDistributionParam = (float?)reader.ReadAsDouble() ?? beatDistributionParam;
-                                        break;
+                                        case _beatDistributionParam:
+                                            beatDistributionParam =
+                                                (float?)reader.ReadAsDouble() ?? beatDistributionParam;
+                                            break;
 
-                                    case _beatDistributionParamType:
-                                        beatDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? beatDistributionParamType;
-                                        break;
+                                        case _beatDistributionParamType:
+                                            beatDistributionParamType =
+                                                (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ??
+                                                beatDistributionParamType;
+                                            break;
 
-                                    case "s":
-                                        rotationDistributionParam = (float?)reader.ReadAsDouble() ?? rotationDistributionParam;
-                                        break;
+                                        case "s":
+                                            rotationDistributionParam = (float?)reader.ReadAsDouble() ??
+                                                                        rotationDistributionParam;
+                                            break;
 
-                                    case "t":
-                                        rotationDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? rotationDistributionParamType;
-                                        break;
+                                        case "t":
+                                            rotationDistributionParamType =
+                                                (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ??
+                                                rotationDistributionParamType;
+                                            break;
 
-                                    case "b":
-                                        rotationDistributionShouldAffectFirstBaseEvent = reader.ReadIntAsBoolean() ?? rotationDistributionShouldAffectFirstBaseEvent;
-                                        break;
+                                        case "b":
+                                            rotationDistributionShouldAffectFirstBaseEvent =
+                                                reader.ReadIntAsBoolean() ??
+                                                rotationDistributionShouldAffectFirstBaseEvent;
+                                            break;
 
-                                    case "a":
-                                        axis = (Axis?)reader.ReadAsInt32Safe() ?? axis;
-                                        break;
+                                        case "a":
+                                            axis = (Axis?)reader.ReadAsInt32Safe() ?? axis;
+                                            break;
 
-                                    case "r":
-                                        flipRotation = reader.ReadIntAsBoolean() ?? flipRotation;
-                                        break;
+                                        case "r":
+                                            flipRotation = reader.ReadIntAsBoolean() ?? flipRotation;
+                                            break;
 
-                                    case "i":
-                                        rotationDistributionEaseType = (EaseType?)reader.ReadAsInt32() ?? rotationDistributionEaseType;
-                                        break;
+                                        case "i":
+                                            rotationDistributionEaseType = (EaseType?)reader.ReadAsInt32() ??
+                                                                           rotationDistributionEaseType;
+                                            break;
 
-                                    case "l":
-                                        reader.ReadObjectArray(() =>
-                                        {
-                                            float lightBeat = default;
-                                            bool usePreviousEventRotationValue = default;
-                                            EaseType easeType = default;
-                                            int loopsCount = default;
-                                            float rotation = default;
-                                            LightRotationBaseData.RotationDirection rotationDirection = default;
-                                            reader.ReadObject(lightName =>
+                                        case "l":
+                                            reader.ReadArray(() =>
                                             {
-                                                switch (lightName)
+                                                float lightBeat = default;
+                                                bool usePreviousEventRotationValue = default;
+                                                EaseType easeType = default;
+                                                int loopsCount = default;
+                                                float rotation = default;
+                                                LightRotationBaseData.RotationDirection rotationDirection = default;
+                                                return reader.ReadObject(lightName =>
                                                 {
-                                                    case _beat:
-                                                        lightBeat = (float?)reader.ReadAsDouble() ?? lightBeat;
-                                                        break;
+                                                    switch (lightName)
+                                                    {
+                                                        case _beat:
+                                                            lightBeat = (float?)reader.ReadAsDouble() ?? lightBeat;
+                                                            break;
 
-                                                    case "p":
-                                                        usePreviousEventRotationValue = reader.ReadIntAsBoolean() ?? usePreviousEventRotationValue;
-                                                        break;
+                                                        case "p":
+                                                            usePreviousEventRotationValue = reader.ReadIntAsBoolean() ??
+                                                                usePreviousEventRotationValue;
+                                                            break;
 
-                                                    case "e":
-                                                        easeType = (EaseType?)reader.ReadAsInt32Safe() ?? easeType;
-                                                        break;
+                                                        case "e":
+                                                            easeType = (EaseType?)reader.ReadAsInt32Safe() ?? easeType;
+                                                            break;
 
-                                                    case "l":
-                                                        loopsCount = reader.ReadAsInt32Safe() ?? loopsCount;
-                                                        break;
+                                                        case "l":
+                                                            loopsCount = reader.ReadAsInt32Safe() ?? loopsCount;
+                                                            break;
 
-                                                    case "r":
-                                                        rotation = (float?)reader.ReadAsDouble() ?? rotation;
-                                                        break;
+                                                        case "r":
+                                                            rotation = (float?)reader.ReadAsDouble() ?? rotation;
+                                                            break;
 
-                                                    case "o":
-                                                        rotationDirection = (LightRotationBaseData.RotationDirection?)reader.ReadAsInt32Safe() ?? rotationDirection;
-                                                        break;
+                                                        case "o":
+                                                            rotationDirection =
+                                                                (LightRotationBaseData.RotationDirection?)reader
+                                                                    .ReadAsInt32Safe() ?? rotationDirection;
+                                                            break;
 
-                                                    default:
-                                                        reader.Skip();
-                                                        break;
-                                                }
+                                                        default:
+                                                            reader.Skip();
+                                                            break;
+                                                    }
+                                                }).Finish(() => lightRotationBaseDataList.Add(new LightRotationBaseData(
+                                                    lightBeat,
+                                                    usePreviousEventRotationValue,
+                                                    easeType,
+                                                    loopsCount,
+                                                    rotation,
+                                                    rotationDirection)));
                                             });
+                                            break;
 
-                                            lightRotationBaseDataList.Add(new LightRotationBaseData(
-                                                lightBeat,
-                                                usePreviousEventRotationValue,
-                                                easeType,
-                                                loopsCount,
-                                                rotation,
-                                                rotationDirection));
-                                        });
-                                        break;
-
-                                    default:
-                                        reader.Skip();
-                                        break;
-                                }
+                                        default:
+                                            reader.Skip();
+                                            break;
+                                    }
+                                }).Finish(() => eventBoxes.Add(new LightRotationEventBox(
+                                    indexFilter,
+                                    beatDistributionParam,
+                                    beatDistributionParamType,
+                                    rotationDistributionParam,
+                                    rotationDistributionParamType,
+                                    rotationDistributionShouldAffectFirstBaseEvent,
+                                    rotationDistributionEaseType,
+                                    axis,
+                                    flipRotation,
+                                    lightRotationBaseDataList)));
                             });
+                            break;
 
-                            eventBoxes.Add(new LightRotationEventBox(
-                                indexFilter,
-                                beatDistributionParam,
-                                beatDistributionParamType,
-                                rotationDistributionParam,
-                                rotationDistributionParamType,
-                                rotationDistributionShouldAffectFirstBaseEvent,
-                                rotationDistributionEaseType,
-                                axis,
-                                flipRotation,
-                                lightRotationBaseDataList));
-                        });
-                        break;
+                        case _customData:
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    case _customData:
-                        reader.ReadToDictionary(data);
-                        break;
-
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new LightRotationEventBoxGroup(beat, groupId, eventBoxes, data)));
             });
-
-            return new LightRotationEventBoxGroup(beat, groupId, eventBoxes, data);
         }
 
         // TODO: figure out custom data for event boxes and co.
-        public static LightTranslationEventBoxGroup DeserializeLightTranslationEventBoxGroup([InstantHandle] JsonReader reader)
+        public static void DeserializeLightTranslationEventBoxGroupArray(JsonReader reader, List<LightTranslationEventBoxGroup> list)
         {
-            float beat = default;
-            List<LightTranslationEventBox> eventBoxes = new();
-            int groupId = default;
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float beat = default;
+                List<LightTranslationEventBox> eventBoxes = new();
+                int groupId = default;
+                return reader.ReadObject(objectName =>
                 {
-                    case _beat:
-                        beat = (float?)reader.ReadAsDouble() ?? beat;
-                        break;
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
 
-                    case _groupId:
-                        groupId = reader.ReadAsInt32Safe() ?? groupId;
-                        break;
+                        case _groupId:
+                            groupId = reader.ReadAsInt32Safe() ?? groupId;
+                            break;
 
-                    case _eventBoxes:
-                        reader.ReadObjectArray(() =>
-                        {
-                            IndexFilter? indexFilter = default;
-                            float beatDistributionParam = default;
-                            EventBox.DistributionParamType beatDistributionParamType = default;
-                            float gapDistributionParam = default;
-                            EventBox.DistributionParamType gapDistributionParamType = default;
-                            bool gapDistributionShouldAffectFirstBaseEvent = default;
-                            EaseType gapDistributionEaseType = default;
-                            Axis axis = default;
-                            bool flipRotation = default;
-                            List<LightTranslationBaseData> lightTranslationBaseDataList = new();
-                            reader.ReadObject(eventName =>
+                        case _eventBoxes:
+                            reader.ReadArray(() =>
                             {
-                                switch (eventName)
+                                IndexFilter? indexFilter = default;
+                                float beatDistributionParam = default;
+                                EventBox.DistributionParamType beatDistributionParamType = default;
+                                float gapDistributionParam = default;
+                                EventBox.DistributionParamType gapDistributionParamType = default;
+                                bool gapDistributionShouldAffectFirstBaseEvent = default;
+                                EaseType gapDistributionEaseType = default;
+                                Axis axis = default;
+                                bool flipRotation = default;
+                                List<LightTranslationBaseData> lightTranslationBaseDataList = new();
+                                return reader.ReadObject(eventName =>
                                 {
-                                    case _indexFilter:
-                                        indexFilter = DeserializeIndexFilter(reader);
-                                        break;
+                                    switch (eventName)
+                                    {
+                                        case _indexFilter:
+                                            indexFilter = DeserializeIndexFilter(reader);
+                                            break;
 
-                                    case _beatDistributionParam:
-                                        beatDistributionParam = (float?)reader.ReadAsDouble() ?? beatDistributionParam;
-                                        break;
+                                        case _beatDistributionParam:
+                                            beatDistributionParam =
+                                                (float?)reader.ReadAsDouble() ?? beatDistributionParam;
+                                            break;
 
-                                    case _beatDistributionParamType:
-                                        beatDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? beatDistributionParamType;
-                                        break;
+                                        case _beatDistributionParamType:
+                                            beatDistributionParamType =
+                                                (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ??
+                                                beatDistributionParamType;
+                                            break;
 
-                                    case "s":
-                                        gapDistributionParam = (float?)reader.ReadAsDouble() ?? gapDistributionParam;
-                                        break;
+                                        case "s":
+                                            gapDistributionParam =
+                                                (float?)reader.ReadAsDouble() ?? gapDistributionParam;
+                                            break;
 
-                                    case "t":
-                                        gapDistributionParamType = (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ?? gapDistributionParamType;
-                                        break;
+                                        case "t":
+                                            gapDistributionParamType =
+                                                (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ??
+                                                gapDistributionParamType;
+                                            break;
 
-                                    case "b":
-                                        gapDistributionShouldAffectFirstBaseEvent = reader.ReadIntAsBoolean() ?? gapDistributionShouldAffectFirstBaseEvent;
-                                        break;
+                                        case "b":
+                                            gapDistributionShouldAffectFirstBaseEvent = reader.ReadIntAsBoolean() ??
+                                                gapDistributionShouldAffectFirstBaseEvent;
+                                            break;
 
-                                    case "a":
-                                        axis = (Axis?)reader.ReadAsInt32Safe() ?? axis;
-                                        break;
+                                        case "a":
+                                            axis = (Axis?)reader.ReadAsInt32Safe() ?? axis;
+                                            break;
 
-                                    case "r":
-                                        flipRotation = reader.ReadIntAsBoolean() ?? flipRotation;
-                                        break;
+                                        case "r":
+                                            flipRotation = reader.ReadIntAsBoolean() ?? flipRotation;
+                                            break;
 
-                                    case "i":
-                                        gapDistributionEaseType = (EaseType?)reader.ReadAsInt32() ?? gapDistributionEaseType;
-                                        break;
+                                        case "i":
+                                            gapDistributionEaseType = (EaseType?)reader.ReadAsInt32() ??
+                                                                      gapDistributionEaseType;
+                                            break;
 
-                                    case "l":
-                                        reader.ReadObjectArray(() =>
-                                        {
-                                            float lightBeat = default;
-                                            bool usePreviousEventTransitionValue = default;
-                                            EaseType easeType = default;
-                                            float translation = default;
-                                            reader.ReadObject(lightName =>
+                                        case "l":
+                                            reader.ReadArray(() =>
                                             {
-                                                switch (lightName)
+                                                float lightBeat = default;
+                                                bool usePreviousEventTransitionValue = default;
+                                                EaseType easeType = default;
+                                                float translation = default;
+                                                return reader.ReadObject(lightName =>
                                                 {
-                                                    case _beat:
-                                                        lightBeat = (float?)reader.ReadAsDouble() ?? lightBeat;
-                                                        break;
+                                                    switch (lightName)
+                                                    {
+                                                        case _beat:
+                                                            lightBeat = (float?)reader.ReadAsDouble() ?? lightBeat;
+                                                            break;
 
-                                                    case "p":
-                                                        usePreviousEventTransitionValue = reader.ReadIntAsBoolean() ?? usePreviousEventTransitionValue;
-                                                        break;
+                                                        case "p":
+                                                            usePreviousEventTransitionValue =
+                                                                reader.ReadIntAsBoolean() ??
+                                                                usePreviousEventTransitionValue;
+                                                            break;
 
-                                                    case "e":
-                                                        easeType = (EaseType?)reader.ReadAsInt32Safe() ?? easeType;
-                                                        break;
+                                                        case "e":
+                                                            easeType = (EaseType?)reader.ReadAsInt32Safe() ?? easeType;
+                                                            break;
 
-                                                    case "t":
-                                                        translation = (float?)reader.ReadAsDouble() ?? translation;
-                                                        break;
+                                                        case "t":
+                                                            translation = (float?)reader.ReadAsDouble() ?? translation;
+                                                            break;
 
-                                                    default:
-                                                        reader.Skip();
-                                                        break;
-                                                }
+                                                        default:
+                                                            reader.Skip();
+                                                            break;
+                                                    }
+                                                }).Finish(() => lightTranslationBaseDataList.Add(new LightTranslationBaseData(
+                                                    lightBeat,
+                                                    usePreviousEventTransitionValue,
+                                                    easeType,
+                                                    translation)));
                                             });
+                                            break;
 
-                                            lightTranslationBaseDataList.Add(new LightTranslationBaseData(
-                                                lightBeat,
-                                                usePreviousEventTransitionValue,
-                                                easeType,
-                                                translation));
-                                        });
-                                        break;
-
-                                    default:
-                                        reader.Skip();
-                                        break;
-                                }
+                                        default:
+                                            reader.Skip();
+                                            break;
+                                    }
+                                }).Finish(() => eventBoxes.Add(new LightTranslationEventBox(
+                                    indexFilter,
+                                    beatDistributionParam,
+                                    beatDistributionParamType,
+                                    gapDistributionParam,
+                                    gapDistributionParamType,
+                                    gapDistributionShouldAffectFirstBaseEvent,
+                                    gapDistributionEaseType,
+                                    axis,
+                                    flipRotation,
+                                    lightTranslationBaseDataList)));
                             });
+                            break;
 
-                            eventBoxes.Add(new LightTranslationEventBox(
-                                indexFilter,
-                                beatDistributionParam,
-                                beatDistributionParamType,
-                                gapDistributionParam,
-                                gapDistributionParamType,
-                                gapDistributionShouldAffectFirstBaseEvent,
-                                gapDistributionEaseType,
-                                axis,
-                                flipRotation,
-                                lightTranslationBaseDataList));
-                        });
-                        break;
-
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new LightTranslationEventBoxGroup(beat, groupId, eventBoxes)));
             });
-
-            return new LightTranslationEventBoxGroup(beat, groupId, eventBoxes);
         }
 
-        public static BasicEventTypesWithKeywords.BasicEventTypesForKeyword DeserializeBasicEventTypesForKeyword(JsonReader reader)
+        public static void DeserializeBasicEventTypesForKeywordArray(JsonReader reader, List<BasicEventTypesWithKeywords.BasicEventTypesForKeyword> list)
         {
-            string keyword = string.Empty;
-            List<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType> eventTypes = new();
-            reader.ReadObject(keywordName =>
+            reader.ReadArray(() =>
             {
-                switch (keywordName)
+                string keyword = string.Empty;
+                List<BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType> eventTypes = new();
+                return reader.ReadObject(keywordName =>
                 {
-                    case "k":
-                        keyword = reader.ReadAsString() ?? keyword;
-                        break;
+                    switch (keywordName)
+                    {
+                        case "k":
+                            keyword = reader.ReadAsString() ?? keyword;
+                            break;
 
-                    case "e":
-                        reader.Read();
-                        if (reader.TokenType != JsonToken.StartArray)
-                        {
-                            throw new JsonSerializationException("[e] was not array.");
-                        }
-
-                        while (true)
-                        {
-                            int? specialEvent = reader.ReadAsInt32Safe();
-                            if (specialEvent.HasValue)
+                        case "e":
+                            reader.Read();
+                            if (reader.TokenType != JsonToken.StartArray)
                             {
-                                eventTypes.Add((BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType)specialEvent);
+                                throw new JsonSerializationException("[e] was not array.");
                             }
-                            else
+
+                            while (true)
                             {
-                                if (reader.TokenType == JsonToken.EndArray)
+                                int? specialEvent = reader.ReadAsInt32Safe();
+                                if (specialEvent.HasValue)
                                 {
-                                    break;
+                                    eventTypes.Add(
+                                        (BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType)specialEvent);
                                 }
+                                else
+                                {
+                                    if (reader.TokenType == JsonToken.EndArray)
+                                    {
+                                        break;
+                                    }
 
-                                throw new JsonSerializationException("Value in [e] was not int.");
+                                    throw new JsonSerializationException("Value in [e] was not int.");
+                                }
                             }
-                        }
 
-                        break;
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new BasicEventTypesWithKeywords.BasicEventTypesForKeyword(keyword, eventTypes)));
             });
-
-            return new BasicEventTypesWithKeywords.BasicEventTypesForKeyword(keyword, eventTypes);
         }
 
         public readonly struct SaveDataCustomDatas

@@ -156,15 +156,15 @@ namespace CustomJSONData.CustomBeatmap
                             break;
 
                         case "_environmentNames":
-                            environmentNames = reader.ReadStringArray() ?? environmentNames;
+                            environmentNames = reader.ReadAsStringArray(false);
                             break;
 
                         case "_colorSchemes":
-                            reader.ReadObjectArray(() =>
+                            reader.ReadArray(() =>
                             {
                                 bool useOverride = false;
                                 PlayerSaveData.ColorScheme? colorScheme = null;
-                                reader.ReadObject(objectName =>
+                                return reader.ReadObject(objectName =>
                                 {
                                     switch (objectName)
                                     {
@@ -230,22 +230,20 @@ namespace CustomJSONData.CustomBeatmap
                                                 environmentColor1Boost);
                                             break;
                                     }
-                                });
-
-                                colorSchemes.Add(new BeatmapLevelColorSchemeSaveData
+                                }).Finish(() => colorSchemes.Add(new BeatmapLevelColorSchemeSaveData
                                 {
                                     useOverride = useOverride,
                                     colorScheme = colorScheme
-                                });
+                                }));
                             });
                             break;
 
                         case "_difficultyBeatmapSets":
-                            reader.ReadObjectArray(() =>
+                            reader.ReadArray(() =>
                             {
                                 string beatmapCharacteristicName = string.Empty;
                                 List<DifficultyBeatmap> difficultyBeatmaps = new();
-                                reader.ReadObject(objectName =>
+                                return reader.ReadObject(objectName =>
                                 {
                                     switch (objectName)
                                     {
@@ -254,7 +252,7 @@ namespace CustomJSONData.CustomBeatmap
                                             break;
 
                                         case "_difficultyBeatmaps":
-                                            reader.ReadObjectArray(() =>
+                                            reader.ReadArray(() =>
                                             {
                                                 string difficulty = string.Empty;
                                                 int difficultyRank = default;
@@ -264,7 +262,7 @@ namespace CustomJSONData.CustomBeatmap
                                                 int beatmapColorSchemeIdx = default;
                                                 int environmentNameIdx = default;
                                                 CustomData data = new();
-                                                reader.ReadObject(difficultyBeatmapObjectName =>
+                                                return reader.ReadObject(difficultyBeatmapObjectName =>
                                                 {
                                                     switch (difficultyBeatmapObjectName)
                                                     {
@@ -304,18 +302,19 @@ namespace CustomJSONData.CustomBeatmap
                                                             reader.Skip();
                                                             break;
                                                     }
+                                                }).Finish(() =>
+                                                {
+                                                    beatmapCustomDatasByFilename[beatmapFilename] = data;
+                                                    difficultyBeatmaps.Add(new DifficultyBeatmap(
+                                                        difficulty,
+                                                        difficultyRank,
+                                                        beatmapFilename,
+                                                        noteJumpMovementSpeed,
+                                                        noteJumpStartBeatOffset,
+                                                        beatmapColorSchemeIdx,
+                                                        environmentNameIdx,
+                                                        data));
                                                 });
-
-                                                beatmapCustomDatasByFilename[beatmapFilename] = data;
-                                                difficultyBeatmaps.Add(new DifficultyBeatmap(
-                                                    difficulty,
-                                                    difficultyRank,
-                                                    beatmapFilename,
-                                                    noteJumpMovementSpeed,
-                                                    noteJumpStartBeatOffset,
-                                                    beatmapColorSchemeIdx,
-                                                    environmentNameIdx,
-                                                    data));
                                             });
 
                                             break;
@@ -324,11 +323,9 @@ namespace CustomJSONData.CustomBeatmap
                                             reader.Skip();
                                             break;
                                     }
-                                });
-
-                                difficultyBeatmapSets.Add(new DifficultyBeatmapSet(
+                                }).Finish(() => difficultyBeatmapSets.Add(new DifficultyBeatmapSet(
                                     beatmapCharacteristicName,
-                                    difficultyBeatmaps.ToArray<StandardLevelInfoSaveData.DifficultyBeatmap>()));
+                                    difficultyBeatmaps.ToArray<StandardLevelInfoSaveData.DifficultyBeatmap>())));
                             });
 
                             break;

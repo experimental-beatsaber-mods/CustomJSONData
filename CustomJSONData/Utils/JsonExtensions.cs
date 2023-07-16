@@ -77,11 +77,12 @@ namespace CustomJSONData
             ObjectReadObject(reader, dictionary, specialCase);
         }
 
-        public static void ReadObject(this JsonReader reader, [InstantHandle] Action<string> action, bool doThrow = true)
+        public static bool ReadObject(this JsonReader reader, [InstantHandle] Action<string> action)
         {
-            if (!reader.AssertToken("object", JsonToken.StartObject, doThrow))
+            reader.Read();
+            if (reader.TokenType != JsonToken.StartObject)
             {
-                return;
+                return false;
             }
 
             reader.Read();
@@ -91,47 +92,59 @@ namespace CustomJSONData
 
                 reader.Read();
             }
+
+            return true;
         }
 
-        public static string[]? ReadStringArray(this JsonReader reader, bool doThrow = true)
+        public static bool Finish(this bool result, [InstantHandle] Action action)
         {
-            reader.Read(); // StartArray
-            if (!reader.AssertToken("string array", JsonToken.StartArray, doThrow))
+            if (!result)
             {
-                return null;
+                return false;
             }
 
-            reader.Read(); // StartObject (hopefully)
+            action();
+            return true;
+        }
+
+        public static string[] ReadAsStringArray(this JsonReader reader, bool doThrow = true)
+        {
             List<string> result = new();
-            while (reader.TokenType == JsonToken.String)
+            reader.ReadArray(
+                () =>
             {
+                reader.Read();
+                if (reader.TokenType != JsonToken.String)
+                {
+                    return false;
+                }
+
                 string? cur = reader.ReadAsString();
                 if (cur != null)
                 {
                     result.Add(cur);
                 }
-            }
 
-            reader.AssertToken("string array", JsonToken.EndArray);
+                return true;
+            },
+                doThrow);
+
             return result.ToArray();
         }
 
-        public static void ReadObjectArray(this JsonReader reader, [InstantHandle] Action action, bool doThrow = true)
+        public static void ReadArray(this JsonReader reader, [InstantHandle] Func<bool> action, bool doThrow = true)
         {
             reader.Read(); // StartArray
-            if (!reader.AssertToken("object array", JsonToken.StartArray, doThrow))
+            if (!reader.AssertToken("array", JsonToken.StartArray, doThrow))
             {
                 return;
             }
 
-            reader.Read(); // StartObject (hopefully)
-            while (reader.TokenType == JsonToken.StartObject)
+            while (action())
             {
-                action();
-                reader.Read();
             }
 
-            reader.AssertToken("object array", JsonToken.EndArray);
+            reader.AssertToken("array", JsonToken.EndArray);
         }
 
         public static string FormatMessage(this JsonReader reader, string message)

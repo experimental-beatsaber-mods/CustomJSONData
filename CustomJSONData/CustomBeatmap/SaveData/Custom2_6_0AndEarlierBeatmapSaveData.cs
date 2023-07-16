@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using BeatmapSaveDataVersion2_6_0AndEarlier;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace CustomJSONData.CustomBeatmap
@@ -68,32 +67,31 @@ namespace CustomJSONData.CustomBeatmap
                             break;
 
                         case "_events":
-                            reader.ReadObjectArray(() => events.Add(DeserializeEvent(reader)));
+                            DeserializeEventArray(reader, events);
                             break;
 
                         case "_notes":
-                            reader.ReadObjectArray(() => notes.Add(DeserializeNote(reader)));
+                            DeserializeNoteArray(reader, notes);
                             break;
 
                         case "_sliders":
-                            reader.ReadObjectArray(() => sliders.Add(DeserializeSlider(reader)));
+                            DeserializeSliderArray(reader, sliders);
                             break;
 
                         case "_waypoints":
-                            reader.ReadObjectArray(() => waypoints.Add(DeserializeWaypoint(reader)));
+                            DeserializeWaypointArray(reader, waypoints);
                             break;
 
                         case "_obstacles":
-                            reader.ReadObjectArray(() => obstacles.Add(DeserializeObstacle(reader)));
+                            DeserializeObstacleArray(reader, obstacles);
                             break;
 
                         case "_specialEventsKeywordFilters":
-                            reader.Read();
                             reader.ReadObject(propertyName =>
                             {
                                 if (propertyName.Equals("_keywords"))
                                 {
-                                    reader.ReadObjectArray(() => keywords.Add(DeserializeKeyword(reader)));
+                                    DeserializeKeywordArray(reader, keywords);
                                 }
                                 else
                                 {
@@ -111,7 +109,7 @@ namespace CustomJSONData.CustomBeatmap
                                     return true;
                                 }
 
-                                reader.ReadObjectArray(() => customEvents.Add(DeserializeCustomEvent(reader)));
+                                DeserializeCustomEventArray(reader, customEvents);
                                 return false;
                             });
 
@@ -139,345 +137,356 @@ namespace CustomJSONData.CustomBeatmap
             return beatmapSaveData;
         }
 
-        public static EventData DeserializeEvent([InstantHandle] JsonReader reader)
+        public static void DeserializeEventArray(JsonReader reader, List<EventData> list)
         {
-            float time = default;
-            BeatmapSaveData.BeatmapEventType type = default;
-            int value = default;
-            float floatValue = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float time = default;
+                BeatmapSaveData.BeatmapEventType type = default;
+                int value = default;
+                float floatValue = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case "_time":
-                        time = (float?)reader.ReadAsDouble() ?? time;
-                        break;
+                    switch (objectName)
+                    {
+                        case "_time":
+                            time = (float?)reader.ReadAsDouble() ?? time;
+                            break;
 
-                    case "_type":
-                        type = (BeatmapSaveData.BeatmapEventType?)reader.ReadAsInt32Safe() ?? type;
-                        break;
+                        case "_type":
+                            type = (BeatmapSaveData.BeatmapEventType?)reader.ReadAsInt32Safe() ?? type;
+                            break;
 
-                    case "_value":
-                        value = reader.ReadAsInt32Safe() ?? value;
-                        break;
+                        case "_value":
+                            value = reader.ReadAsInt32Safe() ?? value;
+                            break;
 
-                    case "_floatValue":
-                        floatValue = (float?)reader.ReadAsDouble() ?? floatValue;
-                        break;
+                        case "_floatValue":
+                            floatValue = (float?)reader.ReadAsDouble() ?? floatValue;
+                            break;
 
-                    case "_customData":
-                        reader.ReadToDictionary(data);
-                        break;
+                        case "_customData":
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new EventData(time, type, value, floatValue, data)));
             });
-
-            return new EventData(time, type, value, floatValue, data);
         }
 
-        public static NoteData DeserializeNote([InstantHandle] JsonReader reader)
+        public static void DeserializeNoteArray(JsonReader reader, List<NoteData> list)
         {
-            float time = default;
-            int lineIndex = default;
-            NoteLineLayer lineLayer = default;
-            BeatmapSaveData.NoteType type = default;
-            NoteCutDirection cutDirection = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float time = default;
+                int lineIndex = default;
+                NoteLineLayer lineLayer = default;
+                BeatmapSaveData.NoteType type = default;
+                NoteCutDirection cutDirection = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case "_time":
-                        time = (float?)reader.ReadAsDouble() ?? time;
-                        break;
+                    switch (objectName)
+                    {
+                        case "_time":
+                            time = (float?)reader.ReadAsDouble() ?? time;
+                            break;
 
-                    case "_lineIndex":
-                        lineIndex = reader.ReadAsInt32Safe() ?? lineIndex;
-                        break;
+                        case "_lineIndex":
+                            lineIndex = reader.ReadAsInt32Safe() ?? lineIndex;
+                            break;
 
-                    case "_lineLayer":
-                        lineLayer = (NoteLineLayer?)reader.ReadAsInt32Safe() ?? lineLayer;
-                        break;
+                        case "_lineLayer":
+                            lineLayer = (NoteLineLayer?)reader.ReadAsInt32Safe() ?? lineLayer;
+                            break;
 
-                    case "_type":
-                        type = (BeatmapSaveData.NoteType?)reader.ReadAsInt32Safe() ?? type;
-                        break;
+                        case "_type":
+                            type = (BeatmapSaveData.NoteType?)reader.ReadAsInt32Safe() ?? type;
+                            break;
 
-                    case "_cutDirection":
-                        cutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? cutDirection;
-                        break;
+                        case "_cutDirection":
+                            cutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? cutDirection;
+                            break;
 
-                    case "_customData":
-                        reader.ReadToDictionary(data);
-                        break;
+                        case "_customData":
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new NoteData(time, lineIndex, lineLayer, type, cutDirection, data)));
             });
-
-            return new NoteData(time, lineIndex, lineLayer, type, cutDirection, data);
         }
 
-        public static SliderData DeserializeSlider([InstantHandle] JsonReader reader)
+        public static void DeserializeSliderArray(JsonReader reader, List<SliderData> list)
         {
-            float time = default;
-            BeatmapSaveData.ColorType colorType = default;
-            int headLineIndex = default;
-            NoteLineLayer noteLineLayer = default;
-            float headControlPointLengthMultiplier = default;
-            NoteCutDirection noteCutDirection = default;
-            float tailTime = default;
-            int tailLineIndex = default;
-            NoteLineLayer tailLineLayer = default;
-            float tailControlPointLengthMultiplier = default;
-            NoteCutDirection tailCutDirection = default;
-            SliderMidAnchorMode sliderMidAnchorMode = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float time = default;
+                BeatmapSaveData.ColorType colorType = default;
+                int headLineIndex = default;
+                NoteLineLayer noteLineLayer = default;
+                float headControlPointLengthMultiplier = default;
+                NoteCutDirection noteCutDirection = default;
+                float tailTime = default;
+                int tailLineIndex = default;
+                NoteLineLayer tailLineLayer = default;
+                float tailControlPointLengthMultiplier = default;
+                NoteCutDirection tailCutDirection = default;
+                SliderMidAnchorMode sliderMidAnchorMode = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case "_time":
-                        time = (float?)reader.ReadAsDouble() ?? time;
-                        break;
+                    switch (objectName)
+                    {
+                        case "_time":
+                            time = (float?)reader.ReadAsDouble() ?? time;
+                            break;
 
-                    case "_colorType":
-                        colorType = (BeatmapSaveData.ColorType?)reader.ReadAsInt32Safe() ?? colorType;
-                        break;
+                        case "_colorType":
+                            colorType = (BeatmapSaveData.ColorType?)reader.ReadAsInt32Safe() ?? colorType;
+                            break;
 
-                    case "_headLineIndex":
-                        headLineIndex = reader.ReadAsInt32Safe() ?? headLineIndex;
-                        break;
+                        case "_headLineIndex":
+                            headLineIndex = reader.ReadAsInt32Safe() ?? headLineIndex;
+                            break;
 
-                    case "_noteLineLayer":
-                        noteLineLayer = (NoteLineLayer?)reader.ReadAsInt32Safe() ?? noteLineLayer;
-                        break;
+                        case "_noteLineLayer":
+                            noteLineLayer = (NoteLineLayer?)reader.ReadAsInt32Safe() ?? noteLineLayer;
+                            break;
 
-                    case "_headControlPointLengthMultiplier":
-                        headControlPointLengthMultiplier = (float?)reader.ReadAsDouble() ?? headControlPointLengthMultiplier;
-                        break;
+                        case "_headControlPointLengthMultiplier":
+                            headControlPointLengthMultiplier =
+                                (float?)reader.ReadAsDouble() ?? headControlPointLengthMultiplier;
+                            break;
 
-                    case "_noteCutDirection":
-                        noteCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? noteCutDirection;
-                        break;
+                        case "_noteCutDirection":
+                            noteCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? noteCutDirection;
+                            break;
 
-                    case "_tailTime":
-                        tailTime = (float?)reader.ReadAsDouble() ?? tailTime;
-                        break;
+                        case "_tailTime":
+                            tailTime = (float?)reader.ReadAsDouble() ?? tailTime;
+                            break;
 
-                    case "_tailLineIndex":
-                        tailLineIndex = reader.ReadAsInt32Safe() ?? tailLineIndex;
-                        break;
+                        case "_tailLineIndex":
+                            tailLineIndex = reader.ReadAsInt32Safe() ?? tailLineIndex;
+                            break;
 
-                    case "_tailLineLayer":
-                        tailLineLayer = (NoteLineLayer?)reader.ReadAsInt32Safe() ?? tailLineLayer;
-                        break;
+                        case "_tailLineLayer":
+                            tailLineLayer = (NoteLineLayer?)reader.ReadAsInt32Safe() ?? tailLineLayer;
+                            break;
 
-                    case "_tailControlPointLengthMultiplier":
-                        tailControlPointLengthMultiplier = (float?)reader.ReadAsDouble() ?? tailControlPointLengthMultiplier;
-                        break;
+                        case "_tailControlPointLengthMultiplier":
+                            tailControlPointLengthMultiplier =
+                                (float?)reader.ReadAsDouble() ?? tailControlPointLengthMultiplier;
+                            break;
 
-                    case "_tailCutDirection":
-                        tailCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? tailCutDirection;
-                        break;
+                        case "_tailCutDirection":
+                            tailCutDirection = (NoteCutDirection?)reader.ReadAsInt32Safe() ?? tailCutDirection;
+                            break;
 
-                    case "_sliderMidAnchorMode":
-                        sliderMidAnchorMode = (SliderMidAnchorMode?)reader.ReadAsInt32Safe() ?? sliderMidAnchorMode;
-                        break;
+                        case "_sliderMidAnchorMode":
+                            sliderMidAnchorMode = (SliderMidAnchorMode?)reader.ReadAsInt32Safe() ?? sliderMidAnchorMode;
+                            break;
 
-                    case "_customData":
-                        reader.ReadToDictionary(data);
-                        break;
+                        case "_customData":
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new SliderData(
+                    colorType,
+                    time,
+                    headLineIndex,
+                    noteLineLayer,
+                    headControlPointLengthMultiplier,
+                    noteCutDirection,
+                    tailTime,
+                    tailLineIndex,
+                    tailLineLayer,
+                    tailControlPointLengthMultiplier,
+                    tailCutDirection,
+                    sliderMidAnchorMode,
+                    data)));
             });
-
-            return new SliderData(
-                colorType,
-                time,
-                headLineIndex,
-                noteLineLayer,
-                headControlPointLengthMultiplier,
-                noteCutDirection,
-                tailTime,
-                tailLineIndex,
-                tailLineLayer,
-                tailControlPointLengthMultiplier,
-                tailCutDirection,
-                sliderMidAnchorMode,
-                data);
         }
 
-        public static WaypointData DeserializeWaypoint([InstantHandle] JsonReader reader)
+        public static void DeserializeWaypointArray(JsonReader reader, List<WaypointData> list)
         {
-            float time = default;
-            int lineIndex = default;
-            NoteLineLayer lineLayer = default;
-            OffsetDirection offsetDirection = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float time = default;
+                int lineIndex = default;
+                NoteLineLayer lineLayer = default;
+                OffsetDirection offsetDirection = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case "_time":
-                        time = (float?)reader.ReadAsDouble() ?? time;
-                        break;
+                    switch (objectName)
+                    {
+                        case "_time":
+                            time = (float?)reader.ReadAsDouble() ?? time;
+                            break;
 
-                    case "_lineIndex":
-                        lineIndex = reader.ReadAsInt32Safe() ?? lineIndex;
-                        break;
+                        case "_lineIndex":
+                            lineIndex = reader.ReadAsInt32Safe() ?? lineIndex;
+                            break;
 
-                    case "_lineLayer":
-                        lineLayer = (NoteLineLayer?)reader.ReadAsInt32Safe() ?? lineLayer;
-                        break;
+                        case "_lineLayer":
+                            lineLayer = (NoteLineLayer?)reader.ReadAsInt32Safe() ?? lineLayer;
+                            break;
 
-                    case "_offsetDirection":
-                        offsetDirection = (OffsetDirection?)reader.ReadAsInt32Safe() ?? offsetDirection;
-                        break;
+                        case "_offsetDirection":
+                            offsetDirection = (OffsetDirection?)reader.ReadAsInt32Safe() ?? offsetDirection;
+                            break;
 
-                    case "_customData":
-                        reader.ReadToDictionary(data);
-                        break;
+                        case "_customData":
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new WaypointData(time, lineIndex, lineLayer, offsetDirection, data)));
             });
-
-            return new WaypointData(time, lineIndex, lineLayer, offsetDirection, data);
         }
 
-        public static ObstacleData DeserializeObstacle([InstantHandle] JsonReader reader)
+        public static void DeserializeObstacleArray(JsonReader reader, List<ObstacleData> list)
         {
-            float time = default;
-            int lineIndex = default;
-            BeatmapSaveData.ObstacleType type = default;
-            float duration = default;
-            int width = default;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                float time = default;
+                int lineIndex = default;
+                BeatmapSaveData.ObstacleType type = default;
+                float duration = default;
+                int width = default;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case "_time":
-                        time = (float?)reader.ReadAsDouble() ?? time;
-                        break;
+                    switch (objectName)
+                    {
+                        case "_time":
+                            time = (float?)reader.ReadAsDouble() ?? time;
+                            break;
 
-                    case "_lineIndex":
-                        lineIndex = reader.ReadAsInt32Safe() ?? lineIndex;
-                        break;
+                        case "_lineIndex":
+                            lineIndex = reader.ReadAsInt32Safe() ?? lineIndex;
+                            break;
 
-                    case "_type":
-                        type = (BeatmapSaveData.ObstacleType?)reader.ReadAsInt32Safe() ?? type;
-                        break;
+                        case "_type":
+                            type = (BeatmapSaveData.ObstacleType?)reader.ReadAsInt32Safe() ?? type;
+                            break;
 
-                    case "_duration":
-                        duration = (float?)reader.ReadAsDouble() ?? duration;
-                        break;
+                        case "_duration":
+                            duration = (float?)reader.ReadAsDouble() ?? duration;
+                            break;
 
-                    case "_width":
-                        width = reader.ReadAsInt32Safe() ?? width;
-                        break;
+                        case "_width":
+                            width = reader.ReadAsInt32Safe() ?? width;
+                            break;
 
-                    case "_customData":
-                        reader.ReadToDictionary(data);
-                        break;
+                        case "_customData":
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new ObstacleData(time, lineIndex, type, duration, width, data)));
             });
-
-            return new ObstacleData(time, lineIndex, type, duration, width, data);
         }
 
-        public static BeatmapSaveData.SpecialEventsForKeyword DeserializeKeyword([InstantHandle] JsonReader reader)
+        public static void DeserializeKeywordArray(JsonReader reader, List<BeatmapSaveData.SpecialEventsForKeyword> list)
         {
-            string keyword = string.Empty;
-            List<BeatmapSaveData.BeatmapEventType> specialEvents = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(() =>
             {
-                switch (objectName)
+                string keyword = string.Empty;
+                List<BeatmapSaveData.BeatmapEventType> specialEvents = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case "_keyword":
-                        keyword = reader.ReadAsString() ?? keyword;
-                        break;
+                    switch (objectName)
+                    {
+                        case "_keyword":
+                            keyword = reader.ReadAsString() ?? keyword;
+                            break;
 
-                    case "_specialEvents":
-                        reader.Read();
-                        if (reader.TokenType != JsonToken.StartArray)
-                        {
-                            throw new JsonSerializationException("_specialEvents was not array.");
-                        }
-
-                        while (true)
-                        {
-                            int? specialEvent = reader.ReadAsInt32Safe();
-                            if (specialEvent.HasValue)
+                        case "_specialEvents":
+                            reader.Read();
+                            if (reader.TokenType != JsonToken.StartArray)
                             {
-                                specialEvents.Add((BeatmapSaveData.BeatmapEventType)specialEvent);
+                                throw new JsonSerializationException("_specialEvents was not array.");
                             }
-                            else
+
+                            while (true)
                             {
-                                if (reader.TokenType == JsonToken.EndArray)
+                                int? specialEvent = reader.ReadAsInt32Safe();
+                                if (specialEvent.HasValue)
                                 {
-                                    break;
+                                    specialEvents.Add((BeatmapSaveData.BeatmapEventType)specialEvent);
                                 }
+                                else
+                                {
+                                    if (reader.TokenType == JsonToken.EndArray)
+                                    {
+                                        break;
+                                    }
 
-                                throw new JsonSerializationException("Value in _specialEvents was not int.");
+                                    throw new JsonSerializationException("Value in _specialEvents was not int.");
+                                }
                             }
-                        }
 
-                        break;
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new BeatmapSaveData.SpecialEventsForKeyword(keyword, specialEvents)));
             });
-
-            return new BeatmapSaveData.SpecialEventsForKeyword(keyword, specialEvents);
         }
 
-        public static CustomEventData DeserializeCustomEvent(JsonReader reader)
+        public static void DeserializeCustomEventArray(JsonReader reader, List<CustomEventData> list)
         {
-            float time = default;
-            string type = string.Empty;
-            CustomData data = new();
-            reader.ReadObject(objectName =>
+            reader.ReadArray(
+                () =>
             {
-                switch (objectName)
+                float time = default;
+                string type = string.Empty;
+                CustomData data = new();
+                return reader.ReadObject(objectName =>
                 {
-                    case "_time":
-                        time = (float?)reader.ReadAsDouble() ?? time;
-                        break;
+                    switch (objectName)
+                    {
+                        case "_time":
+                            time = (float?)reader.ReadAsDouble() ?? time;
+                            break;
 
-                    case "_type":
-                        type = reader.ReadAsString() ?? type;
-                        break;
+                        case "_type":
+                            type = reader.ReadAsString() ?? type;
+                            break;
 
-                    case "_data":
-                        reader.ReadToDictionary(data);
-                        break;
+                        case "_data":
+                            reader.ReadToDictionary(data);
+                            break;
 
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            });
-
-            return new CustomEventData(time, type, data);
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new CustomEventData(time, type, data)));
+            },
+                false);
         }
 
         private static void ConvertBeatmapSaveDataPreV2_5_0(Custom2_6_0AndEarlierBeatmapSaveData beatmapSaveData)

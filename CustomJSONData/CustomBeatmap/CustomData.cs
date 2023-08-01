@@ -146,7 +146,7 @@ namespace CustomJSONData.CustomBeatmap
             string prefix = new('\t', indent);
             StringBuilder builder = new();
             builder.AppendLine(prefix + "{");
-            foreach ((var key, object? value) in dictionary)
+            foreach ((string? key, object? value) in dictionary)
             {
                 builder.AppendLine($"{prefix}\t\"{key}\": {FormatObject(value, indent + 1)}");
             }

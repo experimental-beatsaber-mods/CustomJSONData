@@ -64,12 +64,27 @@ namespace CustomJSONData.CustomBeatmap
             }
         }
 
+        public abstract class VersionableBeatmapDataItemConverter<TBase, TIn, TOut>
+            : BeatmapDataLoader.BeatmapDataItemConvertor<TBase, TIn, TOut>
+            where TBase : BeatmapDataItem
+            where TIn : BeatmapSaveData.BeatmapSaveDataItem
+            where TOut : TBase
+        {
+            protected VersionableBeatmapDataItemConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor)
+            {
+                Version2_6_0AndEarlier = beatmapSaveData is CustomBeatmapSaveData { version2_6_0AndEarlier: true };
+            }
+
+            protected bool Version2_6_0AndEarlier { get; }
+        }
+
         public class CustomColorNoteConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapObjectData, BeatmapSaveData.ColorNoteData, NoteData>
+            : VersionableBeatmapDataItemConverter<BeatmapObjectData, BeatmapSaveData.ColorNoteData, NoteData>
         {
             [UsedImplicitly]
-            public CustomColorNoteConverter(BpmProcessor bpmTimeProcessor)
-                : base(bpmTimeProcessor)
+            public CustomColorNoteConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
             }
 
@@ -81,18 +96,19 @@ namespace CustomJSONData.CustomBeatmap
                     _convertNoteLineLayer(data.layer),
                     _convertColorType(data.color),
                     data.cutDirection,
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
                 noteData.SetCutDirectionAngleOffset(data.angleOffset);
                 return noteData;
             }
         }
 
         public class CustomBombNoteConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapObjectData, BeatmapSaveData.BombNoteData, NoteData>
+            : VersionableBeatmapDataItemConverter<BeatmapObjectData, BeatmapSaveData.BombNoteData, NoteData>
         {
             [UsedImplicitly]
-            public CustomBombNoteConverter(BpmProcessor bpmTimeProcessor)
-                : base(bpmTimeProcessor)
+            public CustomBombNoteConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
             }
 
@@ -102,24 +118,17 @@ namespace CustomJSONData.CustomBeatmap
                     BeatToTime(data.beat),
                     data.line,
                     _convertNoteLineLayer(data.layer),
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
             }
         }
 
         public class CustomObstacleConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapObjectData, BeatmapSaveData.ObstacleData, ObstacleData>
+            : VersionableBeatmapDataItemConverter<BeatmapObjectData, BeatmapSaveData.ObstacleData, ObstacleData>
         {
-            private static readonly Func<int, NoteLineLayer> _getNoteLineLayer =
-                (Func<int, NoteLineLayer>)Delegate.CreateDelegate(
-                    typeof(Func<int, NoteLineLayer>),
-                    typeof(BeatmapDataLoader.ObstacleConvertor),
-                    "GetNoteLineLayer",
-                    false,
-                    true)!;
-
             [UsedImplicitly]
-            public CustomObstacleConverter(BpmProcessor bpmTimeProcessor)
-                : base(bpmTimeProcessor)
+            public CustomObstacleConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
             }
 
@@ -129,20 +138,21 @@ namespace CustomJSONData.CustomBeatmap
                 return new CustomObstacleData(
                     beat,
                     data.line,
-                    _getNoteLineLayer(data.layer),
+                    BeatmapDataLoader.ObstacleConvertor.GetNoteLineLayer(data.layer),
                     BeatToTime(data.beat + data.duration) - beat,
                     data.width,
                     data.height,
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
             }
         }
 
         public class CustomSliderConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapObjectData, BeatmapSaveData.SliderData, SliderData>
+            : VersionableBeatmapDataItemConverter<BeatmapObjectData, BeatmapSaveData.SliderData, SliderData>
         {
             [UsedImplicitly]
-            public CustomSliderConverter(BpmProcessor bpmTimeProcessor)
-                : base(bpmTimeProcessor)
+            public CustomSliderConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
             }
 
@@ -163,7 +173,8 @@ namespace CustomJSONData.CustomBeatmap
                     data.tailControlPointLengthMultiplier,
                     data.tailCutDirection,
                     data.sliderMidAnchorMode,
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
             }
         }
 
@@ -197,11 +208,11 @@ namespace CustomJSONData.CustomBeatmap
         }
 
         public class CustomWaypointConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapObjectData, BeatmapSaveData.WaypointData, WaypointData>
+            : VersionableBeatmapDataItemConverter<BeatmapObjectData, BeatmapSaveData.WaypointData, WaypointData>
         {
             [UsedImplicitly]
-            public CustomWaypointConverter(BpmProcessor bpmTimeProcessor)
-                : base(bpmTimeProcessor)
+            public CustomWaypointConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
             }
 
@@ -212,16 +223,17 @@ namespace CustomJSONData.CustomBeatmap
                     data.line,
                     _convertNoteLineLayer(data.layer),
                     data.offsetDirection,
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
             }
         }
 
         public class CustomBpmEventConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapEventData, BeatmapSaveData.BpmChangeEventData, BPMChangeBeatmapEventData>
+            : VersionableBeatmapDataItemConverter<BeatmapEventData, BeatmapSaveData.BpmChangeEventData, BPMChangeBeatmapEventData>
         {
             [UsedImplicitly]
-            public CustomBpmEventConverter(BpmProcessor bpmTimeProcessor)
-                : base(bpmTimeProcessor)
+            public CustomBpmEventConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
             }
 
@@ -230,16 +242,17 @@ namespace CustomJSONData.CustomBeatmap
                 return new CustomBPMChangeBeatmapEventData(
                     BeatToTime(data.beat),
                     data.bpm,
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
             }
         }
 
         public class CustomRotationEventConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapEventData, BeatmapSaveData.RotationEventData, SpawnRotationBeatmapEventData>
+            : VersionableBeatmapDataItemConverter<BeatmapEventData, BeatmapSaveData.RotationEventData, SpawnRotationBeatmapEventData>
         {
             [UsedImplicitly]
-            public CustomRotationEventConverter(BpmProcessor bpmTimeProcessor)
-                : base(bpmTimeProcessor)
+            public CustomRotationEventConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
             }
 
@@ -253,20 +266,22 @@ namespace CustomJSONData.CustomBeatmap
                     BeatToTime(data.beat),
                     executionTime,
                     data.rotation,
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
             }
         }
 
         public class CustomBasicEventConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapEventData, BeatmapSaveData.BasicEventData, BasicBeatmapEventData>
+            : VersionableBeatmapDataItemConverter<BeatmapEventData, BeatmapSaveData.BasicEventData, BasicBeatmapEventData>
         {
             private readonly BeatmapDataLoader.SpecialEventsFilter _specialEventsFilter;
 
             [UsedImplicitly]
             public CustomBasicEventConverter(
                 BpmProcessor bpmTimeProcessor,
-                BeatmapDataLoader.SpecialEventsFilter specialEventsFilter)
-                : base(bpmTimeProcessor)
+                BeatmapDataLoader.SpecialEventsFilter specialEventsFilter,
+                BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
                 _specialEventsFilter = specialEventsFilter;
             }
@@ -283,16 +298,17 @@ namespace CustomJSONData.CustomBeatmap
                     (BasicBeatmapEventType)data.eventType,
                     data.value,
                     data.floatValue,
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
             }
         }
 
         public class CustomColorBoostEventConverter
-            : BeatmapDataLoader.BeatmapDataItemConvertor<BeatmapEventData, BeatmapSaveData.ColorBoostEventData, ColorBoostBeatmapEventData>
+            : VersionableBeatmapDataItemConverter<BeatmapEventData, BeatmapSaveData.ColorBoostEventData, ColorBoostBeatmapEventData>
         {
             [UsedImplicitly]
-            public CustomColorBoostEventConverter(BpmProcessor bpmTimeProcessor)
-                : base(bpmTimeProcessor)
+            public CustomColorBoostEventConverter(BpmProcessor bpmTimeProcessor, BeatmapSaveData beatmapSaveData)
+                : base(bpmTimeProcessor, beatmapSaveData)
             {
             }
 
@@ -301,7 +317,8 @@ namespace CustomJSONData.CustomBeatmap
                 return new CustomColorBoostBeatmapEventData(
                     BeatToTime(data.beat),
                     data.boost,
-                    data.GetData());
+                    data.GetData(),
+                    Version2_6_0AndEarlier);
             }
         }
     }

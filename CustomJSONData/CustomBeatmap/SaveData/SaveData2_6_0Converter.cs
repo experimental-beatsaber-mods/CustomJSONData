@@ -29,7 +29,8 @@ namespace CustomJSONData.CustomBeatmap
                     BeatmapSaveData.GetNoteColorType(n.type),
                     n.cutDirection,
                     0,
-                    n.customData))
+                    n.customData,
+                    true))
                 .Cast<BeatmapSaveData.ColorNoteData>()
                 .ToList();
             List<BeatmapSaveData.BombNoteData> bombNotes = notesSplit[true]
@@ -37,7 +38,8 @@ namespace CustomJSONData.CustomBeatmap
                     n.time,
                     n.lineIndex,
                     (int)n.lineLayer,
-                    n.customData))
+                    n.customData,
+                    true))
                 .Cast<BeatmapSaveData.BombNoteData>()
                 .ToList();
 
@@ -51,7 +53,8 @@ namespace CustomJSONData.CustomBeatmap
                     n.duration,
                     n.width,
                     BeatmapSaveData.GetHeightForObstacleType(n.type),
-                    n.customData))
+                    n.customData,
+                    true))
                 .Cast<BeatmapSaveData.ObstacleData>()
                 .ToList();
 
@@ -71,7 +74,8 @@ namespace CustomJSONData.CustomBeatmap
                     n.tailControlPointLengthMultiplier,
                     n.tailCutDirection,
                     n.sliderMidAnchorMode,
-                    n.customData))
+                    n.customData,
+                    true))
                 .Cast<BeatmapSaveData.SliderData>()
                 .ToList();
 
@@ -83,7 +87,8 @@ namespace CustomJSONData.CustomBeatmap
                     n.lineIndex,
                     (int)n.lineLayer,
                     n.offsetDirection,
-                    n.customData))
+                    n.customData,
+                    true))
                 .Cast<BeatmapSaveData.WaypointData>()
                 .ToList();
 
@@ -100,7 +105,7 @@ namespace CustomJSONData.CustomBeatmap
                 });
             List<BeatmapSaveData.ColorBoostEventData> colorBoosts =
                 eventsSplit[0]
-                    .Select(n => new CustomBeatmapSaveData.ColorBoostEventData(n.time, n.value == 1, n.customData))
+                    .Select(n => new CustomBeatmapSaveData.ColorBoostEventData(n.time, n.value == 1, n.customData, true))
                     .Cast<BeatmapSaveData.ColorBoostEventData>()
                     .ToList();
             List<BeatmapSaveData.RotationEventData> rotationEvents =
@@ -109,17 +114,18 @@ namespace CustomJSONData.CustomBeatmap
                         n.time,
                         n.type == BeatmapSaveDataVersion2_6_0AndEarlier.BeatmapSaveData.BeatmapEventType.Event14 ? BeatmapSaveData.ExecutionTime.Early : BeatmapSaveData.ExecutionTime.Late,
                         BeatmapSaveData.SpawnRotationForEventValue(n.value),
-                        n.customData))
+                        n.customData,
+                        true))
                     .Cast<BeatmapSaveData.RotationEventData>()
                     .ToList();
             List<BeatmapSaveData.BpmChangeEventData> bpmChanges =
                 eventsSplit[2]
-                    .Select(n => new CustomBeatmapSaveData.BpmChangeEventData(n.time, n.floatValue, n.customData))
+                    .Select(n => new CustomBeatmapSaveData.BpmChangeEventData(n.time, n.floatValue, n.customData, true))
                     .Cast<BeatmapSaveData.BpmChangeEventData>()
                     .ToList();
             List<BeatmapSaveData.BasicEventData> basicEvents =
                 eventsSplit[3]
-                    .Select(n => new CustomBeatmapSaveData.BasicEventData(n.time, n.type, n.value, n.floatValue, n.customData))
+                    .Select(n => new CustomBeatmapSaveData.BasicEventData(n.time, n.type, n.value, n.floatValue, n.customData, true))
                     .Cast<BeatmapSaveData.BasicEventData>()
                     .ToList();
 
@@ -131,7 +137,7 @@ namespace CustomJSONData.CustomBeatmap
 
             // custom events
             List<CustomBeatmapSaveData.CustomEventData> customEvents = oldSaveData.customEvents
-                .Select(n => new CustomBeatmapSaveData.CustomEventData(n.time, n.type, n.data))
+                .Select(n => new CustomBeatmapSaveData.CustomEventData(n.time, n.type, n.data, true))
                 .ToList();
 
             // yay we're done

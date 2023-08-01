@@ -67,6 +67,7 @@ namespace CustomJSONData.HarmonyPatches
                 .Set(OpCodes.Call, _createCustomBeatmapData)
 
                 .MatchForward(false, new CodeMatch(OpCodes.Newobj, _bpmChangeCtor))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
                 .Set(OpCodes.Call, _createCustomBPMChangeData)
 
                 .MatchForward(false, new CodeMatch(OpCodes.Newobj, _bpmTimeProcessorCtor))
@@ -80,19 +81,19 @@ namespace CustomJSONData.HarmonyPatches
                 // "convertor" is NOT the correct spelling
                 .ReplaceConverter<DataConvertor<BeatmapObjectData>, Converters.CustomDataConverter<BeatmapObjectData>>()
 
-                .ReplaceConverter<BeatmapDataLoader.ColorNoteConvertor, Converters.CustomColorNoteConverter>()
-                .ReplaceConverter<BeatmapDataLoader.BombNoteConvertor, Converters.CustomBombNoteConverter>()
-                .ReplaceConverter<BeatmapDataLoader.ObstacleConvertor, Converters.CustomObstacleConverter>()
-                .ReplaceConverter<BeatmapDataLoader.SliderConvertor, Converters.CustomSliderConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.ColorNoteConvertor, Converters.CustomColorNoteConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.BombNoteConvertor, Converters.CustomBombNoteConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.ObstacleConvertor, Converters.CustomObstacleConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.SliderConvertor, Converters.CustomSliderConverter>()
                 .ReplaceConverter<BeatmapDataLoader.BurstSliderConvertor, Converters.CustomBurstSliderConverter>()
-                .ReplaceConverter<BeatmapDataLoader.WaypointConvertor, Converters.CustomWaypointConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.WaypointConvertor, Converters.CustomWaypointConverter>()
 
-                .ReplaceConverter<DataConvertor<BeatmapEventData>, Converters.CustomDataConverter<BeatmapEventData>>()
+                .ReplaceVersionableConverter<DataConvertor<BeatmapEventData>, Converters.CustomDataConverter<BeatmapEventData>>()
 
-                .ReplaceConverter<BeatmapDataLoader.BpmEventConvertor, Converters.CustomBpmEventConverter>()
-                .ReplaceConverter<BeatmapDataLoader.RotationEventConvertor, Converters.CustomRotationEventConverter>()
-                .ReplaceConverter<BeatmapDataLoader.BasicEventConvertor, Converters.CustomBasicEventConverter>()
-                .ReplaceConverter<BeatmapDataLoader.ColorBoostEventConvertor, Converters.CustomColorBoostEventConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.BpmEventConvertor, Converters.CustomBpmEventConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.RotationEventConvertor, Converters.CustomRotationEventConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.BasicEventConvertor, Converters.CustomBasicEventConverter>()
+                .ReplaceVersionableConverter<BeatmapDataLoader.ColorBoostEventConvertor, Converters.CustomColorBoostEventConverter>()
 
                 // for reasons beyond my understanding, the leave will still take you to the InsertDefaultEnvironmentEvents, but inserting a nop fixes it...
                 .End()
@@ -101,6 +102,16 @@ namespace CustomJSONData.HarmonyPatches
                 .Insert(new CodeInstruction(OpCodes.Nop))
 
                 .InstructionEnumeration();
+        }
+
+        private static CodeMatcher ReplaceVersionableConverter<TOriginal, TCustom>(this CodeMatcher matcher)
+        {
+            ConstructorInfo original = AccessTools.FirstConstructor(typeof(TOriginal), _ => true);
+            ConstructorInfo custom = AccessTools.FirstConstructor(typeof(TCustom), _ => true);
+
+            return matcher.MatchForward(false, new CodeMatch(OpCodes.Newobj, original))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
+                .SetOperandAndAdvance(custom);
         }
 
         private static CodeMatcher ReplaceConverter<TOriginal, TCustom>(this CodeMatcher matcher)
@@ -132,9 +143,13 @@ namespace CustomJSONData.HarmonyPatches
                 new CustomData());
         }
 
-        private static BPMChangeBeatmapEventData CreateCustomBPMChangeData(float time, float bpm)
+        private static BPMChangeBeatmapEventData CreateCustomBPMChangeData(float time, float bpm, BeatmapSaveData beatmapSaveData)
         {
-            return new CustomBPMChangeBeatmapEventData(time, bpm, new CustomData());
+            return new CustomBPMChangeBeatmapEventData(
+                time,
+                bpm,
+                new CustomData(),
+                beatmapSaveData is CustomBeatmapSaveData { version2_6_0AndEarlier: true });
         }
 
         private static void AddCustomEvents(
@@ -152,7 +167,8 @@ namespace CustomJSONData.HarmonyPatches
                 beatmapData.InsertCustomEventData(new CustomEventData(
                     timeProcessor.ConvertBeatToTime(customEventSaveData.beat),
                     customEventSaveData.type,
-                    customEventSaveData.customData));
+                    customEventSaveData.customData,
+                    customSaveData.version2_6_0AndEarlier));
             }
         }
     }

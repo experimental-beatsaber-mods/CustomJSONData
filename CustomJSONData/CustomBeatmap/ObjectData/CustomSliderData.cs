@@ -1,6 +1,6 @@
 ﻿namespace CustomJSONData.CustomBeatmap
 {
-    public class CustomSliderData : SliderData, ICustomData
+    public class CustomSliderData : SliderData, ICustomData, IVersionable
     {
         public CustomSliderData(
             Type sliderType,
@@ -24,7 +24,8 @@
             SliderMidAnchorMode midAnchorMode,
             int sliceCount,
             float squishAmount,
-            CustomData customData)
+            CustomData customData,
+            bool version260AndEarlier)
             : base(
                 sliderType,
                 colorType,
@@ -49,9 +50,12 @@
                 squishAmount)
         {
             this.customData = customData;
+            version2_6_0AndEarlier = version260AndEarlier;
         }
 
         public CustomData customData { get; }
+
+        public bool version2_6_0AndEarlier { get; }
 
         public static SliderData CreateCustomSliderData(
             ColorType colorType,
@@ -68,7 +72,8 @@
             float tailControlPointLengthMultiplier,
             NoteCutDirection tailCutDirection,
             SliderMidAnchorMode midAnchorMode,
-            CustomData customData)
+            CustomData customData,
+            bool version260AndEarlier)
         {
             return new CustomSliderData(
                 Type.Normal,
@@ -92,7 +97,8 @@
                 midAnchorMode,
                 0,
                 1,
-                customData);
+                customData,
+                version260AndEarlier);
         }
 
         public static SliderData CreateCustomBurstSliderData(
@@ -133,7 +139,8 @@
                 SliderMidAnchorMode.Straight,
                 sliceCount,
                 squishAmount,
-                customData);
+                customData,
+                false);
         }
 
         public override BeatmapDataItem GetCopy()
@@ -160,7 +167,8 @@
                 midAnchorMode,
                 sliceCount,
                 squishAmount,
-                customData.Copy());
+                customData.Copy(),
+                version2_6_0AndEarlier);
         }
     }
 }

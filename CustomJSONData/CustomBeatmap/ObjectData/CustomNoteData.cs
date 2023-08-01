@@ -1,6 +1,6 @@
 ﻿namespace CustomJSONData.CustomBeatmap
 {
-    public class CustomNoteData : NoteData, ICustomData
+    public class CustomNoteData : NoteData, ICustomData, IVersionable
     {
         public CustomNoteData(
             float time,
@@ -17,7 +17,8 @@
             float flipYSide,
             float cutDirectionAngleOffset,
             float cutSfxVolumeMultiplier,
-            CustomData customData)
+            CustomData customData,
+            bool version260AndEarlier)
                        : base(
                              time,
                              lineIndex,
@@ -35,15 +36,19 @@
                              cutSfxVolumeMultiplier)
         {
             this.customData = customData;
+            version2_6_0AndEarlier = version260AndEarlier;
         }
 
         public CustomData customData { get; }
+
+        public bool version2_6_0AndEarlier { get; }
 
         public static CustomNoteData CreateCustomBombNoteData(
             float time,
             int lineIndex,
             NoteLineLayer noteLineLayer,
-            CustomData customData)
+            CustomData customData,
+            bool version260AndEarlier)
         {
             return new CustomNoteData(
                 time,
@@ -60,7 +65,8 @@
                 0f,
                 0f,
                 1f,
-                customData);
+                customData,
+                version260AndEarlier);
         }
 
         public static CustomNoteData CreateCustomBasicNoteData(
@@ -69,7 +75,8 @@
             NoteLineLayer noteLineLayer,
             ColorType colorType,
             NoteCutDirection cutDirection,
-            CustomData customData)
+            CustomData customData,
+            bool version260AndEarlier)
         {
             return new CustomNoteData(
                 time,
@@ -86,7 +93,8 @@
                 0f,
                 0f,
                 1f,
-                customData);
+                customData,
+                version260AndEarlier);
         }
 
         public static CustomNoteData CreateCustomBurstSliderNoteData(
@@ -114,7 +122,8 @@
                 0f,
                 0f,
                 cutSfxVolumeMultiplier,
-                customData);
+                customData,
+                false);
         }
 
         public override BeatmapDataItem GetCopy()
@@ -134,7 +143,8 @@
                 flipYSide,
                 cutDirectionAngleOffset,
                 cutSfxVolumeMultiplier,
-                customData.Copy());
+                customData.Copy(),
+                version2_6_0AndEarlier);
         }
     }
 }

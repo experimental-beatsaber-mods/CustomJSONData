@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace CustomJSONData.CustomBeatmap
 {
@@ -24,6 +26,10 @@ namespace CustomJSONData.CustomBeatmap
             string coverImageFilename,
             string environmentName,
             string allDirectionsEnvironmentName,
+#if LATEST
+            string[] environmentNames,
+            BeatmapLevelColorSchemeSaveData[] colorSchemes,
+#endif
             DifficultyBeatmapSet[] difficultyBeatmapSets,
             CustomData customData,
             Dictionary<string, CustomData> beatmapCustomDatasByFilename)
@@ -42,6 +48,10 @@ namespace CustomJSONData.CustomBeatmap
                   coverImageFilename,
                   environmentName,
                   allDirectionsEnvironmentName,
+#if LATEST
+                  environmentNames,
+                  colorSchemes,
+#endif
                   difficultyBeatmapSets)
         {
             _version = version;
@@ -71,7 +81,11 @@ namespace CustomJSONData.CustomBeatmap
             string songFilename = string.Empty;
             string coverImageFilename = string.Empty;
             string environmentName = string.Empty;
-            string allDirectionsEnvrionmentName = string.Empty;
+            string allDirectionsEnvironmentName = string.Empty;
+#if LATEST
+            string[] environmentNames = Array.Empty<string>();
+            List<BeatmapLevelColorSchemeSaveData> colorSchemes = new();
+#endif
             List<DifficultyBeatmapSet> difficultyBeatmapSets = new();
             CustomData customData = new();
             Dictionary<string, CustomData> beatmapCustomDatasByFilename = new();
@@ -144,8 +158,84 @@ namespace CustomJSONData.CustomBeatmap
                             break;
 
                         case "_allDirectionsEnvironmentName":
-                            allDirectionsEnvrionmentName = reader.ReadAsString() ?? allDirectionsEnvrionmentName;
+                            allDirectionsEnvironmentName = reader.ReadAsString() ?? allDirectionsEnvironmentName;
                             break;
+
+#if LATEST
+                        case "_environmentNames":
+                            environmentNames = reader.ReadAsStringArray(false);
+                            break;
+
+                        case "_colorSchemes":
+                            reader.ReadArray(() =>
+                            {
+                                bool useOverride = false;
+                                PlayerSaveData.ColorScheme? colorScheme = null;
+                                return reader.ReadObject(objectName =>
+                                {
+                                    switch (objectName)
+                                    {
+                                        case "useOverride":
+                                            useOverride = reader.ReadAsBoolean() ?? useOverride;
+                                            break;
+                                        case "colorScheme":
+                                            string colorSchemeId = string.Empty;
+                                            Color saberAColor = default;
+                                            Color saberBColor = default;
+                                            Color environmentColor0 = default;
+                                            Color environmentColor1 = default;
+                                            Color obstaclesColor = default;
+                                            Color environmentColor0Boost = default;
+                                            Color environmentColor1Boost = default;
+                                            reader.ReadObject(colorSchemeName =>
+                                            {
+                                                switch (colorSchemeName)
+                                                {
+                                                    case "colorSchemeId":
+                                                        colorSchemeId = reader.ReadAsString() ?? colorSchemeId;
+                                                        break;
+                                                    case "saberAColor":
+                                                        saberAColor = reader.ReadAsColor();
+                                                        break;
+                                                    case "saberBColor":
+                                                        saberBColor = reader.ReadAsColor();
+                                                        break;
+                                                    case "environmentColor0":
+                                                        environmentColor0 = reader.ReadAsColor();
+                                                        break;
+                                                    case "environmentColor1":
+                                                        environmentColor1 = reader.ReadAsColor();
+                                                        break;
+                                                    case "obstaclesColor":
+                                                        obstaclesColor = reader.ReadAsColor();
+                                                        break;
+                                                    case "environmentColor0Boost":
+                                                        environmentColor0Boost = reader.ReadAsColor();
+                                                        break;
+                                                    case "environmentColor1Boost":
+                                                        environmentColor1Boost = reader.ReadAsColor();
+                                                        break;
+                                                }
+                                            });
+                                            colorScheme = new PlayerSaveData.ColorScheme(
+                                                colorSchemeId,
+                                                saberAColor,
+                                                saberBColor,
+                                                environmentColor0,
+                                                environmentColor1,
+                                                obstaclesColor,
+                                                environmentColor0Boost,
+                                                environmentColor1Boost);
+                                            break;
+                                    }
+                                }).Finish(() => colorSchemes.Add(new BeatmapLevelColorSchemeSaveData
+                                {
+                                    useOverride = useOverride,
+                                    colorScheme = colorScheme
+                                }));
+                            });
+                            break;
+#endif
 
                         case "_difficultyBeatmapSets":
                             reader.ReadArray(() =>
@@ -220,6 +310,10 @@ namespace CustomJSONData.CustomBeatmap
                                                         beatmapFilename,
                                                         noteJumpMovementSpeed,
                                                         noteJumpStartBeatOffset,
+#if LATEST
+                                                        beatmapColorSchemeIdx,
+                                                        environmentNameIdx,
+#endif
                                                         data));
                                                 });
                                             });
@@ -259,7 +353,11 @@ namespace CustomJSONData.CustomBeatmap
                 songFilename,
                 coverImageFilename,
                 environmentName,
-                allDirectionsEnvrionmentName,
+                allDirectionsEnvironmentName,
+#if LATEST
+                environmentNames,
+                colorSchemes.ToArray(),
+#endif
                 difficultyBeatmapSets.ToArray(),
                 customData,
                 beatmapCustomDatasByFilename);
@@ -273,13 +371,23 @@ namespace CustomJSONData.CustomBeatmap
                 string beatmapFilename,
                 float noteJumpMovementSpeed,
                 float noteJumpStartBeatOffset,
+#if LATEST
+                int beatmapColorSchemeIdx,
+                int environmentNameIdx,
+#endif
                 CustomData customData)
             : base(
                 difficultyName,
                 difficultyRank,
                 beatmapFilename,
                 noteJumpMovementSpeed,
+#if LATEST
+                noteJumpStartBeatOffset,
+                beatmapColorSchemeIdx,
+                environmentNameIdx)
+#else
                 noteJumpStartBeatOffset)
+#endif
             {
                 this.customData = customData;
             }

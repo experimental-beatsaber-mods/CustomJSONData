@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -43,16 +44,29 @@ namespace CustomJSONData.HarmonyPatches
             EnvironmentKeywords environmentKeywords,
             EnvironmentLightGroups environmentLightGroups,
             DefaultEnvironmentEvents defaultEnvironmentEvents,
+#if LATEST
+            BeatmapLightshowSaveData defaultLightshowEventsSaveData,
+            PlayerSpecificSettings playerSpecificSettings,
+            Stopwatch? stopwatch = null)
+#else
             PlayerSpecificSettings playerSpecificSettings)
+#endif
         {
             lock (_lock)
             {
                 return (BeatmapData)_getBeatmapDataFromBeatmapSaveData.Invoke(
                     null,
-                    new object[]
+                    new object?[]
                     {
                         beatmapSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment, environmentKeywords, environmentLightGroups,
-                        defaultEnvironmentEvents, playerSpecificSettings
+                        defaultEnvironmentEvents,
+#if LATEST
+                        defaultLightshowEventsSaveData,
+                        playerSpecificSettings,
+                        stopwatch
+#else
+                        playerSpecificSettings
+#endif
                     });
             }
         }

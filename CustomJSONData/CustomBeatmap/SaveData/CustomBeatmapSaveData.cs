@@ -44,6 +44,10 @@ namespace CustomJSONData.CustomBeatmap
             List<BeatmapSaveData.LightColorEventBoxGroup> lightColorEventBoxGroups,
             List<BeatmapSaveData.LightRotationEventBoxGroup> lightRotationEventBoxGroups,
             List<LightTranslationEventBoxGroup> lightTranslationEventBoxGroups,
+#if LATEST
+            List<FxEventBoxGroup> vfxEventBoxGroup,
+            FxEventsCollection fxEventsCollection,
+#endif
             BasicEventTypesWithKeywords basicEventTypesWithKeywords,
             bool useNormalEventsAsCompatibleEvents,
             bool version2_6_0AndEarlier,
@@ -65,6 +69,10 @@ namespace CustomJSONData.CustomBeatmap
                 lightColorEventBoxGroups,
                 lightRotationEventBoxGroups,
                 lightTranslationEventBoxGroups,
+#if LATEST
+                vfxEventBoxGroup,
+                fxEventsCollection,
+#endif
                 basicEventTypesWithKeywords,
                 useNormalEventsAsCompatibleEvents)
         {
@@ -112,6 +120,10 @@ namespace CustomJSONData.CustomBeatmap
             List<BeatmapSaveData.LightColorEventBoxGroup> lightColorEventBoxGroups = new();
             List<BeatmapSaveData.LightRotationEventBoxGroup> lightRotationEventBoxGroups = new();
             List<LightTranslationEventBoxGroup> lightTranslationEventBoxGroups = new();
+#if LATEST
+            List<FxEventBoxGroup> vfxEventBoxGroups = new();
+            FxEventsCollection? fxEventsCollection = null;
+#endif
             List<BasicEventTypesWithKeywords.BasicEventTypesForKeyword> basicEventTypesForKeyword = new();
             bool useNormalEventsAsCompatibleEvents = default;
             CustomData data = new();
@@ -203,6 +215,16 @@ namespace CustomJSONData.CustomBeatmap
                             DeserializeLightTranslationEventBoxGroupArray(reader, lightTranslationEventBoxGroups);
                             break;
 
+#if LATEST
+                        case "vfxEventBoxGroups":
+                            DeserializeFxEventBoxGroupArray(reader, vfxEventBoxGroups);
+                            break;
+
+                        case "_fxEventsCollection":
+                            fxEventsCollection = DeserializeFxEventCollection(reader);
+                            break;
+#endif
+
                         case "basicEventTypesWithKeywords":
                             reader.ReadObject(objectName =>
                             {
@@ -255,6 +277,10 @@ namespace CustomJSONData.CustomBeatmap
                 lightColorEventBoxGroups.OrderBy(n => n).ToList(),
                 lightRotationEventBoxGroups.OrderBy(n => n).ToList(),
                 lightTranslationEventBoxGroups.OrderBy(n => n).ToList(),
+#if LATEST
+                vfxEventBoxGroups.OrderBy(n => n).ToList(),
+                fxEventsCollection ?? new FxEventsCollection(),
+#endif
                 new BasicEventTypesWithKeywords(basicEventTypesForKeyword),
                 useNormalEventsAsCompatibleEvents,
                 false,
@@ -962,6 +988,10 @@ namespace CustomJSONData.CustomBeatmap
                                                 EnvironmentColorType colorType = default;
                                                 float brightness = default;
                                                 int strobeFrequency = default;
+#if LATEST
+                                                float strobeBrightness = default;
+                                                bool strobeFade = default;
+#endif
                                                 return reader.ReadObject(lightName =>
                                                 {
                                                     switch (lightName)
@@ -990,6 +1020,17 @@ namespace CustomJSONData.CustomBeatmap
                                                             strobeFrequency = reader.ReadAsInt32Safe() ??
                                                                               strobeFrequency;
                                                             break;
+#if LATEST
+                                                        case "sb":
+                                                            strobeBrightness = (float?)reader.ReadAsDouble() ??
+                                                                               strobeBrightness;
+                                                            break;
+
+                                                        case "sf":
+                                                            strobeFade = reader.ReadIntAsBoolean() ??
+                                                                         strobeFade;
+                                                            break;
+#endif
 
                                                         default:
                                                             reader.Skip();
@@ -1000,7 +1041,13 @@ namespace CustomJSONData.CustomBeatmap
                                                     transitionType,
                                                     colorType,
                                                     brightness,
+#if LATEST
+                                                    strobeFrequency,
+                                                    strobeBrightness,
+                                                    strobeFade)));
+#else
                                                     strobeFrequency)));
+#endif
                                             });
                                             break;
 
@@ -1345,6 +1392,201 @@ namespace CustomJSONData.CustomBeatmap
                 }).Finish(() => list.Add(new LightTranslationEventBoxGroup(beat, groupId, eventBoxes)));
             });
         }
+
+        // TODO: Make this file not 1 billion lines long
+#if LATEST
+        public static void DeserializeFxEventBoxGroupArray(JsonReader reader, List<FxEventBoxGroup> list)
+        {
+            reader.ReadArray(() =>
+            {
+                float beat = default;
+                List<FxEventBox> eventBoxes = new();
+                int groupId = default;
+                FxEventType type = default;
+                return reader.ReadObject(objectName =>
+                {
+                    switch (objectName)
+                    {
+                        case _beat:
+                            beat = (float?)reader.ReadAsDouble() ?? beat;
+                            break;
+
+                        case _groupId:
+                            groupId = reader.ReadAsInt32Safe() ?? groupId;
+                            break;
+
+                        case _eventBoxes:
+                            reader.ReadArray(() =>
+                            {
+                                IndexFilter? indexFilter = default;
+                                float beatDistributionParam = default;
+                                EventBox.DistributionParamType beatDistributionParamType = default;
+                                float vfxDistributionParam = default;
+                                EventBox.DistributionParamType vfxDistributionParamType = default;
+                                bool vfxDistributionShouldAffectFirstBaseEvent = default;
+                                EaseType vfxDistributionEaseType = default;
+                                int[] vfxBaseDataList = Array.Empty<int>();
+                                return reader.ReadObject(eventName =>
+                                {
+                                    switch (eventName)
+                                    {
+                                        case _indexFilter:
+                                            indexFilter = DeserializeIndexFilter(reader);
+                                            break;
+
+                                        case _beatDistributionParam:
+                                            beatDistributionParam =
+                                                (float?)reader.ReadAsDouble() ?? beatDistributionParam;
+                                            break;
+
+                                        case _beatDistributionParamType:
+                                            beatDistributionParamType =
+                                                (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ??
+                                                beatDistributionParamType;
+                                            break;
+
+                                        case "s":
+                                            vfxDistributionParam =
+                                                (float?)reader.ReadAsDouble() ?? vfxDistributionParam;
+                                            break;
+
+                                        case "t":
+                                            vfxDistributionParamType =
+                                                (EventBox.DistributionParamType?)reader.ReadAsInt32Safe() ??
+                                                vfxDistributionParamType;
+                                            break;
+
+                                        case "b":
+                                            vfxDistributionShouldAffectFirstBaseEvent = reader.ReadIntAsBoolean() ??
+                                                vfxDistributionShouldAffectFirstBaseEvent;
+                                            break;
+
+                                        case "i":
+                                            vfxDistributionEaseType = (EaseType?)reader.ReadAsInt32() ??
+                                                                      vfxDistributionEaseType;
+                                            break;
+
+                                        case "l":
+                                            vfxBaseDataList = reader.ReadAsIntArray();
+                                            break;
+
+                                        default:
+                                            reader.Skip();
+                                            break;
+                                    }
+                                }).Finish(() => eventBoxes.Add(new FxEventBox(
+                                    indexFilter,
+                                    beatDistributionParam,
+                                    beatDistributionParamType,
+                                    vfxDistributionParam,
+                                    vfxDistributionParamType,
+                                    vfxDistributionEaseType,
+                                    vfxDistributionShouldAffectFirstBaseEvent,
+                                    vfxBaseDataList.ToList())));
+                            });
+                            break;
+
+                        case "t":
+                            type = (FxEventType?)reader.ReadAsInt32Safe() ?? type;
+                            break;
+
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }).Finish(() => list.Add(new FxEventBoxGroup(beat, groupId, type, eventBoxes)));
+            });
+        }
+
+        public static FxEventsCollection DeserializeFxEventCollection(JsonReader reader)
+        {
+            FxEventsCollection result = new();
+            List<IntFxEventBaseData> intEventsList = result._il;
+            List<FloatFxEventBaseData> floatEventsList = result._fl;
+            reader.ReadObject(objectName =>
+            {
+                switch (objectName)
+                {
+                    case "_il":
+                        reader.ReadArray(() =>
+                        {
+                            float beat = default;
+                            bool usePreviousEventValue = default;
+                            int value = default;
+                            return reader.ReadObject(keywordName =>
+                            {
+                                switch (keywordName)
+                                {
+                                    case _beat:
+                                        beat = (float?)reader.ReadAsDouble() ?? beat;
+                                        break;
+
+                                    case "p":
+                                        usePreviousEventValue = reader.ReadIntAsBoolean() ?? usePreviousEventValue;
+                                        break;
+
+                                    case "v":
+                                        value = reader.ReadAsInt32Safe() ?? value;
+                                        break;
+
+                                    default:
+                                        reader.Skip();
+                                        break;
+                                }
+                            }).Finish(() => intEventsList.Add(new IntFxEventBaseData(beat, value)
+                                {
+                                    p = usePreviousEventValue ? 1 : 0 // missing in constructor
+                                }));
+                        });
+
+                        break;
+
+                    case "_fl":
+                        reader.ReadArray(() =>
+                        {
+                            float beat = default;
+                            bool usePreviousEventValue = default;
+                            float value = default;
+                            EaseType easeType = default;
+                            return reader.ReadObject(keywordName =>
+                            {
+                                switch (keywordName)
+                                {
+                                    case _beat:
+                                        beat = (float?)reader.ReadAsDouble() ?? beat;
+                                        break;
+
+                                    case "p":
+                                        usePreviousEventValue = reader.ReadIntAsBoolean() ?? usePreviousEventValue;
+                                        break;
+
+                                    case "v":
+                                        value = (float?)reader.ReadAsDouble() ?? value;
+                                        break;
+
+                                    case "i":
+                                        easeType = (EaseType?)reader.ReadAsInt32() ??
+                                                   easeType;
+                                        break;
+
+                                    default:
+                                        reader.Skip();
+                                        break;
+                                }
+                            }).Finish(() => floatEventsList.Add(new FloatFxEventBaseData(beat, usePreviousEventValue, value, easeType)));
+                        });
+
+                        break;
+
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            });
+
+            return result;
+        }
+#endif
 
         public static void DeserializeBasicEventTypesForKeywordArray(JsonReader reader, List<BasicEventTypesWithKeywords.BasicEventTypesForKeyword> list)
         {

@@ -155,6 +155,10 @@ namespace CustomJSONData.CustomBeatmap
                 new List<BeatmapSaveData.LightColorEventBoxGroup>(),
                 new List<BeatmapSaveData.LightRotationEventBoxGroup>(),
                 new List<BeatmapSaveData.LightTranslationEventBoxGroup>(),
+#if LATEST
+                new List<BeatmapSaveData.FxEventBoxGroup>(),
+                new BeatmapSaveData.FxEventsCollection(),
+#endif
                 basicEventTypesWithKeywords,
                 true,
                 true,

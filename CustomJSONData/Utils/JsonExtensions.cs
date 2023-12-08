@@ -132,6 +132,31 @@ namespace CustomJSONData
             return result.ToArray();
         }
 
+        public static int[] ReadAsIntArray(this JsonReader reader, bool doThrow = true)
+        {
+            List<int> result = new();
+            reader.ReadArray(
+                () =>
+                {
+                    reader.Read();
+                    if (reader.TokenType != JsonToken.Integer && reader.TokenType != JsonToken.Float)
+                    {
+                        return false;
+                    }
+
+                    int? cur = reader.ReadAsInt32Safe();
+                    if (cur != null)
+                    {
+                        result.Add(cur.Value);
+                    }
+
+                    return true;
+                },
+                doThrow);
+
+            return result.ToArray();
+        }
+
         public static void ReadArray(this JsonReader reader, [InstantHandle] Func<bool> action, bool doThrow = true)
         {
             reader.Read(); // StartArray

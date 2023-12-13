@@ -110,24 +110,20 @@ namespace CustomJSONData
         public static string[] ReadAsStringArray(this JsonReader reader, bool doThrow = true)
         {
             List<string> result = new();
-            reader.ReadArray(
-                () =>
+            reader.Read(); // StartArray
+            if (!reader.AssertToken("string array", JsonToken.StartArray, doThrow))
             {
-                reader.Read();
-                if (reader.TokenType != JsonToken.String)
-                {
-                    return false;
-                }
+                return result.ToArray();
+            }
 
+            while (reader.TokenType != JsonToken.EndArray)
+            {
                 string? cur = reader.ReadAsString();
                 if (cur != null)
                 {
                     result.Add(cur);
                 }
-
-                return true;
-            },
-                doThrow);
+            }
 
             return result.ToArray();
         }
@@ -135,24 +131,20 @@ namespace CustomJSONData
         public static int[] ReadAsIntArray(this JsonReader reader, bool doThrow = true)
         {
             List<int> result = new();
-            reader.ReadArray(
-                () =>
+            reader.Read(); // StartArray
+            if (!reader.AssertToken("int array", JsonToken.StartArray, doThrow))
+            {
+                return result.ToArray();
+            }
+
+            while (reader.TokenType != JsonToken.EndArray)
+            {
+                int? cur = reader.ReadAsInt32Safe();
+                if (cur != null)
                 {
-                    reader.Read();
-                    if (reader.TokenType != JsonToken.Integer && reader.TokenType != JsonToken.Float)
-                    {
-                        return false;
-                    }
-
-                    int? cur = reader.ReadAsInt32Safe();
-                    if (cur != null)
-                    {
-                        result.Add(cur.Value);
-                    }
-
-                    return true;
-                },
-                doThrow);
+                    result.Add(cur.Value);
+                }
+            }
 
             return result.ToArray();
         }
